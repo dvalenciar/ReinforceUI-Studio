@@ -1,0 +1,45 @@
+platforms:
+  Gymnasium:
+    environments:
+      - BipedalWalker-v3
+      - BipedalWalkerHardcore-v3
+      - LunarLanderContinuous-v3
+      - MountainCarContinuous-v0
+      - Pendulum-v1
+
+  DMCS:
+    environments:
+      - acrobot_swingup
+      - ball_in_cup_catch
+      - cartpole_balance
+      - cartpole_balance_sparse
+      - cartpole_swingup
+      - cheetah_run
+      - finger_turn_easy
+      - finger_turn_hard
+      - fish_swim
+      - fish_upright
+      - hopper_hop
+      - hopper_stand
+      - humanoid_run
+      - humanoid_walk
+      - pendulum_swingup
+      - reacher_easy
+      - reacher_hard
+      - walker_run
+      - walker_stand
+      - walker_walk
+
+  MuJoCo:
+    environments:
+      - Ant-v5
+      - HalfCheetah-v5
+      - Hopper-v5
+      - Humanoid-v5
+      - HumanoidStandup-v5
+      - InvertedDoublePendulum-v5
+      - InvertedPendulum-v5
+      - Pusher-v5
+      - Reacher-v5
+      - Swimmer-v5
+      - Walker2d-v5

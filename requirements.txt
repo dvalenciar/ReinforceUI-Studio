@@ -1,0 +1,10 @@
+PyQt5~=5.15.6
+matplotlib~=3.9.2
+PyYAML~=6.0.1
+torch~=2.4.1
+numpy~=1.26.4
+seaborn~=0.13.2
+pandas~=2.2.2
+gymnasium~=1.0.0
+dm_control~=1.0.26
+opencv-python-headless~=4.10.0
