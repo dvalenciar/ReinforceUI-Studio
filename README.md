@@ -7,7 +7,7 @@ ReinforceUI <Studio></Studio>
 
 <p align="center">
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/actions/main.yml?branch=main" alt="Build Status">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?branch=main" alt="Build Status">
   </a>
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
