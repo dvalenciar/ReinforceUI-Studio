@@ -9,8 +9,14 @@ ReinforceUI <Studio></Studio>
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?branch=main" alt="Build Status">
   </a>
+  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/main.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?label=Black&branch=main" alt="Black Status">
+  </a>
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
+  </a>
+  <a href="https://www.python.org/downloads/release/python-310/">
+    <img src="https://img.shields.io/badge/python-3.10-blue.svg" alt="Python Version">
   </a>
 </p>
 
