@@ -179,17 +179,12 @@ This method is perfect for users who want a hassle-free, isolated setup without 
 system configurations. Make sure Docker is installed on your system before proceeding. You can find Docker installation instructions [Docker Installation](https://docs.docker.com/get-docker/).
 To make it even easier, we have already provided a pre-built image on Docker Hub.
 
-1. Pull the ReinforceUI Studio Docker image:
+1. Pull and run the ReinforceUI Studio Docker image:
 ```
-docker pull dvr/reinforceui-studio
-```
-
-2. Run the Docker container:
-```
-docker run -it dvr/reinforceui-studio
+docker run --rm -it ghcr.io/dvalenciar/reinforceui-studio:latest
 ```
 
-3. Inside the docker container, run the application: (todo double check this)
+2. Inside the docker container, run the application: (todo double check this)
 ```
 cd ReinforceUI-Studio
 python main.py

@@ -8,6 +8,12 @@ ENV PYTHONUNBUFFERED=1 \
 # Set the working directory
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libxkbcommon-x11-0 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Copy and install dependencies separately to leverage Docker caching
 COPY requirements.txt .
 
@@ -16,3 +22,5 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 # Copy the rest of the application code
 COPY . .
+
+CMD ["python", "main.py"]
