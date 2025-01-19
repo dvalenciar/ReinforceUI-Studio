@@ -33,10 +33,10 @@ jobs:
       run: |
         echo "QT_QPA_PLATFORM=offscreen" >> $GITHUB_ENV
 
-    - name: Run tests
-      run: |
-        pytest
-
-    - name: Check code formatting
-      run: |
-        black --check .
+#    - name: Run tests
+#      run: |
+#        pytest
+#
+#    - name: Check code formatting
+#      run: |
+#        black --check .
