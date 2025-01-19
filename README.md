@@ -12,9 +12,6 @@ ReinforceUI <Studio></Studio>
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
   </a>
-  <a href="https://pypi.org/project/ReinforceUI/">
-    <img src="https://img.shields.io/pypi/v/reinforceui" alt="PyPI">
-  </a>
 </p>
 
 ReinforceUI Studio is a Python-based application designed to simplify the configuration and monitoring of Reinforcement Learning (RL) training processes. Featuring an intuitive graphical user interface (GUI) built with PyQt5, it eliminates the hassle of managing extra repositories or memorizing complex command lines.
@@ -28,11 +25,11 @@ Everything you need to train your RL model is provided in one repository. With j
 - [Why You Should Use ReinforceUI Studio](#why-you-should-use-reinforceui-studio)
 - [Key Features of ReinforceUI Studio](#key-features-of-reinforceui-studio)
 - [Installation](#installation)
-  - [Clone and Run Locally](#installation---clone-and-run-locally)
-  - [Set Up in a Conda Environment](#installation---set-up-in-a-conda-environment)
-  - [Conda Environment with environment.yml File](#installation---conda-environment-with-environmentyml-file)
-  - [Virtual Python Environment](#installation---virtual-python-environment)
-  - [Run with Docker](#installation---run-with-docker)
+  - [Clone and Run Locally](#clone-and-run-locally)
+  - [Set Up in a Conda Environment](#set-up-in-a-conda-environment)
+  - [Conda Environment with environment.yml File](#conda-environment-with-environmentyml-file)
+  - [Virtual Python Environment](#virtual-python-environment)
+  - [Run with Docker](#run-with-docker)
 - [Getting Started](#getting-started)
 - [Limitations](#limitations-of-reinforceui-studio)
 - [Contributing](#contributing-to-reinforceui-studio)
@@ -179,12 +176,17 @@ This method is perfect for users who want a hassle-free, isolated setup without 
 system configurations. Make sure Docker is installed on your system before proceeding. You can find Docker installation instructions [Docker Installation](https://docs.docker.com/get-docker/).
 To make it even easier, we have already provided a pre-built image on Docker Hub.
 
-1. Pull and run the ReinforceUI Studio Docker image:
+1. Pull the ReinforceUI Studio Docker image:
 ```
-docker run --rm -it ghcr.io/dvalenciar/reinforceui-studio:latest
+docker pull ghcr.io/dvalenciar/reinforceui-studio:latest
 ```
 
-2. Inside the docker container, run the application: (todo double check this)
+2. Run the Docker container(TODO this needs to be updated):
+```
+docker run --rm -it ghcr.io/dvalenciar/reinforceui-studio:latest bash
+```
+
+3. Inside the docker container, run the application: (todo double check this)
 ```
 cd ReinforceUI-Studio
 python main.py
@@ -239,7 +241,6 @@ We welcome contributions to ReinforceUI Studio! Whether it’s bug fixes, featur
 1. Report Issues: Found a bug or have a suggestion? Open an issue in the repository, and we’ll take a look.
 2. Fork the Repository: Clone the project and make your changes in a new branch.
 3. Submit a Pull Request: Once your changes are ready, create a pull request with a clear description of your updates.
-4. Join Discussions: Check the Discussions tab to connect with other contributors and share your ideas.
 
 ## Citation
 If you find ReinforceUI Studio useful for your research or project, please kindly star this repo and cite is as follows:
