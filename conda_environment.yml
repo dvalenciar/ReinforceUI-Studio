@@ -1,0 +1,19 @@
+name: reinforceui  # You can change this to any name you like
+channels:
+  - defaults      # Default channel for most packages
+dependencies:
+  - python=3.10   # Adjust if you need a different version of Python
+  - pyqt=5.15.6   # PyQt5
+  - matplotlib=3.9.2
+  - pyyaml=6.0.1
+  - torch=2.4.1
+  - numpy=1.26.4
+  - seaborn=0.13.2
+  - pandas=2.2.2
+  - gymnasium=1.0.0
+  - gymnasium[classic-control]=1.0.0
+  - dm_control=1.0.26
+  - opencv-python-headless=4.10.0
+  - pip:
+    - pytest
+    - black
