@@ -195,24 +195,24 @@ To make it even easier, we have already provided a pre-built image, ready to run
 docker pull ghcr.io/dvalenciar/reinforceui-studio:latest
 ```
 
-2. Run the Docker container(TODO this needs to be updated):
+2. Run the Docker container:
 ```
 xhost +local:
 docker run -it --rm   -e DISPLAY=$DISPLAY   -v /tmp/.X11-unix:/tmp/.X11-unix   -v /home/{user_name}:/root/logs   reinforceui-studio bash
 ```
 
-You can get your {user_name} by running: whoami, for example un my case the full command is:
+You can get your {user_name} by running: `whoami`, for example, in my case, the full command is:
 ```
 docker run -it --rm   -e DISPLAY=$DISPLAY   -v /tmp/.X11-unix:/tmp/.X11-unix   -v /home/david:/root/logs  reinforceui-studio bash
 ```
 
-3. Inside the docker container, run the application: (todo double check this)
+3. Inside the docker container, run the application: 
 ```
 python main.py
 ```
 
 You're all set! ReinforceUI Studio is now running in a Docker container.
-Note there are some issues with docker folder and some video display, we are working on it.
+Note: there are some issues with docker folder log and some video record, we are working on it.
 
 
 ## Getting Started
