@@ -9,6 +9,11 @@ ReinforceUI <Studio></Studio>
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?branch=main" alt="Build Status">
   </a>
+
+  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publisher.yml?label=Docker&branch=main" alt="Docker Status">
+  </a>
+
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/main.yml">
     <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?label=Black&branch=main" alt="Black Status">
   </a>
@@ -18,6 +23,7 @@ ReinforceUI <Studio></Studio>
   <a href="https://www.python.org/downloads/release/python-310/">
     <img src="https://img.shields.io/badge/python-3.10-blue.svg" alt="Python Version">
   </a>
+
 </p>
 
 ReinforceUI Studio is a Python-based application designed to simplify the configuration and monitoring of Reinforcement Learning (RL) training processes. Featuring an intuitive graphical user interface (GUI) built with PyQt5, it eliminates the hassle of managing extra repositories or memorizing complex command lines.
@@ -80,7 +86,7 @@ ReinforceUI Studio offers several ways to get started, allowing you to choose th
 - Run with Docker.
 
 
-### Installation -> Clone and Run Locally
+### Clone and Run Locally
 Running locally means setting up ReinforceUI Studio directly on your machine. This method is ideal for users who prefer 
 full control over the application and its dependencies. With just a few commands, you can have everything configured and
 ready to go, no extra tools required.
@@ -99,7 +105,7 @@ python main.py
 
 Easy as that! You're now ready to start training your RL models with ReinforceUI Studio.
 
-### Installation -> Set Up in a Conda Environment
+### Set Up in a Conda Environment
 Conda is a widely used package manager that simplifies dependency management and ensures compatibility across platforms.
 This method is ideal for users who want a clean, isolated environment without conflicts with other Python libraries or 
 system configurations. Ensure Conda is installed on your system before proceeding. 
@@ -124,8 +130,8 @@ python main.py
 ```
 You're all set! ReinforceUI Studio is now installed and ready to use in your Conda environment.
 
-### Installation -> Conda Environment with **environment.yml** file (need to do)
-Another easy way to install ReinforceUI Studio in a Conda environment is to use the provided `environment.yml` file.
+### Conda Environment with conda_environment.yml file
+Another easy way to install ReinforceUI Studio in a Conda environment is to use the provided `conda_environment.yml` file.
 This file contains all the dependencies required to run the application, making the installation process even simpler.
 
 1. Clone the repository:
@@ -133,9 +139,9 @@ This file contains all the dependencies required to run the application, making 
 git clone git@github.com:dvalenciar/ReinforceUI-Studio.git
 cd ReinforceUI-Studio
 ```
-2. Create a new Conda environment using the `environment.yml` file:
+2. Create a new Conda environment using the `conda_environment.yml` file:
 ```bash
-conda env create -f environment.yml
+conda env create -f conda_environment.yml
 ```
 3. Activate the Conda environment:
 ```bash
@@ -148,7 +154,7 @@ python main.py
 
 All done! You can now use ReinforceUI Studio. 
 
-### Installation -> Virtual Python Environment
+### Virtual Python Environment
 If you do not like Conda, a virtual Python environment is another option for installing ReinforceUI Studio.
 A virtual Python environment is an isolated setup that allows you to manage project dependencies without affecting your system’s Python or other projects. It's ideal for users who prefer lightweight setups without additional package managers like Conda.
 
@@ -176,11 +182,13 @@ python main.py
 
 That's it! You're now ready to use ReinforceUI Studio in your virtual Python environment.
 
-### Installation -> Run with Docker (todo this)
+### Run with Docker
+
 Docker is a popular containerization tool that simplifies the deployment of applications across different platforms. 
-This method is perfect for users who want a hassle-free, isolated setup without worrying about managing dependencies or
-system configurations. Make sure Docker is installed on your system before proceeding. You can find Docker installation instructions [Docker Installation](https://docs.docker.com/get-docker/).
-To make it even easier, we have already provided a pre-built image on Docker Hub.
+This method is perfect for users who want a hassle-free, isolated setup without worrying about managing dependencies.
+Make sure Docker is installed on your system. Docker installation instructions [Docker Installation](https://docs.docker.com/get-docker/).
+
+To make it even easier, we have already provided a pre-built image, ready to run in a Docker container.
 
 1. Pull the ReinforceUI Studio Docker image:
 ```
@@ -189,16 +197,22 @@ docker pull ghcr.io/dvalenciar/reinforceui-studio:latest
 
 2. Run the Docker container(TODO this needs to be updated):
 ```
-docker run --rm -it ghcr.io/dvalenciar/reinforceui-studio:latest bash
+xhost +local:
+docker run -it --rm   -e DISPLAY=$DISPLAY   -v /tmp/.X11-unix:/tmp/.X11-unix   -v /home/{user_name}:/root/logs   reinforceui-studio bash
+```
+
+You can get your {user_name} by running: whoami, for example un my case the full command is:
+```
+docker run -it --rm   -e DISPLAY=$DISPLAY   -v /tmp/.X11-unix:/tmp/.X11-unix   -v /home/david:/root/logs  reinforceui-studio bash
 ```
 
 3. Inside the docker container, run the application: (todo double check this)
 ```
-cd ReinforceUI-Studio
 python main.py
 ```
 
-You're all set! ReinforceUI Studio is now running in a Docker container. 
+You're all set! ReinforceUI Studio is now running in a Docker container.
+Note there are some issues with docker folder and some video display, we are working on it.
 
 
 ## Getting Started
@@ -265,3 +279,6 @@ If you find ReinforceUI Studio useful for your research or project, please kindl
 ReinforceUI Studio is licensed under the MIT License. You are free to use, modify, and distribute this software, 
 provided that the original copyright notice and license are included in any copies or substantial portions of the software.
 
+
+### Acknowledgements
+This project was inspired by the [CARES reinforcement learning](https://github.com/UoA-CARES/cares_reinforcement_learning) from the University of Auckland 
