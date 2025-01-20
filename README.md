@@ -11,7 +11,7 @@ ReinforceUI <Studio></Studio>
   </a>
 
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publisher.yml?label=Docker&branch=main" alt="Docker Status">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status">
   </a>
 
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/main.yml">
