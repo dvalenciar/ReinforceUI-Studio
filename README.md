@@ -59,7 +59,7 @@ ReinforceUI Studio is built to streamline and enhance RL workflows, making it th
 
 4. Real-Time Monitoring: Monitor training performance metrics as they happen, enabling quick insights and troubleshooting.
 
-5. Comprehensive Logging: Automatically log training data, evaluation results, curve plots, and models. This feature simplifies analysis, comparisons, and refinement of your experiments.
+5. Comprehensive Logging: Automatically log training data, evaluation results, curve plots, and models. This feature simplifies the analysis, comparisons, and refinement of your experiments.
 
 6. Save Time and Effort: Focus on what matters—building and testing RL models—while ReinforceUI Studio handles the rest.
 
@@ -81,7 +81,7 @@ ReinforceUI Studio is built to streamline and enhance RL workflows, making it th
 ReinforceUI Studio offers several ways to get started, allowing you to choose the method that best suits your setup:
 
 - Clone and run locally.
-- Set up in a Conda environment or yaml file.
+- Set up in a Conda environment or YAML file.
 - Use a virtual Python environment. 
 - Run with Docker.
 
@@ -89,7 +89,7 @@ ReinforceUI Studio offers several ways to get started, allowing you to choose th
 ### Clone and Run Locally
 Running locally means setting up ReinforceUI Studio directly on your machine. This method is ideal for users who prefer 
 full control over the application and its dependencies. With just a few commands, you can have everything configured and
-ready to go, no extra tools required.
+ready to go, no extra tools are required.
 
 1. Clone the repository:
 ```bash
@@ -212,7 +212,7 @@ python main.py
 ```
 
 You're all set! ReinforceUI Studio is now running in a Docker container.
-Note: there are some issues with docker folder log and some video record, we are working on it.
+Note: there are some issues with the docker folder log and some video records; we are working on it.
 
 
 ## Getting Started
@@ -239,7 +239,7 @@ Customize your training parameters or use the default settings to get started qu
 7. Visualize Progress:
 Watch real-time training and evaluation curves to track your model’s performance.
 
-And that’s it! You’re ready to train your model
+And that’s it! You’re ready to train your model.
 
 <p align="center">
   <img src="media_resources/main_window.png">
@@ -248,12 +248,14 @@ And that’s it! You’re ready to train your model
 When the training process is complete, ReinforceUI Studio will automatically save all you need.
 We will save the models, log training data, and evaluate your model’s performance and provide a final video with the model's performance. 
 
+Check out our [video tutorial](https://www.youtube.com/watch?v=olaspgr3vlM), where we show you how ReinforceUI Studio works
+
 ## Limitations of ReinforceUI Studio. 
 ReinforceUI Studio is designed to simplify the training and monitoring of RL models, but for environments and algorithms for **CONTINUOUS ACTION SPACE** only. 
-Which this means? So it is not suitable for  environments such as Atari games or discrete control tasks and algorithms like DQN.
+Which this means? So, it is not suitable for  environments such as Atari games or discrete control tasks and algorithms like DQN.
 
-Why we have this limitation? Because these days robotics and many other real-world applications are using continuous action space environments and algorithms.
-So we keep our focus on this area.
+Why do we have this limitation? Because these days robotics and many other real-world applications are using continuous action space environments and algorithms.
+So, we keep our focus on this area.
 
 ## Contributing to ReinforceUI Studio
 We welcome contributions to ReinforceUI Studio! Whether it’s bug fixes, feature suggestions, or documentation improvements, your input is valuable. Here’s how you can get involved:
