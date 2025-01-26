@@ -31,10 +31,12 @@ ReinforceUI Studio is a Python-based application designed to simplify the config
 Everything you need to train your RL model is provided in one repository. With just a few clicks, you can train your model, visualize the training process, and save the model for later use—ready to be deployed and analyzed.
 
 
-Please check out our full documentation available [here](https://docs.reinforceui-studio.com) for installation instructions, tutorials, RL concepts, and more.
+Please check out our **full documentation** available [here](https://docs.reinforceui-studio.com) for installation instructions, tutorials, RL concepts, and more.
 
 
-
+<p align="center">
+  <img src="media_resources/main_window.gif">
+</p>
 
 # Why you should use ReinforceUI Studio
 1. Simplified RL Workflows: The intuitive GUI eliminates the need for complex command-line operations
