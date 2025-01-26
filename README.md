@@ -17,6 +17,11 @@ ReinforceUI <Studio></Studio>
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/main.yml">
     <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?label=Black&branch=main" alt="Black Status">
   </a>
+  
+  <a href="https://docs.reinforceui-studio.com/">
+    <img  src="https://img.shields.io/badge/Docs-Publish-blue" alt="Static Badge">
+  </a>
+  
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
   </a>
