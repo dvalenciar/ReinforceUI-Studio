@@ -19,7 +19,7 @@ ReinforceUI <Studio></Studio>
   </a>
   
   <a href="https://docs.reinforceui-studio.com/">
-    <img  src="https://img.shields.io/badge/Docs-Publish-blue" alt="Static Badge">
+    <img  src="https://img.shields.io/badge/Docs-Up-blue" alt="Static Badge">
   </a>
   
   <a href="https://opensource.org/licenses/MIT">

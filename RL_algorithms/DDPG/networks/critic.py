@@ -10,17 +10,8 @@ class Critic(nn.Module):
         if hidden_size is None:
             hidden_size = [256, 256]
 
-        # Q1 architecture
-        self.Q1 = nn.Sequential(
-            nn.Linear(observation_size + num_actions, hidden_size[0]),
-            nn.ReLU(),
-            nn.Linear(hidden_size[0], hidden_size[1]),
-            nn.ReLU(),
-            nn.Linear(hidden_size[1], 1),
-        )
-
-        # Q2 architecture
-        self.Q2 = nn.Sequential(
+        # Single Q architecture
+        self.Q = nn.Sequential(
             nn.Linear(observation_size + num_actions, hidden_size[0]),
             nn.ReLU(),
             nn.Linear(hidden_size[0], hidden_size[1]),
@@ -32,4 +23,4 @@ class Critic(nn.Module):
             self, state: torch.Tensor, action: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
         obs_action = torch.cat([state, action], dim=1)
-        return self.Q1(obs_action), self.Q2(obs_action)
+        return self.Q(obs_action)
