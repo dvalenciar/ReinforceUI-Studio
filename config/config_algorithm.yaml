@@ -1,12 +1,11 @@
 algorithms:
-  - name: TD3
+  - name: DDPG
     hyperparameters:
       actor_lr: 3e-4
       critic_lr: 3e-4
       gamma: 0.99
       tau: 0.005
       buffer_size: 1000000
-
 
   - name: SAC
     hyperparameters:
@@ -18,16 +17,23 @@ algorithms:
       buffer_size: 1000000
       log_std_bounds: [-20, 2]
 
-  - name : TQC
+  - name: TQC
     hyperparameters:
-        actor_lr: 3e-4
-        critic_lr: 3e-4
-        alpha_lr: 3e-4
-        gamma: 0.99
-        tau: 0.005
-        buffer_size: 1000000
-        top_quantiles_to_drop : 2
-        n_quantiles: 25
-        log_std_bounds: [-20, 2]
-        num_critics : 5
+      actor_lr: 3e-4
+      critic_lr: 3e-4
+      alpha_lr: 3e-4
+      gamma: 0.99
+      tau: 0.005
+      buffer_size: 1000000
+      top_quantiles_to_drop: 2
+      n_quantiles: 25
+      log_std_bounds: [-20, 2]
+      num_critics: 5
 
+  - name: TD3
+    hyperparameters:
+      actor_lr: 3e-4
+      critic_lr: 3e-4
+      gamma: 0.99
+      tau: 0.005
+      buffer_size: 1000000
