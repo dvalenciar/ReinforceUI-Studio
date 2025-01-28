@@ -27,9 +27,9 @@ class DDPG:
         )
 
     def select_action_from_policy(
-            self,
-            state: np.ndarray,
-            evaluation: bool = False,
+        self,
+        state: np.ndarray,
+        evaluation: bool = False,
     ) -> np.ndarray:
 
         self.actor_net.eval()
@@ -42,12 +42,12 @@ class DDPG:
         return action
 
     def _update_critic(
-            self,
-            states: torch.Tensor,
-            actions: torch.Tensor,
-            rewards: torch.Tensor,
-            next_states: torch.Tensor,
-            dones: torch.Tensor,
+        self,
+        states: torch.Tensor,
+        actions: torch.Tensor,
+        rewards: torch.Tensor,
+        next_states: torch.Tensor,
+        dones: torch.Tensor,
     ) -> float:
         with torch.no_grad():
             self.target_actor_net.eval()
@@ -102,14 +102,14 @@ class DDPG:
 
         # Update target network params
         for param, target_param in zip(
-                self.critic_net.parameters(), self.target_critic_net.parameters()
+            self.critic_net.parameters(), self.target_critic_net.parameters()
         ):
             target_param.data.copy_(
                 self.tau * param.data + (1 - self.tau) * target_param.data
             )
 
         for param, target_param in zip(
-                self.actor_net.parameters(), self.target_actor_net.parameters()
+            self.actor_net.parameters(), self.target_actor_net.parameters()
         ):
             target_param.data.copy_(
                 self.tau * param.data + (1 - self.tau) * target_param.data

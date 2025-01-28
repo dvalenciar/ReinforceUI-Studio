@@ -4,7 +4,7 @@ from torch import nn
 
 class Critic(nn.Module):
     def __init__(
-            self, observation_size: int, num_actions: int, hidden_size: list[int] = None
+        self, observation_size: int, num_actions: int, hidden_size: list[int] = None
     ):
         super().__init__()
         if hidden_size is None:
@@ -29,7 +29,7 @@ class Critic(nn.Module):
         )
 
     def forward(
-            self, state: torch.Tensor, action: torch.Tensor
+        self, state: torch.Tensor, action: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
         obs_action = torch.cat([state, action], dim=1)
         return self.Q1(obs_action), self.Q2(obs_action)

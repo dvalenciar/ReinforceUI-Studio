@@ -35,7 +35,7 @@ class TD3:
         )
 
     def select_action_from_policy(
-            self, state: np.ndarray, evaluation: bool = False, noise_scale: float = 0.1
+        self, state: np.ndarray, evaluation: bool = False, noise_scale: float = 0.1
     ) -> np.ndarray:
 
         self.actor_net.eval()
@@ -52,12 +52,12 @@ class TD3:
         return action
 
     def _update_critic(
-            self,
-            states: torch.Tensor,
-            actions: torch.Tensor,
-            rewards: torch.Tensor,
-            next_states: torch.Tensor,
-            dones: torch.Tensor,
+        self,
+        states: torch.Tensor,
+        actions: torch.Tensor,
+        rewards: torch.Tensor,
+        next_states: torch.Tensor,
+        dones: torch.Tensor,
     ) -> tuple[float, float, float]:
 
         with torch.no_grad():
@@ -67,7 +67,9 @@ class TD3:
             next_actions = next_actions + target_noise
             next_actions = torch.clamp(next_actions, min=-1, max=1)
 
-            target_q_values_one, target_q_values_two = self.target_critic_net(next_states, next_actions)
+            target_q_values_one, target_q_values_two = self.target_critic_net(
+                next_states, next_actions
+            )
             target_q_values = torch.minimum(target_q_values_one, target_q_values_two)
             q_target = rewards + self.gamma * (1 - dones) * target_q_values
 
@@ -118,14 +120,14 @@ class TD3:
 
             # Update target network params
             for param, target_param in zip(
-                    self.critic_net.parameters(), self.target_critic_net.parameters()
+                self.critic_net.parameters(), self.target_critic_net.parameters()
             ):
                 target_param.data.copy_(
                     self.tau * param.data + (1 - self.tau) * target_param.data
                 )
 
             for param, target_param in zip(
-                    self.actor_net.parameters(), self.target_actor_net.parameters()
+                self.actor_net.parameters(), self.target_actor_net.parameters()
             ):
                 target_param.data.copy_(
                     self.tau * param.data + (1 - self.tau) * target_param.data
