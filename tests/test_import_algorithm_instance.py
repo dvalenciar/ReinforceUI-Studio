@@ -1,5 +1,5 @@
 # tests/test_import_algorithm_instance.py
-from RL_algorithms.training_policy_loop import import_algorithm_instance
+from RL_loops.training_policy_loop import import_algorithm_instance
 
 
 def test_import_algorithm_instance():

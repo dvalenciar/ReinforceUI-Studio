@@ -80,4 +80,4 @@ provided that the original copyright notice and license are included in any copi
 
 
 ### Acknowledgements
-This project was inspired by the [CARES reinforcement learning](https://github.com/UoA-CARES/cares_reinforcement_learning) from the University of Auckland 
+This project was inspired by the CARES Reinforcement Learning Package from the University of Auckland 

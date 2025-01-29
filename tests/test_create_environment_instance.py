@@ -1,5 +1,4 @@
-import pytest
-from RL_algorithms.training_policy_loop import create_environment_instance
+from RL_loops.training_policy_loop import create_environment_instance
 
 
 def test_create_environment_instance():
