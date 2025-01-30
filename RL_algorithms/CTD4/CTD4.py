@@ -15,7 +15,7 @@ class CTD4:
         self.ensemble_size = int(hyperparameters.get("ensemble_size"))
 
         self.actor_net = Actor(observation_size, action_num).to(self.device)
-        self.target_actor_net = copy.deepcopy(self.actor_net)
+        self.target_actor_net = copy.deepcopy(self.actor_net).to(self.device)
 
         self.ensemble_critics = torch.nn.ModuleList(
             [
@@ -23,7 +23,9 @@ class CTD4:
                 for _ in range(self.ensemble_size)
             ]
         )
-        self.target_ensemble_critics = copy.deepcopy(self.ensemble_critics)
+        self.target_ensemble_critics = copy.deepcopy(self.ensemble_critics).to(
+            self.device
+        )
 
         self.noise_clip = 0.5
         self.target_policy_noise_scale = 0.2
@@ -67,11 +69,10 @@ class CTD4:
         std_2: torch.Tensor,
         mean_2: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
+
         kalman_gain = (std_1**2) / (std_1**2 + std_2**2)
         fusion_mean = mean_1 + kalman_gain * (mean_2 - mean_1)
-        fusion_variance = (
-            (1 - kalman_gain) * std_1**2 + kalman_gain * std_2**2 + 1e-6
-        )  # 1e-6 was included to avoid values equal to 0
+        fusion_variance = (1 - kalman_gain) * std_1**2 + kalman_gain * std_2**2 + 1e-6
         fusion_std = torch.sqrt(fusion_variance)
         return fusion_mean, fusion_std
 
@@ -79,16 +80,17 @@ class CTD4:
         self, u_set: list[torch.Tensor], std_set: list[torch.Tensor]
     ) -> tuple[torch.Tensor, torch.Tensor]:
         # Kalman fusion
-        for i in range(len(u_set) - 1):
-            if i == 0:
-                x_1, std_1 = u_set[i], std_set[i]
-                x_2, std_2 = u_set[i + 1], std_set[i + 1]
-                fusion_u, fusion_std = self._fusion_kalman(std_1, x_1, std_2, x_2)
-            else:
-                x_2, std_2 = u_set[i + 1], std_set[i + 1]
-                fusion_u, fusion_std = self._fusion_kalman(
-                    fusion_std, fusion_u, std_2, x_2
-                )
+        if len(u_set) == 0 or len(std_set) == 0:
+            raise ValueError("Input lists must not be empty.")
+        if len(u_set) == 1:
+            return u_set[0], std_set[0]
+
+        fusion_u, fusion_std = u_set[0], std_set[0]
+        for i in range(1, len(u_set)):
+            fusion_u, fusion_std = self._fusion_kalman(
+                fusion_std, fusion_u, std_set[i], u_set[i]
+            )
+
         return fusion_u, fusion_std
 
     def _update_critics(
@@ -124,7 +126,7 @@ class CTD4:
             u_target = rewards + self.gamma * fusion_u * (1 - dones)
             std_target = self.gamma * fusion_std
             target_distribution = torch.distributions.normal.Normal(
-                u_target, std_target
+                u_target, std_target + 1e-6
             )
 
         critic_loss_totals = []
@@ -134,7 +136,7 @@ class CTD4:
         ):
             u_current, std_current = critic_net(states, actions)
             current_distribution = torch.distributions.normal.Normal(
-                u_current, std_current
+                u_current, std_current + 1e-6
             )
 
             # Compute each critic loss
@@ -186,7 +188,7 @@ class CTD4:
         actions = torch.FloatTensor(np.asarray(actions)).to(self.device)
         rewards = torch.FloatTensor(np.asarray(rewards)).to(self.device)
         next_states = torch.FloatTensor(np.asarray(next_states)).to(self.device)
-        dones = torch.LongTensor(np.asarray(dones)).to(self.device)
+        dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
 
         # Reshape to batch_size
         rewards = rewards.unsqueeze(0).reshape(batch_size, 1)

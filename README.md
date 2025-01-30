@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-ReinforceUI <Studio></Studio>
+ReinforceUI Studio
   <br>
 </h1>
 
