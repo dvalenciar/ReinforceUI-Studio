@@ -1,12 +1,12 @@
 import time
 import importlib
-from RL_algorithms.memory.memory_buffer import MemoryBuffer
+from RL_memory.memory_buffer import MemoryBuffer
 from RL_environment.gym_env import GymEnvironment
 from RL_environment.dmcs_env import DMControlEnvironment
 from RL_helpers.util import normalize_action, denormalize_action, set_seed
 from RL_helpers.record_logger import RecordLogger
-from RL_algorithms.evaluate_policy_loop import evaluate_policy_loop
-from RL_algorithms.testing_policy_loop import test_policy_loop
+from RL_loops.evaluate_policy_loop import evaluate_policy_loop
+from RL_loops.testing_policy_loop import test_policy_loop
 
 
 def import_algorithm_instance(config_data):

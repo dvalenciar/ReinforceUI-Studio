@@ -21,7 +21,7 @@ from PyQt5.QtCore import Qt, QUrl, pyqtSignal, QThread
 from PyQt5.QtGui import QDesktopServices
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from RL_algorithms.training_policy_loop import training_loop
+from RL_loops.training_policy_loop import training_loop
 
 
 class TrainingWindow(QMainWindow):
