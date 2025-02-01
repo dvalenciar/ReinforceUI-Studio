@@ -1,6 +1,6 @@
 import importlib
 
-from RL_helpers.util import denormalize_action
+from RL_helpers.util import denormalize_action, set_seed
 from RL_environment.dmcs_env import DMControlEnvironment
 from RL_environment.gym_env import GymEnvironment
 
@@ -32,12 +32,13 @@ def policy_from_model_load_test(config_data, models_log_path):
     selected_environment = config_data.get("selected_environment")
     algorithm = config_data.get("Algorithm")
     seed = int(config_data.get("Seed"))
+    set_seed(seed)
     hyperparameters = config_data.get("Hyperparameters")
     # Create environment instance
     if selected_platform == "Gymnasium" or selected_platform == "MuJoCo":
         env = GymEnvironment(selected_environment, seed=seed, render_mode="human")
     elif selected_platform == "DMCS":
-        env = DMControlEnvironment(selected_environment, seed=seed)
+        env = DMControlEnvironment(selected_environment, seed=seed, render_mode="human")
     else:
         raise ValueError(f"Unsupported platform: {selected_platform}")
 
@@ -56,7 +57,10 @@ def policy_from_model_load_test(config_data, models_log_path):
         episode_reward = 0
         while not done and not truncated:
             action = rl_agent.select_action_from_policy(state, evaluation=True)
-            next_state, reward, done, truncated = env.step(action)
+            action_env = denormalize_action(
+                action, env.max_action_value(), env.min_action_value()
+            )
+            next_state, reward, done, truncated = env.step(action_env)
             state = next_state
             episode_reward += reward
             env.render_frame()
