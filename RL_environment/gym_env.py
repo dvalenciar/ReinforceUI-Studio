@@ -3,8 +3,8 @@ import gymnasium as gym
 
 
 class GymEnvironment:
-    def __init__(self, env_name: str, seed: int):
-        self.env = gym.make(env_name, render_mode="rgb_array")
+    def __init__(self, env_name: str, seed: int, render_mode: str = "rgb_array"):
+        self.env = gym.make(env_name, render_mode=render_mode)
         _, _ = self.env.reset(seed=seed)
         self.env.action_space.seed(seed)
 
@@ -34,3 +34,6 @@ class GymEnvironment:
     def render_frame(self) -> np.ndarray:
         frame = self.env.render()
         return frame
+
+    def close(self):
+        self.env.close()

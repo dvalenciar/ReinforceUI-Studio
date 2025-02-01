@@ -23,7 +23,7 @@ class SelectHyperWindow(QDialog):
         self.hyperparam_fields = {}
 
         self.setWindowTitle(f"Hyperparameters for {selected_algorithm}")
-        self.setStyleSheet("background-color: black;")
+        self.setStyleSheet("background-color: #121212;")
 
         layout = QVBoxLayout()
 

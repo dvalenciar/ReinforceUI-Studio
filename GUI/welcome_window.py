@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QMainWindow,
     QPushButton,
@@ -10,15 +11,18 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 
 from GUI.select_platform_window import PlatformConfigWindow
+from GUI.load_model_window import LoadConfigWindow
 
 
 class WelcomeWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.manual_config_window = None
+        self.load_config_window = None
+        self.platform_config_window = None
         self.user_selections = {"setup_choice": ""}
         self.setWindowTitle("RL Configuration Guide")
-        self.setFixedSize(700, 200)
+        self.setFixedSize(900, 200)
+        self.setStyleSheet("background-color: #121212;")
         self.center()
 
         main_widget = QWidget()
@@ -34,23 +38,32 @@ class WelcomeWindow(QMainWindow):
         welcome_label.setWordWrap(True)
         welcome_label.setAlignment(Qt.AlignCenter)
         welcome_label.setStyleSheet(
-            "color: yellow; font-size: 18px; font-weight: bold;"
+            "color: #E0E0E0; font-size: 18px; font-weight: bold;"
         )
         main_layout.addWidget(welcome_label)
 
         button_layout = QHBoxLayout()
-        manual_button = self.create_button("Start Configuration", 250, 50)
-        # config_button = self.create_button("", 50, 50, QIcon('media_resources/icon_config.png'))
+        button_layout.setSpacing(20)  # Increase the separation between buttons
+        manual_button = self.create_button(
+            "Start Training Configuration",
+            250,
+            50,
+            QIcon("media_resources/icon_custom_config.png"),
+        )
+        load_button = self.create_button(
+            "Load Pre-trained Model", 250, 50, QIcon("media_resources/icon_config.png")
+        )
 
         button_layout.addWidget(manual_button)
+        button_layout.addWidget(load_button)
         button_layout.setContentsMargins(100, 20, 100, 20)
         button_layout.setAlignment(Qt.AlignCenter)
         main_layout.addLayout(button_layout)
 
         main_widget.setLayout(main_layout)
-        self.setStyleSheet("background-color: black;")
 
         manual_button.clicked.connect(self.open_manual_configuration)
+        load_button.clicked.connect(self.open_manual_configuration)
 
     def create_button(self, text, width, height, icon=None):
         button = QPushButton(text, self)
@@ -63,7 +76,7 @@ class WelcomeWindow(QMainWindow):
             QPushButton {
                 background-color: #444444;
                 color: white;
-                font-size: 16px;
+                font-size: 15px;
                 padding: 10px 20px;
                 border-radius: 10px;
                 border: 1px solid white;
@@ -76,12 +89,18 @@ class WelcomeWindow(QMainWindow):
         return button
 
     def open_manual_configuration(self):
-        self.user_selections["setup_choice"] = "manual"
-        self.close()
-        self.manual_config_window = PlatformConfigWindow(
-            self.show, self.user_selections
-        )
-        self.manual_config_window.show()
+        if self.sender().text() == "Load Pre-trained Model":
+            self.user_selections["setup_choice"] = "load_model"
+            self.close()
+            self.load_config_window = LoadConfigWindow(self.show, self.user_selections)
+            self.load_config_window.show()
+        else:
+            self.user_selections["setup_choice"] = "train_model"
+            self.close()
+            self.platform_config_window = PlatformConfigWindow(
+                self.show, self.user_selections
+            )
+            self.platform_config_window.show()
 
     def center(self):
         screen_geometry = QDesktopWidget().availableGeometry().center()

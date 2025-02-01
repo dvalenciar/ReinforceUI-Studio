@@ -1,9 +1,10 @@
 from dm_control import suite
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class DMControlEnvironment:
-    def __init__(self, env_name: str, seed: int):
+    def __init__(self, env_name: str, seed: int, render_mode: str = None):
         if env_name == "ball_in_cup_catch":
             self.domain = "ball_in_cup"
             task = "catch"
@@ -17,6 +18,7 @@ class DMControlEnvironment:
         self.env = suite.load(
             domain_name=self.domain, task_name=task, task_kwargs={"random": seed}
         )
+        self.render_mode = render_mode
 
     def max_action_value(self):
         return self.env.action_spec().maximum[0]
@@ -58,4 +60,16 @@ class DMControlEnvironment:
         frame1 = self.env.physics.render(camera_id=0, height=height, width=width)
         frame2 = self.env.physics.render(camera_id=1, height=height, width=width)
         combined_frame = np.hstack((frame1, frame2))  # Combine frames horizontally
+
+        # display the frame similar to GymEnvironment with render_mode=render_mode
+        # using matplotlib to display the frame was chosen because easy, This simple display the frame
+        if self.render_mode == "human":
+            plt.imshow(combined_frame)
+            plt.axis("off")
+            plt.show(block=False)  # Non-blocking
+            plt.pause(0.01)  # Adjust refresh rate
+            plt.clf()  # Clear figure for the next frame
         return combined_frame
+
+    def close(self):
+        plt.close()  # Close the figure

@@ -107,7 +107,7 @@ class TrainingWindow(QMainWindow):
     def init_ui(self):
         self.setWindowTitle("Training Configuration Window")
         self.setFixedSize(1100, 700)
-        self.setStyleSheet("background-color: black;")
+        self.setStyleSheet("background-color: #121212;")
         self.center()
 
         main_layout = QVBoxLayout()

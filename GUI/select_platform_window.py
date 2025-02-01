@@ -21,7 +21,7 @@ class PlatformConfigWindow(QDialog):
         self.user_selections = user_selections
         self.setWindowTitle("RL Training Platform Selection")
         self.setFixedSize(1000, 430)
-        self.setStyleSheet("background-color: black;")
+        self.setStyleSheet("background-color: #121212;")
 
         main_layout = QVBoxLayout(self)
         buttons_layout = QHBoxLayout()

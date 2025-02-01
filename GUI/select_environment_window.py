@@ -23,7 +23,7 @@ class SelectEnvironmentWindow(QDialog):
 
         self.setWindowTitle(f"Select Environment")
         self.setFixedSize(500, 300)
-        self.setStyleSheet("background-color: black;")
+        self.setStyleSheet("background-color: #121212;")
 
         layout = QVBoxLayout()
         button_layout = QHBoxLayout()
