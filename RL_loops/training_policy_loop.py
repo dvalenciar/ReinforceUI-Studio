@@ -6,7 +6,7 @@ from RL_environment.dmcs_env import DMControlEnvironment
 from RL_helpers.util import normalize_action, denormalize_action, set_seed
 from RL_helpers.record_logger import RecordLogger
 from RL_loops.evaluate_policy_loop import evaluate_policy_loop
-from RL_loops.testing_policy_loop import test_policy_loop
+from RL_loops.testing_policy_loop import policy_loop_test
 
 
 def import_algorithm_instance(config_data):
@@ -16,15 +16,15 @@ def import_algorithm_instance(config_data):
     return algorithm_class
 
 
-def create_environment_instance(config_data):
+def create_environment_instance(config_data, render_mode="rgb_array"):
     platform_name = config_data.get("selected_platform")
     env_name = config_data.get("selected_environment")
     seed = int(config_data.get("Seed"))
 
     if platform_name == "Gymnasium" or platform_name == "MuJoCo":
-        environment = GymEnvironment(env_name, seed)
+        environment = GymEnvironment(env_name, seed, render_mode)
     elif platform_name == "DMCS":
-        environment = DMControlEnvironment(env_name, seed)
+        environment = DMControlEnvironment(env_name, seed, render_mode)
     else:
         raise ValueError(f"Unsupported platform: {platform_name}")
     return environment
@@ -139,5 +139,5 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
             episode_start_time = time.time()
 
     logger.save_logs()
-    test_policy_loop(env, rl_agent, logger)
+    policy_loop_test(env, rl_agent, logger)
     training_window.training_completed_signal.emit(training_completed)

@@ -23,7 +23,7 @@ class SelectEnvironmentWindow(QDialog):
 
         self.setWindowTitle(f"Select Environment")
         self.setFixedSize(500, 300)
-        self.setStyleSheet("background-color: black;")
+        self.setStyleSheet("background-color: #121212;")
 
         layout = QVBoxLayout()
         button_layout = QHBoxLayout()
@@ -51,7 +51,7 @@ class SelectEnvironmentWindow(QDialog):
         )
         welcome_label.setAlignment(Qt.AlignCenter)
         welcome_label.setStyleSheet(
-            "color: yellow; font-size: 16px; font-weight: bold;"
+            "color: #E0E0E0; font-size: 16px; font-weight: bold;"
         )
         layout.addWidget(welcome_label)
 
