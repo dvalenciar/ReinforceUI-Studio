@@ -149,6 +149,7 @@ class TD3:
                 weights_only=True,
             )
         )
+        self.actor_net.eval()
         self.critic_net.load_state_dict(
             torch.load(
                 f"{filepath}/{filename}_critic.pht",
@@ -156,3 +157,4 @@ class TD3:
                 weights_only=True,
             )
         )
+        self.critic_net.eval()

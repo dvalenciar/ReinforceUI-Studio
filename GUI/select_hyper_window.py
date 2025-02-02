@@ -29,7 +29,7 @@ class SelectHyperWindow(QDialog):
 
         title_label = QLabel(f"Custom Hyperparameters for {selected_algorithm}", self)
         title_label.setAlignment(Qt.AlignCenter)
-        title_label.setStyleSheet("color: yellow; font-size: 16px; font-weight: bold;")
+        title_label.setStyleSheet("color: #E0E0E0; font-size: 16px; font-weight: bold;")
         layout.addWidget(title_label)
 
         self.load_hyperparameters(selected_algorithm)

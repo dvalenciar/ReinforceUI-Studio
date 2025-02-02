@@ -47,7 +47,7 @@ class PlatformConfigWindow(QDialog):
         welcome_label = QLabel("Select the RL Platform.", self)
         welcome_label.setAlignment(Qt.AlignCenter)
         welcome_label.setStyleSheet(
-            "color: yellow; font-size: 18px; font-weight: bold;"
+            "color: #E0E0E0; font-size: 18px; font-weight: bold;"
         )
         main_layout.addWidget(welcome_label)
 

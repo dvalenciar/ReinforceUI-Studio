@@ -16,15 +16,15 @@ def import_algorithm_instance(config_data):
     return algorithm_class
 
 
-def create_environment_instance(config_data):
+def create_environment_instance(config_data, render_mode="rgb_array"):
     platform_name = config_data.get("selected_platform")
     env_name = config_data.get("selected_environment")
     seed = int(config_data.get("Seed"))
 
     if platform_name == "Gymnasium" or platform_name == "MuJoCo":
-        environment = GymEnvironment(env_name, seed)
+        environment = GymEnvironment(env_name, seed, render_mode)
     elif platform_name == "DMCS":
-        environment = DMControlEnvironment(env_name, seed)
+        environment = DMControlEnvironment(env_name, seed, render_mode)
     else:
         raise ValueError(f"Unsupported platform: {platform_name}")
     return environment
