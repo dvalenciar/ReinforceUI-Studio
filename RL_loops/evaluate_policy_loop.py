@@ -1,7 +1,7 @@
 from RL_helpers.util import denormalize_action
 
 
-def evaluate_policy_loop(env, rl_agent, number_eval_episodes, logger, total_steps):
+def evaluate_policy_loop(env, rl_agent, number_eval_episodes, logger, total_steps, algo_name=None):
     total_reward = 0
     df_log = None
     for episode in range(number_eval_episodes):
@@ -12,7 +12,11 @@ def evaluate_policy_loop(env, rl_agent, number_eval_episodes, logger, total_step
         truncated = False
         while not done and not truncated:
             episode_timesteps += 1
-            action = rl_agent.select_action_from_policy(state, evaluation=True)
+            if algo_name == "PPO":
+                action, _ = rl_agent.select_action_from_policy(state)
+            else:
+                action = rl_agent.select_action_from_policy(state, evaluation=True)
+
             action_env = denormalize_action(
                 action, env.max_action_value(), env.min_action_value()
             )
@@ -30,3 +34,4 @@ def evaluate_policy_loop(env, rl_agent, number_eval_episodes, logger, total_step
             average_reward,
         )
     return df_log
+

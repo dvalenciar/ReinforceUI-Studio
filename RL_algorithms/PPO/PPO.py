@@ -16,7 +16,6 @@ class PPO:
         self.actor_lr = float(hyperparameters.get("actor_lr"))
         self.critic_lr = float(hyperparameters.get("critic_lr"))
         self.eps_clip = float(hyperparameters.get("eps_clip"))
-        self.max_steps_per_batch = int(hyperparameters.get("max_steps_per_batch"))
         self.updates_per_iteration = int(hyperparameters.get("updates_per_iteration"))
 
         self.action_num = action_num
@@ -33,10 +32,7 @@ class PPO:
         self.cov_mat = torch.diag(self.cov_var)
 
 
-
-    def select_action_from_policy(
-            self, state: np.ndarray
-    ) ->  tuple[np.ndarray, np.ndarray]:
+    def select_action_from_policy(self, state: np.ndarray) ->  tuple[np.ndarray, np.ndarray]:
         self.actor_net.eval()
         with torch.no_grad():
             state_tensor = torch.FloatTensor(state).to(self.device)
@@ -50,13 +46,12 @@ class PPO:
         self.actor_net.train()
         return action, log_prob # fixme - check if this is correct, what should be returned
 
-    def _evaluate_policy(self, states, actions):
+    def _evaluate_policy(self, state, action):
         v = self.critic_net(state).squeeze()
         mean = self.actor_net(state)
         dist = MultivariateNormal(mean, self.cov_mat)
         log_prob = dist.log_prob(action)
         return v, log_prob
-
 
     def _calculate_rewards_to_go(
         self, batch_rewards: torch.Tensor, batch_dones: torch.Tensor
@@ -70,7 +65,6 @@ class PPO:
         return batch_rtgs
 
     def train_policy(self, memory):
-        print("Training policy")
         # Get the experiences from the memory and flush it
         experiences = memory.return_flushed_memory()
         states, actions, rewards, next_states, dones, log_prob = (
@@ -81,40 +75,23 @@ class PPO:
             experiences["done"],
             experiences["log_prob"],
         )
-         # fixme - check if this is correct if i going to convert to asarray so do nto need to send it from memory as array
         states = torch.FloatTensor(np.asarray(states)).to(self.device)
         actions = torch.FloatTensor(np.asarray(actions)).to(self.device)
         rewards = torch.FloatTensor(np.asarray(rewards)).to(self.device)
         next_states = torch.FloatTensor(np.asarray(next_states)).to(self.device)
         dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
-        log_probs_tensor = torch.FloatTensor(np.asarray(log_prob)).to(self.device)
+        log_probs = torch.FloatTensor(np.asarray(log_prob)).to(self.device)
 
-        log_probs_tensor = log_probs_tensor.squeeze()
-
-        # fixme remove the word _tensor from the variables
-
-        print(states.shape)
-        print(actions.shape)
-        print(rewards.shape)
-        print(next_states.shape)
-        print(dones.shape)
-        print(log_probs_tensor.shape)
-        input("Press Enter to continue...")
-        exit()
-
-        rtgs = self._calculate_rewards_to_go(rewards_tensor, dones_tensor)
-        v, _ = self._evaluate_policy(states_tensor, actions_tensor)
+        rtgs = self._calculate_rewards_to_go(rewards, dones)
+        v, _ = self._evaluate_policy(states, actions)
         advantages = rtgs.detach() - v.detach()
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-10)
 
-        td_errors = torch.abs(advantages)
-        td_errors = td_errors.data.cpu().numpy()
-
         for _ in range(self.updates_per_iteration):
-            v, curr_log_probs = self._evaluate_policy(states_tensor, actions_tensor)
+            v, curr_log_probs = self._evaluate_policy(states, actions)
 
             # Calculate ratios
-            ratios = torch.exp(curr_log_probs - log_probs_tensor.detach())
+            ratios = torch.exp(curr_log_probs - log_probs.detach())
 
             # Finding Surrogate Loss
             surrogate_lose_one = ratios * advantages
@@ -158,18 +135,3 @@ class PPO:
         )
         self.critic_net.eval()
 
-
-
-
-if __name__ == "__main__":
-    observation_size = 3
-    action_num = 2
-    hyperparameters = {
-        "gamma": 0.99,
-        "tau": 0.005,
-        "actor_lr": 0.0003,
-        "critic_lr": 0.0003,
-    }
-    agent = PPO(observation_size, action_num, hyperparameters)
-    print(agent.actor_net)
-    print(agent.critic_net)
