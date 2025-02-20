@@ -216,4 +216,3 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
         logger.save_logs()
         policy_loop_test(env, rl_agent, logger)
         training_window.training_completed_signal.emit(training_completed)
-

@@ -20,13 +20,8 @@ class PPO:
 
         self.action_num = action_num
 
-        self.actor_net_optimiser = torch.optim.Adam(
-            self.actor_net.parameters(), lr=self.actor_lr
-        )
-
-        self.critic_net_optimiser = torch.optim.Adam(
-            self.critic_net.parameters(), lr=self.critic_lr
-        )
+        self.actor_net_optimiser = torch.optim.Adam(self.actor_net.parameters(), lr=self.actor_lr)
+        self.critic_net_optimiser = torch.optim.Adam(self.critic_net.parameters(), lr=self.critic_lr)
 
         self.cov_var = torch.full(size=(self.action_num,), fill_value=0.5).to(self.device)
         self.cov_mat = torch.diag(self.cov_var)
@@ -41,10 +36,11 @@ class PPO:
             dist = MultivariateNormal(mean, self.cov_mat)
             action = dist.sample()
             log_prob = dist.log_prob(action)
+
             action = action.cpu().data.numpy().flatten()
-            log_prob = log_prob.cpu().data.numpy().flatten()  # fixme - check if this is correct
+            log_prob = log_prob.cpu().data.numpy().flatten()
         self.actor_net.train()
-        return action, log_prob # fixme - check if this is correct, what should be returned
+        return action, log_prob
 
     def _evaluate_policy(self, state, action):
         v = self.critic_net(state).squeeze()
@@ -53,9 +49,7 @@ class PPO:
         log_prob = dist.log_prob(action)
         return v, log_prob
 
-    def _calculate_rewards_to_go(
-        self, batch_rewards: torch.Tensor, batch_dones: torch.Tensor
-    ) -> torch.Tensor:
+    def _calculate_rewards_to_go(self, batch_rewards: torch.Tensor, batch_dones: torch.Tensor) -> torch.Tensor:
         rtgs: list[float] = []
         discounted_reward = 0
         for reward, done in zip(reversed(batch_rewards), reversed(batch_dones)):
@@ -67,25 +61,29 @@ class PPO:
     def train_policy(self, memory):
         # Get the experiences from the memory and flush it
         experiences = memory.return_flushed_memory()
-        states, actions, rewards, next_states, dones, log_prob = (
-            experiences["state"],
-            experiences["action"],
-            experiences["reward"],
-            experiences["next_state"],
-            experiences["done"],
-            experiences["log_prob"],
-        )
+        states, actions, rewards, _, dones, log_probs = experiences
+
         states = torch.FloatTensor(np.asarray(states)).to(self.device)
         actions = torch.FloatTensor(np.asarray(actions)).to(self.device)
         rewards = torch.FloatTensor(np.asarray(rewards)).to(self.device)
-        next_states = torch.FloatTensor(np.asarray(next_states)).to(self.device)
         dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
-        log_probs = torch.FloatTensor(np.asarray(log_prob)).to(self.device)
+        log_probs = torch.FloatTensor(np.asarray(log_probs)).to(self.device)
+
+        # rewards = rewards.unsqueeze(1)
+        # dones = dones.unsqueeze(1)
+        # log_probs = log_probs.unsqueeze(1)
 
         rtgs = self._calculate_rewards_to_go(rewards, dones)
         v, _ = self._evaluate_policy(states, actions)
+
+        print(rtgs.shape, v.shape)
+
         advantages = rtgs.detach() - v.detach()
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-10)
+
+        print(advantages.shape)
+        input("Press Enter to continue...")
+
 
         for _ in range(self.updates_per_iteration):
             v, curr_log_probs = self._evaluate_policy(states, actions)
@@ -94,14 +92,14 @@ class PPO:
             ratios = torch.exp(curr_log_probs - log_probs.detach())
 
             # Finding Surrogate Loss
-            surrogate_lose_one = ratios * advantages
-            surrogate_lose_two = (torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages)
+            surrogate_loss_one = ratios * advantages
+            surrogate_loss_two = (torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages)
 
-            actor_loss = (-torch.minimum(surrogate_lose_one, surrogate_lose_two)).mean()
+            actor_loss = (-torch.min(surrogate_loss_one, surrogate_loss_two)).mean()
             critic_loss = F.mse_loss(v, rtgs)
 
             self.actor_net_optimiser.zero_grad()
-            actor_loss.backward(retain_graph=True)
+            actor_loss.backward()
             self.actor_net_optimiser.step()
 
             self.critic_net_optimiser.zero_grad()
