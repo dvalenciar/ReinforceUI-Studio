@@ -26,7 +26,6 @@ class PPO:
         self.cov_var = torch.full(size=(self.action_num,), fill_value=0.5).to(self.device)
         self.cov_mat = torch.diag(self.cov_var)
 
-
     def select_action_from_policy(self, state: np.ndarray) ->  tuple[np.ndarray, np.ndarray]:
         self.actor_net.eval()
         with torch.no_grad():
@@ -43,20 +42,19 @@ class PPO:
         return action, log_prob
 
     def _evaluate_policy(self, state, action):
-        v = self.critic_net(state).squeeze()
-        mean = self.actor_net(state)
+        v = self.critic_net(state).squeeze()  # Ensure shape is (batch_size,)
+        mean = self.actor_net(state) # Expected shape: (batch_size, action_dim)
         dist = MultivariateNormal(mean, self.cov_mat)
-        log_prob = dist.log_prob(action)
+        log_prob = dist.log_prob(action) # Expected shape: (batch_size,)
         return v, log_prob
 
     def _calculate_rewards_to_go(self, batch_rewards: torch.Tensor, batch_dones: torch.Tensor) -> torch.Tensor:
-        rtgs: list[float] = []
-        discounted_reward = 0
+        rtgs = []
+        discounted_reward = 0.0
         for reward, done in zip(reversed(batch_rewards), reversed(batch_dones)):
             discounted_reward = reward + self.gamma * (1 - done) * discounted_reward
             rtgs.insert(0, discounted_reward)
-        batch_rtgs = torch.tensor(rtgs, dtype=torch.float).to(self.device)
-        return batch_rtgs
+        return torch.FloatTensor(rtgs).to(self.device)
 
     def train_policy(self, memory):
         # Get the experiences from the memory and flush it
@@ -69,33 +67,26 @@ class PPO:
         dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
         log_probs = torch.FloatTensor(np.asarray(log_probs)).to(self.device)
 
-        # rewards = rewards.unsqueeze(1)
-        # dones = dones.unsqueeze(1)
-        # log_probs = log_probs.unsqueeze(1)
-
-        rtgs = self._calculate_rewards_to_go(rewards, dones)
-        v, _ = self._evaluate_policy(states, actions)
-
-        print(rtgs.shape, v.shape)
+        rtgs = self._calculate_rewards_to_go(rewards, dones)  # the shape here is torch.Size([2400])
+        v, _ = self._evaluate_policy(states, actions) # the shape here is torch.Size([2400])
 
         advantages = rtgs.detach() - v.detach()
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-10)
-
-        print(advantages.shape)
-        input("Press Enter to continue...")
-
+        #advantages = rtgs - v
+        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-10) # Expected shape: (batch_size,)
 
         for _ in range(self.updates_per_iteration):
+
             v, curr_log_probs = self._evaluate_policy(states, actions)
 
             # Calculate ratios
-            ratios = torch.exp(curr_log_probs - log_probs.detach())
+            ratios = torch.exp(curr_log_probs - log_probs.detach()) # the shape here is torch.Size([2400])
+            #ratios = torch.exp(curr_log_probs - log_probs)
 
             # Finding Surrogate Loss
             surrogate_loss_one = ratios * advantages
             surrogate_loss_two = (torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages)
 
-            actor_loss = (-torch.min(surrogate_loss_one, surrogate_loss_two)).mean()
+            actor_loss = -torch.min(surrogate_loss_one, surrogate_loss_two).mean()
             critic_loss = F.mse_loss(v, rtgs)
 
             self.actor_net_optimiser.zero_grad()
