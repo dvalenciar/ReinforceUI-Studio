@@ -90,7 +90,6 @@ class CTD4:
             fusion_u, fusion_std = self._fusion_kalman(
                 fusion_std, fusion_u, std_set[i], u_set[i]
             )
-
         return fusion_u, fusion_std
 
     def _update_critics(
@@ -191,8 +190,8 @@ class CTD4:
         dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
 
         # Reshape to batch_size
-        rewards = rewards.unsqueeze(0).reshape(batch_size, 1)
-        dones = dones.unsqueeze(0).reshape(batch_size, 1)
+        rewards = rewards.reshape(batch_size, 1)
+        dones = dones.reshape(batch_size, 1)
 
         self._update_critics(states, actions, rewards, next_states, dones)
 

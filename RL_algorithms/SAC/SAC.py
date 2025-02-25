@@ -130,9 +130,8 @@ class SAC:
         next_states = torch.FloatTensor(np.asarray(next_states)).to(self.device)
         dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
 
-        # Reshape to batch_size x whatever
-        rewards = rewards.unsqueeze(0).reshape(batch_size, 1)
-        dones = dones.unsqueeze(0).reshape(batch_size, 1)
+        rewards = rewards.reshape(batch_size, 1)
+        dones = dones.reshape(batch_size, 1)
 
         # Update the Critic
         self._update_critic(states, actions, rewards, next_states, dones)
