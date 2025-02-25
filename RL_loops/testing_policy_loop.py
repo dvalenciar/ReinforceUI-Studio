@@ -29,6 +29,7 @@ def policy_from_model_load_test(config_data, models_log_path):
         import_algorithm_instance,
         create_environment_instance,
     )
+
     set_seed(int(config_data.get("Seed")))
     algorithm, algorithm_name = import_algorithm_instance(config_data)
     env = create_environment_instance(config_data, render_mode="human")

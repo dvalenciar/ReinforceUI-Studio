@@ -1,7 +1,9 @@
 from RL_helpers.util import denormalize_action
 
 
-def evaluate_policy_loop(env, rl_agent, number_eval_episodes, logger, total_steps, algo_name=None):
+def evaluate_policy_loop(
+    env, rl_agent, number_eval_episodes, logger, total_steps, algo_name=None
+):
     total_reward = 0
     df_log = None
     for episode in range(number_eval_episodes):
@@ -34,4 +36,3 @@ def evaluate_policy_loop(env, rl_agent, number_eval_episodes, logger, total_step
             average_reward,
         )
     return df_log
-
