@@ -2,8 +2,9 @@ import os
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch.distributions import MultivariateNormal
+from torch.distributions import Normal
 from RL_algorithms.PPO.networks import Actor, Critic
+
 
 class PPO:
     def __init__(self, observation_size, action_num, hyperparameters):
@@ -20,44 +21,48 @@ class PPO:
 
         self.action_num = action_num
 
-        self.actor_net_optimiser = torch.optim.Adam(self.actor_net.parameters(), lr=self.actor_lr)
-        self.critic_net_optimiser = torch.optim.Adam(self.critic_net.parameters(), lr=self.critic_lr)
+        self.actor_net_optimiser = torch.optim.Adam(
+            self.actor_net.parameters(), lr=self.actor_lr
+        )
+        self.critic_net_optimiser = torch.optim.Adam(
+            self.critic_net.parameters(), lr=self.critic_lr
+        )
 
-        self.cov_var = torch.full(size=(self.action_num,), fill_value=0.5).to(self.device)
-        self.cov_mat = torch.diag(self.cov_var)
-
-    def select_action_from_policy(self, state: np.ndarray) ->  tuple[np.ndarray, np.ndarray]:
+    def select_action_from_policy(
+        self, state: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
         self.actor_net.eval()
         with torch.no_grad():
-            state_tensor = torch.FloatTensor(state).to(self.device)
-            state_tensor = state_tensor.unsqueeze(0)
-            mean = self.actor_net(state_tensor)
-            dist = MultivariateNormal(mean, self.cov_mat)
+            state_tensor = torch.FloatTensor(state).to(self.device).unsqueeze(0)
+            mean, std = self.actor_net(state_tensor)
+            dist = Normal(mean, std)
             action = dist.sample()
-            log_prob = dist.log_prob(action)
-
+            log_prob = dist.log_prob(action).sum(dim=-1)
             action = action.cpu().data.numpy().flatten()
-            log_prob = log_prob.cpu().data.numpy().flatten()
+            log_prob = log_prob.cpu().numpy()  # Keep as scalar, no need to flatten
         self.actor_net.train()
         return action, log_prob
 
     def _evaluate_policy(self, state, action):
-        v = self.critic_net(state).squeeze()  # Ensure shape is (batch_size,)
-        mean = self.actor_net(state) # Expected shape: (batch_size, action_dim)
-        dist = MultivariateNormal(mean, self.cov_mat)
-        log_prob = dist.log_prob(action) # Expected shape: (batch_size,)
+        v = self.critic_net(state).squeeze()
+        mean, std = self.actor_net(state)
+        dist = Normal(mean, std)
+        log_prob = dist.log_prob(action).sum(dim=-1)
         return v, log_prob
 
-    def _calculate_rewards_to_go(self, batch_rewards: torch.Tensor, batch_dones: torch.Tensor) -> torch.Tensor:
-        rtgs = []
+    def _calculate_rewards_to_go(
+        self, batch_rewards: torch.Tensor, batch_dones: torch.Tensor
+    ) -> torch.Tensor:
+        rtgs = torch.zeros_like(batch_rewards)
         discounted_reward = 0.0
-        for reward, done in zip(reversed(batch_rewards), reversed(batch_dones)):
-            discounted_reward = reward + self.gamma * (1 - done) * discounted_reward
-            rtgs.insert(0, discounted_reward)
-        return torch.FloatTensor(rtgs).to(self.device)
+        for i in reversed(range(len(batch_rewards))):
+            discounted_reward = (
+                batch_rewards[i] + self.gamma * (1 - batch_dones[i]) * discounted_reward
+            )
+            rtgs[i] = discounted_reward
+        return rtgs.to(self.device)
 
     def train_policy(self, memory):
-        # Get the experiences from the memory and flush it
         experiences = memory.return_flushed_memory()
         states, actions, rewards, _, dones, log_probs = experiences
 
@@ -67,27 +72,26 @@ class PPO:
         dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
         log_probs = torch.FloatTensor(np.asarray(log_probs)).to(self.device)
 
-        rtgs = self._calculate_rewards_to_go(rewards, dones)  # the shape here is torch.Size([2400])
-        v, _ = self._evaluate_policy(states, actions) # the shape here is torch.Size([2400])
+        rtgs = self._calculate_rewards_to_go(rewards, dones)
+        v, _ = self._evaluate_policy(states, actions)
 
         advantages = rtgs.detach() - v.detach()
-        #advantages = rtgs - v
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-10) # Expected shape: (batch_size,)
+        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-10)
 
         for _ in range(self.updates_per_iteration):
-
-            v, curr_log_probs = self._evaluate_policy(states, actions)
+            current_v, curr_log_probs = self._evaluate_policy(states, actions)
 
             # Calculate ratios
-            ratios = torch.exp(curr_log_probs - log_probs.detach()) # the shape here is torch.Size([2400])
-            #ratios = torch.exp(curr_log_probs - log_probs)
+            ratios = torch.exp(curr_log_probs - log_probs.detach())
 
             # Finding Surrogate Loss
-            surrogate_loss_one = ratios * advantages
-            surrogate_loss_two = (torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages)
+            surrogate_loss_one = ratios * (advantages.detach())
+            surrogate_loss_two = (
+                torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages
+            )
 
             actor_loss = -torch.min(surrogate_loss_one, surrogate_loss_two).mean()
-            critic_loss = F.mse_loss(v, rtgs)
+            critic_loss = F.mse_loss(current_v, (rtgs.detach()))
 
             self.actor_net_optimiser.zero_grad()
             actor_loss.backward()
@@ -96,7 +100,6 @@ class PPO:
             self.critic_net_optimiser.zero_grad()
             critic_loss.backward()
             self.critic_net_optimiser.step()
-
 
     def save_models(self, filename: str, filepath: str) -> None:
         dir_exists = os.path.exists(filepath)
@@ -123,4 +126,3 @@ class PPO:
             )
         )
         self.critic_net.eval()
-

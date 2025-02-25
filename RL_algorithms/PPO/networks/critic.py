@@ -3,9 +3,7 @@ from torch import nn
 
 
 class Critic(nn.Module):
-    def __init__(
-        self, observation_size: int, hidden_size: list[int] = None
-    ):
+    def __init__(self, observation_size: int, hidden_size: list[int] = None):
         super().__init__()
         if hidden_size is None:
             hidden_size = [256, 256]

@@ -191,6 +191,15 @@ class TrainingWindow(QMainWindow):
         # Set the training curve as the default view
         self.show_training_curve()
 
+        # Check if the algorithm is PPO and adjust input fields accordingly
+        if self.previous_selections.get("Algorithm") == "PPO":
+            self.training_inputs["Exploration Steps"].setText("")
+            self.training_inputs["Exploration Steps"].setReadOnly(True)
+            self.training_inputs["Batch Size"].setText("")
+            self.training_inputs["Batch Size"].setReadOnly(True)
+            self.training_inputs["G Value"].setText("")
+            self.training_inputs["G Value"].setReadOnly(True)
+
     def show_training_curve(self):
         self.plot_stack.setCurrentWidget(self.training_figure)
         self.update_button_styles(
@@ -239,7 +248,7 @@ class TrainingWindow(QMainWindow):
             "Seed": QLineEdit(self),
         }
         default_values = {
-            "Training Steps": "10000",
+            "Training Steps": "100000",
             "Exploration Steps": "1000",
             "Batch Size": "32",
             "G Value": "1",
@@ -334,6 +343,13 @@ class TrainingWindow(QMainWindow):
     def start_training(self):
         if self.training_start:
             return
+
+        # Check if the algorithm is PPO and handle input fields accordingly
+        if self.previous_selections.get("Algorithm") == "PPO":
+            self.training_inputs["Exploration Steps"].setText("")
+            self.training_inputs["Batch Size"].setText("")
+            self.training_inputs["G Value"].setText("")
+
         if not self.all_inputs_filled():
             self.show_message_box(
                 "Input Error",
@@ -341,6 +357,7 @@ class TrainingWindow(QMainWindow):
                 QMessageBox.Warning,
             )
             return
+
         if self.show_confirmation(
             "Confirm Training", "The training will start. Are you sure?"
         ):
@@ -388,9 +405,16 @@ class TrainingWindow(QMainWindow):
         self.algorithm_window()
 
     def all_inputs_filled(self):
-        return all(
-            widget.text().strip() != "" for widget in self.training_inputs.values()
-        )
+        for label, widget in self.training_inputs.items():
+            if self.previous_selections.get("Algorithm") == "PPO" and label in [
+                "Exploration Steps",
+                "Batch Size",
+                "G Value",
+            ]:
+                continue
+            if widget.text().strip() == "":
+                return False
+        return True
 
     def center(self):
         screen_geometry = QDesktopWidget().availableGeometry().center()
@@ -432,7 +456,7 @@ class TrainingWindow(QMainWindow):
         self.folder_name = None
 
         default_values = {
-            "Training Steps": "10000",
+            "Training Steps": "100000",
             "Exploration Steps": "1000",
             "Batch Size": "32",
             "G Value": "1",
@@ -461,6 +485,14 @@ class TrainingWindow(QMainWindow):
         # Unlock input fields
         for widget in self.training_inputs.values():
             widget.setReadOnly(False)
+
+        if self.previous_selections.get("Algorithm") == "PPO":
+            self.training_inputs["Exploration Steps"].setText("")
+            self.training_inputs["Exploration Steps"].setReadOnly(True)
+            self.training_inputs["Batch Size"].setText("")
+            self.training_inputs["Batch Size"].setReadOnly(True)
+            self.training_inputs["G Value"].setText("")
+            self.training_inputs["G Value"].setReadOnly(True)
 
         # Reset training start flag
         self.training_start = False

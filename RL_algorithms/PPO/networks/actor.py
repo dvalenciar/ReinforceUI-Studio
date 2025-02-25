@@ -19,5 +19,9 @@ class Actor(nn.Module):
             nn.Tanh(),
         )
 
-    def forward(self, state: torch.Tensor) -> torch.Tensor:
-        return self.act_net(state)
+        self.log_std = nn.Parameter(torch.zeros(num_actions))  # Learnable log std
+
+    def forward(self, state: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        mean = self.act_net(state)
+        std = torch.exp(self.log_std)
+        return mean, std
