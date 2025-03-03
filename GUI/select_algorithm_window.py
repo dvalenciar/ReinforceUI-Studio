@@ -13,14 +13,13 @@ from PyQt5.QtCore import Qt
 import yaml
 
 from GUI.select_hyper_window import SelectHyperWindow
-from GUI.training_window import TrainingWindow
+from GUI.select_platform_window import PlatformConfigWindow
 
 
 class SelectAlgorithmWindow(QDialog):
-    def __init__(self, environment_window, selected_env, user_selections):
+    def __init__(self, environment_window, user_selections):
         super().__init__()
 
-        self.selected_env = selected_env
         self.environment_window = environment_window
         self.user_selections = user_selections
 
@@ -169,13 +168,13 @@ class SelectAlgorithmWindow(QDialog):
                 self.user_selections["Hyperparameters"] = {}
             self.user_selections["Algorithm"] = selected_algo
             self.close()
-            self.train_window = TrainingWindow(self.show, self.user_selections)
-            self.train_window.show()
+            self.platform_window = PlatformConfigWindow(self.show, self.user_selections)
+            self.platform_window.show()
         else:
             self.user_selections["Algorithm"] = self.algo_combo.currentText()
             self.close()
-            self.train_window = TrainingWindow(self.show, self.user_selections)
-            self.train_window.show()
+            self.platform_window = PlatformConfigWindow(self.show, self.user_selections)
+            self.platform_window.show()
 
     def set_active_button(self, active_button, inactive_button):
         self.apply_selected_button_style(active_button)

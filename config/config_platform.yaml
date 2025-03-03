@@ -6,6 +6,15 @@ platforms:
       - LunarLanderContinuous-v3
       - MountainCarContinuous-v0
       - Pendulum-v1
+    discrete_environments:
+      - Acrobot-v1
+      - CartPole-v1
+      - CartPole-v0
+      - MountainCar-v0
+      - MountainCar-v0
+      - Pendulum-v0
+      - Taxi-v3
+    # todo confirm if these are discrete and the proper names
 
   DMCS:
     environments:
@@ -43,3 +52,9 @@ platforms:
       - Reacher-v5
       - Swimmer-v5
       - Walker2d-v5
+    discrete_environments:
+      - Humanoid-v5
+      - HumanoidStandup-v5
+      - Reacher-v5
+      - Swimmer-v5
+      # todo confirm if these are discrete and the proper names

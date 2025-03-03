@@ -19,6 +19,8 @@ class PlatformConfigWindow(QDialog):
 
         self.main_window = main_window
         self.user_selections = user_selections
+        self.algorithm_selected = user_selections["Algorithm"]
+
         self.setWindowTitle("RL Training Platform Selection")
         self.setFixedSize(1000, 430)
         self.setStyleSheet("background-color: #121212;")
@@ -56,14 +58,12 @@ class PlatformConfigWindow(QDialog):
         platforms_layout.addItem(spacer)
 
         platforms = [
-            {
-                "name": "Gymnasium",
-                "gif": "media_resources/pendulum.gif",
-                "is_gif": True,
-            },
-            {"name": "DMCS", "gif": "media_resources/cheetah_run.gif", "is_gif": True},
+            {"name": "Gymnasium", "gif": "media_resources/pendulum.gif", "is_gif": True},
             {"name": "MuJoCo", "gif": "media_resources/half_cheetah", "is_gif": True},
         ]
+
+        if self.algorithm_selected != "DQN":
+            platforms.insert(1, {"name": "DMCS", "gif": "media_resources/cheetah_run.gif", "is_gif": True})
 
         self.selected_button = None
 
@@ -109,7 +109,7 @@ class PlatformConfigWindow(QDialog):
             self.user_selections["selected_platform"] = selected_platform
             self.close()
             self.select_env_window = SelectEnvironmentWindow(
-                self.show, selected_platform, self.user_selections
+                self.show, self.user_selections
             )
             self.select_env_window.show()
         else:

@@ -17,6 +17,12 @@ algorithms:
       tau: 0.005
       buffer_size: 1000000
 
+  - name: DQN
+    hyperparameters:
+      lr: 1e-4
+      gamma: 0.99
+
+
   - name: SAC
     hyperparameters:
       actor_lr: 3e-4
