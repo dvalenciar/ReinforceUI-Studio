@@ -21,6 +21,7 @@ algorithms:
     hyperparameters:
       lr: 1e-4
       gamma: 0.99
+      buffer_size: 1000000
 
 
   - name: SAC

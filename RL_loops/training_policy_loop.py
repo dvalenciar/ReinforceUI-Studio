@@ -23,6 +23,8 @@ def create_environment_instance(config_data, render_mode="rgb_array"):
 
     if platform_name == "Gymnasium" or platform_name == "MuJoCo":
         environment = GymEnvironment(env_name, seed, render_mode)
+        print(environment)
+        input("Press Enter to continue...")
     elif platform_name == "DMCS":
         environment = DMControlEnvironment(env_name, seed, render_mode)
     else:

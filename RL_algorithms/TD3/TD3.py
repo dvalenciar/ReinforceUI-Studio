@@ -98,7 +98,7 @@ class TD3:
         experiences = memory.sample_experience(batch_size)
         states, actions, rewards, next_states, dones = experiences
 
-        batch_size = len(states)
+        batch_size = len(states) # fixme: this is not necessary
 
         # Convert into tensor
         states = torch.FloatTensor(np.asarray(states)).to(self.device)
