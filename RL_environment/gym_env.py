@@ -1,5 +1,6 @@
 import numpy as np
 import gymnasium as gym
+from gymnasium import spaces
 
 
 class GymEnvironment:
@@ -18,7 +19,11 @@ class GymEnvironment:
         return self.env.observation_space.shape[0]
 
     def action_num(self) -> int:
-        return self.env.action_space.shape[0]
+        if isinstance(self.env.action_space, spaces.Box):
+            action_num = self.env.action_space.shape[0]
+        elif isinstance(self.env.action_space, spaces.Discrete):
+            action_num = self.env.action_space.n
+        return action_num
 
     def sample_action(self) -> int:
         return self.env.action_space.sample()

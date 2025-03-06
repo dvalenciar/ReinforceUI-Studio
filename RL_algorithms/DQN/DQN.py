@@ -12,9 +12,6 @@ class DQN:
         self.net = Network(observation_size, action_num).to(self.device)
 
         self.gamma = float(hyperparameters.get("gamma"))
-        self.epsilon = float(hyperparameters.get("epsilon"))
-        self.epsilon_decay = float(hyperparameters.get("epsilon_decay"))
-        self.min_epsilon = float(hyperparameters.get("min_epsilon"))
         self.lr = float(hyperparameters.get("lr"))
 
 
@@ -34,7 +31,7 @@ class DQN:
         return action
 
     def train_policy(self, memory, batch_size):
-        # todo verify the shaope of the tensors and the operations
+        # todo verify the shape of the tensors and the operations
         experiences = memory.sample_experience(batch_size)
         states, actions, rewards, next_states, dones = experiences
 
@@ -45,24 +42,21 @@ class DQN:
         dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
 
         # Reshape to batch_size
+        actions = actions.reshape(batch_size, 1)
         rewards = rewards.reshape(batch_size, 1)
         dones = dones.reshape(batch_size, 1)
-        actions = actions.reshape(batch_size, 1)
 
         # Compute Q-values for the current states
-        q_values = self.net(states)
-
-        # Get Q-values for the actions actually taken
-        taken_action_q_values = q_values.gather(1, actions).squeeze(1)
+        q_values = self.net(states) # expected shape (batch_size, action_num)
+        taken_action_q_values = q_values.gather(1, actions) # expected shape (batch_size, 1)
 
         # Compute Q-values for next states and take max over actions
         next_q_values = self.net(next_states)
-        best_next_q_values = torch.max(next_q_values, 1)[0].unsqueeze(1)
+        best_next_q_values = torch.max(next_q_values, 1)[0].unsqueeze(1) # current shape (batch_size, 1)
 
-        target_q_values = rewards + self.gamma * (1 - dones) * best_next_q_values
+        target_q_values = rewards + self.gamma * (1 - dones) * best_next_q_values # current shape (batch_size, 1)
 
         loss = F.mse_loss(taken_action_q_values, target_q_values.detach())
-
         self.optimiser.zero_grad()
         loss.backward()
         self.optimiser.step()

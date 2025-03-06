@@ -16,12 +16,14 @@ def evaluate_policy_loop(
             episode_timesteps += 1
             if algo_name == "PPO":
                 action, _ = rl_agent.select_action_from_policy(state)
+                action_env = denormalize_action(action, env.max_action_value(), env.min_action_value())
+            elif algo_name == "DQN":
+                action_env = rl_agent.select_action_from_policy(state)
             else:
                 action = rl_agent.select_action_from_policy(state, evaluation=True)
+            if algo_name != "DQN":
+                action_env = denormalize_action(action, env.max_action_value(), env.min_action_value())
 
-            action_env = denormalize_action(
-                action, env.max_action_value(), env.min_action_value()
-            )
             next_state, reward, done, truncated = env.step(action_env)
             episode_reward += reward
             state = next_state

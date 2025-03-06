@@ -1,5 +1,7 @@
 import time
 import importlib
+import random
+
 from RL_memory.memory_buffer import MemoryBuffer
 from RL_environment.gym_env import GymEnvironment
 from RL_environment.dmcs_env import DMControlEnvironment
@@ -23,8 +25,6 @@ def create_environment_instance(config_data, render_mode="rgb_array"):
 
     if platform_name == "Gymnasium" or platform_name == "MuJoCo":
         environment = GymEnvironment(env_name, seed, render_mode)
-        print(environment)
-        input("Press Enter to continue...")
     elif platform_name == "DMCS":
         environment = DMControlEnvironment(env_name, seed, render_mode)
     else:
@@ -61,10 +61,18 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
     state = env.reset()
 
     is_ppo = algorithm_name == "PPO"
+    is_dqn = algorithm_name == "DQN"
+
     if is_ppo:
         max_steps_per_batch = int(
             config_data.get("Hyperparameters").get("max_steps_per_batch")
         )
+    elif is_dqn:
+        exploration_rate = 1
+        exploration_min = float(config_data.get("Hyperparameters").get("epsilon_min"))
+        exploration_decay = float(config_data.get("Hyperparameters").get("epsilon_decay"))
+        G = int(config_data.get("G Value", 1))
+        batch_size = int(config_data.get("Batch Size", 32))
     else:
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
         G = int(config_data.get("G Value", 1))
@@ -86,6 +94,16 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
             action_env = denormalize_action(
                 action, env.max_action_value(), env.min_action_value()
             )
+        if is_dqn:
+            exploration_rate *= exploration_decay
+            exploration_rate = max(exploration_min, exploration_rate)
+            if random.random() < exploration_rate:
+                action = env.sample_action() # todo confirm if this actully returns an action or an index
+                action_env = action
+
+            else:
+                action = rl_agent.select_action_from_policy(state)
+                action_env = action
         else:
             if total_step_counter < steps_exploration:
                 action_env = env.sample_action()
@@ -113,7 +131,12 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
         # Train the policy
         if is_ppo and (total_step_counter + 1) % max_steps_per_batch == 0:
             rl_agent.train_policy(memory)
-        elif not is_ppo and total_step_counter >= steps_exploration:
+
+        elif is_dqn and total_step_counter > batch_size:
+            for _ in range(G):
+                rl_agent.train_policy(memory, batch_size)
+
+        elif not is_ppo and not is_dqn and total_step_counter >= steps_exploration:
             for _ in range(G):
                 rl_agent.train_policy(memory, batch_size)
 
