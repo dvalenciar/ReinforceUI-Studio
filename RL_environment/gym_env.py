@@ -1,11 +1,14 @@
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
+from gymnasium.wrappers import RescaleAction
 
 
 class GymEnvironment:
     def __init__(self, env_name: str, seed: int, render_mode: str = "rgb_array"):
         self.env = gym.make(env_name, render_mode=render_mode)
+        if not isinstance(self.env.action_space, spaces.Discrete):
+            self.env = RescaleAction(self.env, min_action=-1, max_action=1)
         _, _ = self.env.reset(seed=seed)
         self.env.action_space.seed(seed)
 

@@ -10,9 +10,7 @@ platforms:
       - Acrobot-v1
       - CartPole-v1
       - MountainCar-v0
-      - LunarLander-v2
-
-    # todo confirm if these are discrete and the proper names
+      - LunarLander-v3
 
   DMCS:
     environments:
@@ -50,9 +48,3 @@ platforms:
       - Reacher-v5
       - Swimmer-v5
       - Walker2d-v5
-    discrete_environments:
-      - Humanoid-v5
-      - HumanoidStandup-v5
-      - Reacher-v5
-      - Swimmer-v5
-      # todo confirm if these are discrete and the proper names

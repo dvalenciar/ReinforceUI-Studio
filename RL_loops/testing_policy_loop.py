@@ -1,4 +1,5 @@
-from RL_helpers.util import denormalize_action, set_seed
+# from RL_helpers.util import denormalize_action, set_seed
+from RL_helpers.util import set_seed
 
 
 def policy_loop_test(env, rl_agent, logger, number_test_episodes=1, algo_name=None):
@@ -13,16 +14,10 @@ def policy_loop_test(env, rl_agent, logger, number_test_episodes=1, algo_name=No
             if algo_name == "PPO":
                 action, _ = rl_agent.select_action_from_policy(state)
             elif algo_name == "DQN":
-                action_env = rl_agent.select_action_from_policy(state)
+                action = rl_agent.select_action_from_policy(state)
             else:
                 action = rl_agent.select_action_from_policy(state, evaluation=True)
-            if algo_name != "DQN":
-                action_env = denormalize_action(
-                    action, env.max_action_value(), env.min_action_value()
-                )
-
-            next_state, reward, done, truncated = env.step(action_env)
-            state = next_state
+            state, reward, done, truncated = env.step(action)
             episode_reward += reward
             logger.record_video_frame(env.render_frame())
     logger.end_video_record()
@@ -33,7 +28,6 @@ def policy_from_model_load_test(config_data, models_log_path):
         import_algorithm_instance,
         create_environment_instance,
     )
-
     set_seed(int(config_data.get("Seed")))
     algorithm, algorithm_name = import_algorithm_instance(config_data)
     env = create_environment_instance(config_data, render_mode="human")
@@ -50,17 +44,10 @@ def policy_from_model_load_test(config_data, models_log_path):
             if algorithm_name == "PPO":
                 action, _ = rl_agent.select_action_from_policy(state)
             elif algorithm_name == "DQN":
-                action_env = rl_agent.select_action_from_policy(state)
+                action = rl_agent.select_action_from_policy(state)
             else:
                 action = rl_agent.select_action_from_policy(state, evaluation=True)
-
-            if algorithm_name != "DQN":
-                action_env = denormalize_action(
-                    action, env.max_action_value(), env.min_action_value()
-                )
-
-            next_state, reward, done, truncated = env.step(action_env)
-            state = next_state
+            state, reward, done, truncated = env.step(action)
             episode_reward += reward
             env.render_frame()
     env.close()

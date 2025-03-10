@@ -5,7 +5,8 @@ import random
 from RL_memory.memory_buffer import MemoryBuffer
 from RL_environment.gym_env import GymEnvironment
 from RL_environment.dmcs_env import DMControlEnvironment
-from RL_helpers.util import normalize_action, denormalize_action, set_seed
+# from RL_helpers.util import normalize_action, denormalize_action
+from RL_helpers.util import set_seed
 from RL_helpers.record_logger import RecordLogger
 from RL_loops.evaluate_policy_loop import evaluate_policy_loop
 from RL_loops.testing_policy_loop import policy_loop_test
@@ -83,15 +84,13 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
         exploration_rate = 1
         epsilon_min = float(config_data.get("Hyperparameters").get("epsilon_min"))
         epsilon_decay = float(config_data.get("Hyperparameters").get("epsilon_decay"))
-
         G = int(config_data.get("G Value", 1))
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
     else:
-        # todo this may no longer be needed
-        steps_exploration = int(config_data.get("Exploration Steps", 1000))
         G = int(config_data.get("G Value", 1))
         batch_size = int(config_data.get("Batch Size", 32))
+        steps_exploration = int(config_data.get("Exploration Steps", 1000))
 
     training_completed = True
     for total_step_counter in range(steps_training):
@@ -106,38 +105,24 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
         # Select action
         if is_ppo:
             action, log_prob = rl_agent.select_action_from_policy(state)
-            action_env = denormalize_action(
-                action, env.max_action_value(), env.min_action_value()
-            )
         if is_dqn:
             if total_step_counter < steps_exploration:
                 action = env.sample_action()
-                action_env = action
             else:
                 exploration_rate *= epsilon_decay
                 exploration_rate = max(epsilon_min, exploration_rate)
                 if random.random() < exploration_rate:
                     action = env.sample_action()
-                    action_env = action
-                    print("Exploration action")
                 else:
                     action = rl_agent.select_action_from_policy(state)
-                    action_env = action
-                    print("policy action")
         else:
             if total_step_counter < steps_exploration:
-                action_env = env.sample_action()
-                action = normalize_action(
-                    action_env, env.max_action_value(), env.min_action_value()
-                )
+                action= env.sample_action()
             else:
                 action = rl_agent.select_action_from_policy(state)
-                action_env = denormalize_action(
-                    action, env.max_action_value(), env.min_action_value()
-                )
 
         # Take a step in the environment
-        next_state, reward, done, truncated = env.step(action_env)
+        next_state, reward, done, truncated = env.step(action)
 
         # Store experience in memory
         if is_ppo:
