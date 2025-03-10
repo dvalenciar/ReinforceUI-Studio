@@ -9,11 +9,9 @@ platforms:
     discrete_environments:
       - Acrobot-v1
       - CartPole-v1
-      - CartPole-v0
       - MountainCar-v0
-      - MountainCar-v0
-      - Pendulum-v0
-      - Taxi-v3
+      - LunarLander-v2
+
     # todo confirm if these are discrete and the proper names
 
   DMCS:

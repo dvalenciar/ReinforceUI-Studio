@@ -22,10 +22,9 @@ algorithms:
       lr: 1e-4
       gamma: 0.99
       epsilon_min: 0.01
-      epsilon_decay: 0.9999
+      epsilon_decay: 0.9995
+      target_update_freq : 500
       buffer_size: 1000000
-
-
 
   - name: SAC
     hyperparameters:

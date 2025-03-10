@@ -17,7 +17,9 @@ def policy_loop_test(env, rl_agent, logger, number_test_episodes=1, algo_name=No
             else:
                 action = rl_agent.select_action_from_policy(state, evaluation=True)
             if algo_name != "DQN":
-                action_env = denormalize_action(action, env.max_action_value(), env.min_action_value())
+                action_env = denormalize_action(
+                    action, env.max_action_value(), env.min_action_value()
+                )
 
             next_state, reward, done, truncated = env.step(action_env)
             state = next_state
@@ -53,7 +55,9 @@ def policy_from_model_load_test(config_data, models_log_path):
                 action = rl_agent.select_action_from_policy(state, evaluation=True)
 
             if algorithm_name != "DQN":
-                action_env = denormalize_action(action, env.max_action_value(), env.min_action_value())
+                action_env = denormalize_action(
+                    action, env.max_action_value(), env.min_action_value()
+                )
 
             next_state, reward, done, truncated = env.step(action_env)
             state = next_state

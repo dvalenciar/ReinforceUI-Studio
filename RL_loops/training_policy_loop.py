@@ -18,10 +18,16 @@ def import_algorithm_instance(config_data):
     return algorithm_class, algorithm_name
 
 
-def create_environment_instance(config_data, render_mode="rgb_array"):
+def create_environment_instance(
+    config_data, render_mode="rgb_array", evaluation_env=False
+):
     platform_name = config_data.get("selected_platform")
     env_name = config_data.get("selected_environment")
-    seed = int(config_data.get("Seed"))
+    seed = (
+        int(config_data.get("Seed"))
+        if not evaluation_env
+        else (int(config_data.get("Seed")) + 1)
+    )
 
     if platform_name == "Gymnasium" or platform_name == "MuJoCo":
         environment = GymEnvironment(env_name, seed, render_mode)
@@ -35,7 +41,13 @@ def create_environment_instance(config_data, render_mode="rgb_array"):
 def training_loop(config_data, training_window, log_folder_path, is_running):
     set_seed(int(config_data.get("Seed")))
     algorithm, algorithm_name = import_algorithm_instance(config_data)
-    env = create_environment_instance(config_data)
+
+    env = create_environment_instance(
+        config_data, render_mode="rgb_array", evaluation_env=False
+    )
+    env_evaluation = create_environment_instance(
+        config_data, render_mode="rgb_array", evaluation_env=True
+    )
 
     rl_agent = algorithm(
         env.observation_space(), env.action_num(), config_data.get("Hyperparameters")
@@ -69,11 +81,14 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
         )
     elif is_dqn:
         exploration_rate = 1
-        exploration_min = float(config_data.get("Hyperparameters").get("epsilon_min"))
-        exploration_decay = float(config_data.get("Hyperparameters").get("epsilon_decay"))
+        epsilon_min = float(config_data.get("Hyperparameters").get("epsilon_min"))
+        epsilon_decay = float(config_data.get("Hyperparameters").get("epsilon_decay"))
+
         G = int(config_data.get("G Value", 1))
         batch_size = int(config_data.get("Batch Size", 32))
+        steps_exploration = int(config_data.get("Exploration Steps", 1000))
     else:
+        # todo this may no longer be needed
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
         G = int(config_data.get("G Value", 1))
         batch_size = int(config_data.get("Batch Size", 32))
@@ -95,15 +110,20 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
                 action, env.max_action_value(), env.min_action_value()
             )
         if is_dqn:
-            exploration_rate *= exploration_decay
-            exploration_rate = max(exploration_min, exploration_rate)
-            if random.random() < exploration_rate:
-                action = env.sample_action() # todo confirm if this actully returns an action or an index
+            if total_step_counter < steps_exploration:
+                action = env.sample_action()
                 action_env = action
-
             else:
-                action = rl_agent.select_action_from_policy(state)
-                action_env = action
+                exploration_rate *= epsilon_decay
+                exploration_rate = max(epsilon_min, exploration_rate)
+                if random.random() < exploration_rate:
+                    action = env.sample_action()
+                    action_env = action
+                    print("Exploration action")
+                else:
+                    action = rl_agent.select_action_from_policy(state)
+                    action_env = action
+                    print("policy action")
         else:
             if total_step_counter < steps_exploration:
                 action_env = env.sample_action()
@@ -118,7 +138,6 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
 
         # Take a step in the environment
         next_state, reward, done, truncated = env.step(action_env)
-        episode_reward += reward
 
         # Store experience in memory
         if is_ppo:
@@ -127,6 +146,7 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
             memory.add_experience(state, action, reward, next_state, done)
 
         state = next_state
+        episode_reward += reward
 
         # Train the policy
         if is_ppo and (total_step_counter + 1) % max_steps_per_batch == 0:
@@ -139,25 +159,6 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
         elif not is_ppo and not is_dqn and total_step_counter >= steps_exploration:
             for _ in range(G):
                 rl_agent.train_policy(memory, batch_size)
-
-        # Evaluate the policy
-        if (total_step_counter + 1) % evaluation_interval == 0:
-            df_log_evaluation = evaluate_policy_loop(
-                env,
-                rl_agent,
-                number_eval_episodes,
-                logger,
-                total_step_counter,
-                algorithm_name,
-            )
-            df_grouped = df_log_evaluation.groupby(
-                "Total Timesteps", as_index=False
-            ).last()
-            training_window.update_plot_eval(df_grouped)
-
-        # Update the training window
-        training_window.update_progress_signal.emit(int(progress))
-        training_window.update_step_signal.emit(total_step_counter + 1)
 
         # Handle episode completion
         if done or truncated:
@@ -195,6 +196,25 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
             episode_num += 1
             episode_reward = 0
             episode_start_time = time.time()
+
+        # Evaluate the policy
+        if (total_step_counter + 1) % evaluation_interval == 0:
+            df_log_evaluation = evaluate_policy_loop(
+                env_evaluation,
+                rl_agent,
+                number_eval_episodes,
+                logger,
+                total_step_counter,
+                algorithm_name,
+            )
+            df_grouped = df_log_evaluation.groupby(
+                "Total Timesteps", as_index=False
+            ).last()
+            training_window.update_plot_eval(df_grouped)
+
+        # Update the training window
+        training_window.update_progress_signal.emit(int(progress))
+        training_window.update_step_signal.emit(total_step_counter + 1)
 
     # Finalize training
     logger.save_logs()
