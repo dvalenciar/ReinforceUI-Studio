@@ -43,6 +43,20 @@ Please check out our **full documentation** available [here](https://docs.reinfo
   <img src="media_resources/main_window.gif">
 </p>
 
+# Supported Algorithms
+ReinforceUI Studio supports the following algorithms:
+
+| Algorithm | Description |
+| --- | --- |
+| CTD4 | Continuous Distributional Actor-Critic Agent with a Kalman Fusion of Multiple Critics |
+| DDPG | Deep Deterministic Policy Gradient |
+| DQN | Deep Q-Network |
+| PPO | Proximal Policy Optimization |
+| SAC | Soft Actor-Critic |
+| TD3 | Twin Delayed Deep Deterministic Policy Gradient |
+| TQC | Controlling Overestimation Bias with Truncated Mixture of Continuous Distributional Quantile Critics |
+
+
 # Why you should use ReinforceUI Studio
 1. Simplified RL Workflows: The intuitive GUI eliminates the need for complex command-line operations
 2. Environment Support: Seamlessly integrates with MuJoCo, OpenAI Gymnasium, and DeepMind Control Suite.
@@ -52,6 +66,8 @@ Please check out our **full documentation** available [here](https://docs.reinfo
 6. User-Friendly Training and Testing: Train, evaluate, and refine RL policies through a streamlined and intuitive workflow.
 
 Check out our [video tutorial](https://www.youtube.com/watch?v=olaspgr3vlM), where we show you how ReinforceUI Studio works
+
+
 
 
 ## Contributing to ReinforceUI Studio
