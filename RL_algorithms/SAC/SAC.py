@@ -121,8 +121,6 @@ class SAC:
         experiences = memory.sample_experience(batch_size)
         states, actions, rewards, next_states, dones = experiences
 
-        batch_size = len(states)
-
         # Convert into tensor
         states = torch.FloatTensor(states).to(self.device)
         actions = torch.FloatTensor(actions).to(self.device)
