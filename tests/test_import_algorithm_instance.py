@@ -8,4 +8,3 @@ def test_import_algorithm_instance():
         algorithm_class, algorithm_name = import_algorithm_instance(config_data)
         assert algorithm_class.__name__ == algorithm
         assert algorithm_name == algorithm
-
