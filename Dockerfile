@@ -41,6 +41,12 @@ RUN apt-get update && apt-get install -y \
 # Set the working directory
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy and install dependencies separately to leverage Docker caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
