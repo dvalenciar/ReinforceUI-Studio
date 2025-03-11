@@ -66,11 +66,11 @@ class PPO:
         experiences = memory.return_flushed_memory()
         states, actions, rewards, _, dones, log_probs = experiences
 
-        states = torch.FloatTensor(np.asarray(states)).to(self.device)
-        actions = torch.FloatTensor(np.asarray(actions)).to(self.device)
-        rewards = torch.FloatTensor(np.asarray(rewards)).to(self.device)
-        dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
-        log_probs = torch.FloatTensor(np.asarray(log_probs)).to(self.device)
+        states = torch.FloatTensor(states).to(self.device)
+        actions = torch.FloatTensor(actions).to(self.device)
+        rewards = torch.FloatTensor(rewards).to(self.device)
+        dones = torch.FloatTensor(dones).to(self.device)
+        log_probs = torch.FloatTensor(log_probs).to(self.device)
 
         rtgs = self._calculate_rewards_to_go(rewards, dones)
         v, _ = self._evaluate_policy(states, actions)
