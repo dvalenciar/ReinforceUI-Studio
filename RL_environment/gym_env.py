@@ -1,10 +1,14 @@
 import numpy as np
 import gymnasium as gym
+from gymnasium import spaces
+from gymnasium.wrappers import RescaleAction
 
 
 class GymEnvironment:
     def __init__(self, env_name: str, seed: int, render_mode: str = "rgb_array"):
         self.env = gym.make(env_name, render_mode=render_mode)
+        if not isinstance(self.env.action_space, spaces.Discrete):
+            self.env = RescaleAction(self.env, min_action=-1, max_action=1)
         _, _ = self.env.reset(seed=seed)
         self.env.action_space.seed(seed)
 
@@ -17,8 +21,11 @@ class GymEnvironment:
     def observation_space(self):
         return self.env.observation_space.shape[0]
 
-    def action_num(self) -> int:
-        return self.env.action_space.shape[0]
+    def action_num(self):
+        if isinstance(self.env.action_space, spaces.Box):
+            return self.env.action_space.shape[0]
+        elif isinstance(self.env.action_space, spaces.Discrete):
+            return self.env.action_space.n
 
     def sample_action(self) -> int:
         return self.env.action_space.sample()
@@ -28,8 +35,8 @@ class GymEnvironment:
         return state
 
     def step(self, action: int) -> tuple:
-        state, reward, done, truncated, _ = self.env.step(action)
-        return state, reward, done, truncated
+        state, reward, terminated, truncated, _ = self.env.step(action)
+        return state, reward, terminated, truncated
 
     def render_frame(self) -> np.ndarray:
         frame = self.env.render()

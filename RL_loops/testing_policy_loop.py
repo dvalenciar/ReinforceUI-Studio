@@ -1,4 +1,4 @@
-from RL_helpers.util import denormalize_action, set_seed
+from RL_helpers.util import set_seed
 
 
 def policy_loop_test(env, rl_agent, logger, number_test_episodes=1, algo_name=None):
@@ -12,13 +12,11 @@ def policy_loop_test(env, rl_agent, logger, number_test_episodes=1, algo_name=No
         while not done and not truncated:
             if algo_name == "PPO":
                 action, _ = rl_agent.select_action_from_policy(state)
+            elif algo_name == "DQN":
+                action = rl_agent.select_action_from_policy(state)
             else:
                 action = rl_agent.select_action_from_policy(state, evaluation=True)
-            action_env = denormalize_action(
-                action, env.max_action_value(), env.min_action_value()
-            )
-            next_state, reward, done, truncated = env.step(action_env)
-            state = next_state
+            state, reward, done, truncated = env.step(action)
             episode_reward += reward
             logger.record_video_frame(env.render_frame())
     logger.end_video_record()
@@ -45,13 +43,11 @@ def policy_from_model_load_test(config_data, models_log_path):
         while not done and not truncated:
             if algorithm_name == "PPO":
                 action, _ = rl_agent.select_action_from_policy(state)
+            elif algorithm_name == "DQN":
+                action = rl_agent.select_action_from_policy(state)
             else:
                 action = rl_agent.select_action_from_policy(state, evaluation=True)
-            action_env = denormalize_action(
-                action, env.max_action_value(), env.min_action_value()
-            )
-            next_state, reward, done, truncated = env.step(action_env)
-            state = next_state
+            state, reward, done, truncated = env.step(action)
             episode_reward += reward
             env.render_frame()
     env.close()

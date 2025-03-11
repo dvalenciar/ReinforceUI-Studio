@@ -9,8 +9,7 @@ from PyQt5.QtWidgets import (
     QDesktopWidget,
 )
 from PyQt5.QtCore import Qt
-
-from GUI.select_platform_window import PlatformConfigWindow
+from GUI.select_algorithm_window import SelectAlgorithmWindow
 from GUI.load_model_window import LoadConfigWindow
 
 
@@ -21,7 +20,7 @@ class WelcomeWindow(QMainWindow):
         self.platform_config_window = None
         self.user_selections = {"setup_choice": ""}
         self.setWindowTitle("RL Configuration Guide")
-        self.setFixedSize(900, 200)
+        self.setFixedSize(900, 230)
         self.setStyleSheet("background-color: #121212;")
         self.center()
 
@@ -31,7 +30,8 @@ class WelcomeWindow(QMainWindow):
 
         welcome_label = QLabel(
             "Welcome to the ReinforceUI Studio!! \n"
-            "Easily configure RL environments, select algorithms, and monitor training. \n",
+            "Easily configure RL environments, select algorithms, and monitor training. \n"
+            " \n Press select one of the following options to get started:\n",
             self,
         )
 
@@ -43,7 +43,7 @@ class WelcomeWindow(QMainWindow):
         main_layout.addWidget(welcome_label)
 
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(20)  # Increase the separation between buttons
+        button_layout.setSpacing(25)  # Increase the separation between buttons
         manual_button = self.create_button(
             "Start Training Configuration",
             250,
@@ -97,7 +97,7 @@ class WelcomeWindow(QMainWindow):
         else:
             self.user_selections["setup_choice"] = "train_model"
             self.close()
-            self.platform_config_window = PlatformConfigWindow(
+            self.platform_config_window = SelectAlgorithmWindow(
                 self.show, self.user_selections
             )
             self.platform_config_window.show()

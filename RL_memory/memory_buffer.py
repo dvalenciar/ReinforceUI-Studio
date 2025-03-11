@@ -14,7 +14,11 @@ class MemoryBuffer:
 
         # allocate memory for the buffer.
         self.state = np.zeros((self.max_size, observation_size), dtype=np.float32)
-        self.action = np.zeros((self.max_size, action_num), dtype=np.float32)
+        # todo improve this and make it more general and scalable
+        if algorithm_name == "DQN":
+            self.action = np.zeros((self.max_size,), dtype=np.int32)
+        else:
+            self.action = np.zeros((self.max_size, action_num), dtype=np.float32)
         self.reward = np.zeros((self.max_size,), dtype=np.float32)
         self.next_state = np.zeros((self.max_size, observation_size), dtype=np.float32)
         self.done = np.zeros((self.max_size,), dtype=np.bool_)

@@ -6,6 +6,11 @@ platforms:
       - LunarLanderContinuous-v3
       - MountainCarContinuous-v0
       - Pendulum-v1
+    discrete_environments:
+      - Acrobot-v1
+      - CartPole-v1
+      - MountainCar-v0
+      - LunarLander-v3
 
   DMCS:
     environments:

@@ -121,14 +121,12 @@ class SAC:
         experiences = memory.sample_experience(batch_size)
         states, actions, rewards, next_states, dones = experiences
 
-        batch_size = len(states)
-
         # Convert into tensor
-        states = torch.FloatTensor(np.asarray(states)).to(self.device)
-        actions = torch.FloatTensor(np.asarray(actions)).to(self.device)
-        rewards = torch.FloatTensor(np.asarray(rewards)).to(self.device)
-        next_states = torch.FloatTensor(np.asarray(next_states)).to(self.device)
-        dones = torch.FloatTensor(np.asarray(dones)).to(self.device)
+        states = torch.FloatTensor(states).to(self.device)
+        actions = torch.FloatTensor(actions).to(self.device)
+        rewards = torch.FloatTensor(rewards).to(self.device)
+        next_states = torch.FloatTensor(next_states).to(self.device)
+        dones = torch.FloatTensor(dones).to(self.device)
 
         rewards = rewards.reshape(batch_size, 1)
         dones = dones.reshape(batch_size, 1)

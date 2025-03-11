@@ -10,15 +10,17 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
 )
 from PyQt5.QtCore import Qt
-from GUI.select_algorithm_window import SelectAlgorithmWindow
+from GUI.training_window import TrainingWindow
 
 
 class SelectEnvironmentWindow(QDialog):
-    def __init__(self, platform_window, selected_platform, user_selections):
+    def __init__(self, platform_window, user_selections):
         super().__init__()
 
+        self.algorithm_selected = user_selections["Algorithm"]
+
         self.platform_window = platform_window
-        self.selected_platform = selected_platform
+        self.selected_platform = user_selections["selected_platform"]
         self.user_selections = user_selections
 
         self.setWindowTitle(f"Select Environment")
@@ -47,7 +49,7 @@ class SelectEnvironmentWindow(QDialog):
         layout.addLayout(button_layout)
 
         welcome_label = QLabel(
-            f"Please select the environment for {selected_platform}", self
+            f"Please select the environment for {self.selected_platform}", self
         )
         welcome_label.setAlignment(Qt.AlignCenter)
         welcome_label.setStyleSheet(
@@ -55,7 +57,7 @@ class SelectEnvironmentWindow(QDialog):
         )
         layout.addWidget(welcome_label)
 
-        environments = self.load_environments(selected_platform)
+        environments = self.load_environments(self.selected_platform)
 
         self.env_combo = QComboBox(self)
         self.env_combo.addItems(environments)
@@ -80,6 +82,8 @@ class SelectEnvironmentWindow(QDialog):
             with open("config/config_platform.yaml", "r") as file:
                 config = yaml.safe_load(file)
                 platforms = config.get("platforms", {})
+                if self.algorithm_selected == "DQN":
+                    return platforms.get(platform, {}).get("discrete_environments", [])
                 return platforms.get(platform, {}).get("environments", [])
         except FileNotFoundError:
             return []
@@ -93,9 +97,7 @@ class SelectEnvironmentWindow(QDialog):
         selected_env = self.env_combo.currentText()
         self.user_selections["selected_environment"] = selected_env
 
-        self.select_alg_window = SelectAlgorithmWindow(
-            self.show, selected_env, self.user_selections
-        )
+        self.select_alg_window = TrainingWindow(self.show, self.user_selections)
         self.select_alg_window.show()
 
     @staticmethod
