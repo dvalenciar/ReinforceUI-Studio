@@ -18,7 +18,7 @@ def import_algorithm_instance(config_data):
 
 
 def create_environment_instance(
-    config_data, render_mode="rgb_array", evaluation_env=False
+        config_data, render_mode="rgb_array", evaluation_env=False
 ):
     platform_name = config_data.get("selected_platform")
     env_name = config_data.get("selected_environment")
@@ -115,7 +115,7 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
                     action = rl_agent.select_action_from_policy(state)
         else:
             if total_step_counter < steps_exploration:
-                action= env.sample_action()
+                action = env.sample_action()
             else:
                 action = rl_agent.select_action_from_policy(state)
 
@@ -149,8 +149,8 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
             total_episode_time += episode_time
             average_episode_time = total_episode_time / (episode_num + 1)
             remaining_episodes = (
-                steps_training - total_step_counter - 1
-            ) // episode_timesteps
+                                         steps_training - total_step_counter - 1
+                                 ) // episode_timesteps
             estimated_time_remaining = average_episode_time * remaining_episodes
             episode_time_str = time.strftime(
                 "%H:%M:%S", time.gmtime(max(0, estimated_time_remaining))
