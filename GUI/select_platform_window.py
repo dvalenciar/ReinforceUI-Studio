@@ -58,12 +58,30 @@ class PlatformConfigWindow(QDialog):
         platforms_layout.addItem(spacer)
 
         platforms = [
-            {"name": "Gymnasium", "gif": "media_resources/pendulum.gif", "is_gif": True},
+            {
+                "name": "Gymnasium",
+                "gif": "media_resources/pendulum.gif",
+                "is_gif": True,
+            },
         ]
 
         if self.algorithm_selected != "DQN":
-            platforms.insert(1, {"name": "DMCS", "gif": "media_resources/cheetah_run.gif", "is_gif": True})
-            platforms.insert(2, {"name": "MuJoCo", "gif": "media_resources/half_cheetah", "is_gif": True})
+            platforms.insert(
+                1,
+                {
+                    "name": "DMCS",
+                    "gif": "media_resources/cheetah_run.gif",
+                    "is_gif": True,
+                },
+            )
+            platforms.insert(
+                2,
+                {
+                    "name": "MuJoCo",
+                    "gif": "media_resources/half_cheetah",
+                    "is_gif": True,
+                },
+            )
 
         self.selected_button = None
 

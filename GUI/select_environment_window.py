@@ -97,9 +97,7 @@ class SelectEnvironmentWindow(QDialog):
         selected_env = self.env_combo.currentText()
         self.user_selections["selected_environment"] = selected_env
 
-        self.select_alg_window = TrainingWindow(
-            self.show, self.user_selections
-        )
+        self.select_alg_window = TrainingWindow(self.show, self.user_selections)
         self.select_alg_window.show()
 
     @staticmethod

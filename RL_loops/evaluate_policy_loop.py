@@ -1,5 +1,5 @@
 def evaluate_policy_loop(
-        env, rl_agent, number_eval_episodes, logger, total_steps, algo_name=None
+    env, rl_agent, number_eval_episodes, logger, total_steps, algo_name=None
 ):
     df_log = None
     total_reward_env = 0
