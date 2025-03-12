@@ -1,6 +1,9 @@
 name: Docker Publish
 
 on:
+  push:
+    branches:
+      - main # Trigger this only when `main` branch is pushed
   workflow_run:
     workflows: ["CI"] # This triggers the Docker workflow after the test workflow succeeds
     types:
