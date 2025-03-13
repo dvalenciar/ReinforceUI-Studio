@@ -8,7 +8,9 @@ from RL_algorithms.TQC.networks import Actor, Critic
 class TQC:
     def __init__(self, observation_size, action_num, hyperparameters):
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         log_std_bounds = list(hyperparameters.get("log_std_bounds"))
         num_quantiles = int(hyperparameters.get("n_quantiles"))
         num_critics = int(hyperparameters.get("num_critics"))
@@ -23,7 +25,9 @@ class TQC:
 
         self.gamma = float(hyperparameters.get("gamma"))
         self.tau = float(hyperparameters.get("tau"))
-        self.top_quantiles_to_drop = int(hyperparameters.get("top_quantiles_to_drop"))
+        self.top_quantiles_to_drop = int(
+            hyperparameters.get("top_quantiles_to_drop")
+        )
         self.actor_lr = float(hyperparameters.get("actor_lr"))
         self.critic_lr = float(hyperparameters.get("critic_lr"))
         self.alpha_lr = float(hyperparameters.get("alpha_lr"))
@@ -47,10 +51,15 @@ class TQC:
         init_temperature = 1.0
         self.log_alpha = torch.tensor(np.log(init_temperature)).to(self.device)
         self.log_alpha.requires_grad = True
-        self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=self.alpha_lr)
+        self.log_alpha_optimizer = torch.optim.Adam(
+            [self.log_alpha], lr=self.alpha_lr
+        )
 
     def select_action_from_policy(
-        self, state: np.ndarray, evaluation: bool = False, noise_scale: float = 0
+        self,
+        state: np.ndarray,
+        evaluation: bool = False,
+        noise_scale: float = 0,
     ) -> np.ndarray:
         # note that when evaluating this algorithm we need to select tanh(mean) as action
         # so _, _, action = self.actor_net(state_tensor)
@@ -97,7 +106,9 @@ class TQC:
         )  # batch x nets x quantiles x samples
         abs_pairwise_delta = torch.abs(pairwise_delta)
         huber_loss = torch.where(
-            abs_pairwise_delta > 1, abs_pairwise_delta - 0.5, pairwise_delta**2 * 0.5
+            abs_pairwise_delta > 1,
+            abs_pairwise_delta - 0.5,
+            pairwise_delta**2 * 0.5,
         )
 
         n_quantiles = quantiles.shape[2]
@@ -152,14 +163,18 @@ class TQC:
     def _update_actor(self, states: torch.Tensor) -> tuple[float, float]:
         new_action, log_pi, _ = self.actor_net(states)
 
-        mean_qf_pi = self.critic_net(states, new_action).mean(2).mean(1, keepdim=True)
+        mean_qf_pi = (
+            self.critic_net(states, new_action).mean(2).mean(1, keepdim=True)
+        )
         actor_loss = (self.alpha * log_pi - mean_qf_pi).mean()
 
         self.actor_net_optimiser.zero_grad()
         actor_loss.backward()
         self.actor_net_optimiser.step()
 
-        alpha_loss = -self.log_alpha * (log_pi + self.target_entropy).detach().mean()
+        alpha_loss = (
+            -self.log_alpha * (log_pi + self.target_entropy).detach().mean()
+        )
 
         # update the temperature
         self.log_alpha_optimizer.zero_grad()
@@ -193,7 +208,8 @@ class TQC:
 
         if self.learn_counter % self.policy_update_freq == 0:
             for param, target_param in zip(
-                self.critic_net.parameters(), self.target_critic_net.parameters()
+                self.critic_net.parameters(),
+                self.target_critic_net.parameters(),
             ):
                 target_param.data.copy_(
                     self.tau * param.data + (1 - self.tau) * target_param.data
@@ -204,8 +220,12 @@ class TQC:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
-        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        torch.save(
+            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
+        )
+        torch.save(
+            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
+        )
 
     def load_models(self, filename: str, filepath: str) -> None:
         self.actor_net.load_state_dict(

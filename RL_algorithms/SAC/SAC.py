@@ -10,7 +10,9 @@ from RL_algorithms.SAC.networks import Actor, Critic
 class SAC:
     def __init__(self, observation_size, action_num, hyperparameters):
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_critic_net = copy.deepcopy(self.critic_net).to(self.device)
@@ -32,7 +34,9 @@ class SAC:
         init_temperature = 1.0
         self.log_alpha = torch.tensor(np.log(init_temperature)).to(self.device)
         self.log_alpha.requires_grad = True
-        self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=self.alpha_lr)
+        self.log_alpha_optimizer = torch.optim.Adam(
+            [self.log_alpha], lr=self.alpha_lr
+        )
 
         self.actor_net_optimiser = torch.optim.Adam(
             self.actor_net.parameters(), lr=self.actor_lr
@@ -42,7 +46,10 @@ class SAC:
         )
 
     def select_action_from_policy(
-        self, state: np.ndarray, evaluation: bool = False, noise_scale: float = 0
+        self,
+        state: np.ndarray,
+        evaluation: bool = False,
+        noise_scale: float = 0,
     ) -> np.ndarray:
         # note that when evaluating this algorithm we need to select mu as action
         self.actor_net.eval()
@@ -80,7 +87,8 @@ class SAC:
             )
 
             q_target = (
-                rewards * self.reward_scale + self.gamma * (1 - dones) * target_q_values
+                rewards * self.reward_scale
+                + self.gamma * (1 - dones) * target_q_values
             )
 
         q_values_one, q_values_two = self.critic_net(states, actions)
@@ -93,7 +101,11 @@ class SAC:
         critic_loss_total.backward()
         self.critic_net_optimiser.step()
 
-        return critic_loss_one.item(), critic_loss_two.item(), critic_loss_total.item()
+        return (
+            critic_loss_one.item(),
+            critic_loss_two.item(),
+            critic_loss_total.item(),
+        )
 
     def _update_actor_alpha(self, states: torch.Tensor) -> tuple[float, float]:
         pi, log_pi, _ = self.actor_net(states)
@@ -107,7 +119,9 @@ class SAC:
         self.actor_net_optimiser.step()
 
         # update the temperature (alpha)
-        alpha_loss = -(self.log_alpha * (log_pi + self.target_entropy).detach()).mean()
+        alpha_loss = -(
+            self.log_alpha * (log_pi + self.target_entropy).detach()
+        ).mean()
 
         self.log_alpha_optimizer.zero_grad()
         alpha_loss.backward()
@@ -139,7 +153,8 @@ class SAC:
 
         if self.learn_counter % self.policy_update_freq == 0:
             for param, target_param in zip(
-                self.critic_net.parameters(), self.target_critic_net.parameters()
+                self.critic_net.parameters(),
+                self.target_critic_net.parameters(),
             ):
                 target_param.data.copy_(
                     self.tau * param.data + (1 - self.tau) * target_param.data
@@ -150,8 +165,12 @@ class SAC:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
-        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        torch.save(
+            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
+        )
+        torch.save(
+            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
+        )
 
     def load_models(self, filename: str, filepath: str) -> None:
         self.actor_net.load_state_dict(

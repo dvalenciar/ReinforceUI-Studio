@@ -27,7 +27,9 @@ class Critic(nn.Module):
             self.add_module(f"critic_net_{i}", critic_net)
             self.q_networks.append(critic_net)
 
-    def forward(self, state: torch.Tensor, action: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, state: torch.Tensor, action: torch.Tensor
+    ) -> torch.Tensor:
         network_input = torch.cat((state, action), dim=1)
         quantiles = torch.stack(
             tuple(critic(network_input) for critic in self.q_networks), dim=1
@@ -37,13 +39,17 @@ class Critic(nn.Module):
 
 # Standard Multilayer Perceptron (MLP) network
 class MLP(nn.Module):
-    def __init__(self, input_size: int, hidden_sizes: list[int], output_size: int):
+    def __init__(
+        self, input_size: int, hidden_sizes: list[int], output_size: int
+    ):
         super().__init__()
 
         self.fully_connected_layers = []
         for i, next_size in enumerate(hidden_sizes):
             fully_connected_layer = nn.Linear(input_size, next_size)
-            self.add_module(f"fully_connected_layer_{i}", fully_connected_layer)
+            self.add_module(
+                f"fully_connected_layer_{i}", fully_connected_layer
+            )
             self.fully_connected_layers.append(fully_connected_layer)
             input_size = next_size
 

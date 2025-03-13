@@ -8,7 +8,9 @@ from RL_algorithms.DQN.networks import Network
 
 class DQN:
     def __init__(self, observation_size, action_num, hyperparameters):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
 
         self.net = Network(observation_size, action_num).to(self.device)
         self.target_net = copy.deepcopy(self.net).to(self.device)
@@ -17,7 +19,9 @@ class DQN:
         self.lr = float(hyperparameters.get("lr"))
 
         self.learn_counter = 0
-        self.target_update_freq = int(hyperparameters.get("target_update_freq"))
+        self.target_update_freq = int(
+            hyperparameters.get("target_update_freq")
+        )
 
         self.action_num = action_num
         self.optimiser = torch.optim.Adam(self.net.parameters(), lr=self.lr)
@@ -73,7 +77,9 @@ class DQN:
         # Periodic target network update (every `target_update_freq` steps)
         self.learn_counter += 1
         if self.learn_counter % self.target_update_freq == 0:
-            self.target_net.load_state_dict(self.net.state_dict())  # Hard update
+            self.target_net.load_state_dict(
+                self.net.state_dict()
+            )  # Hard update
 
     def save_models(self, filename: str, filepath: str) -> None:
         dir_exists = os.path.exists(filepath)

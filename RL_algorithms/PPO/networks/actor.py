@@ -4,7 +4,10 @@ from torch import nn
 
 class Actor(nn.Module):
     def __init__(
-        self, observation_size: int, num_actions: int, hidden_size: list[int] = None
+        self,
+        observation_size: int,
+        num_actions: int,
+        hidden_size: list[int] = None,
     ):
         super().__init__()
         if hidden_size is None:
@@ -19,9 +22,13 @@ class Actor(nn.Module):
             nn.Tanh(),
         )
 
-        self.log_std = nn.Parameter(torch.zeros(num_actions))  # Learnable log std
+        self.log_std = nn.Parameter(
+            torch.zeros(num_actions)
+        )  # Learnable log std
 
-    def forward(self, state: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self, state: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         mean = self.act_net(state)
         std = torch.exp(self.log_std)
         return mean, std

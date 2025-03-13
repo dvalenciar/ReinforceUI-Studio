@@ -9,7 +9,9 @@ from RL_algorithms.PPO.networks import Actor, Critic
 class PPO:
     def __init__(self, observation_size, action_num, hyperparameters):
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size).to(self.device)
 
@@ -17,7 +19,9 @@ class PPO:
         self.actor_lr = float(hyperparameters.get("actor_lr"))
         self.critic_lr = float(hyperparameters.get("critic_lr"))
         self.eps_clip = float(hyperparameters.get("eps_clip"))
-        self.updates_per_iteration = int(hyperparameters.get("updates_per_iteration"))
+        self.updates_per_iteration = int(
+            hyperparameters.get("updates_per_iteration")
+        )
 
         self.action_num = action_num
 
@@ -33,13 +37,17 @@ class PPO:
     ) -> tuple[np.ndarray, np.ndarray]:
         self.actor_net.eval()
         with torch.no_grad():
-            state_tensor = torch.FloatTensor(state).to(self.device).unsqueeze(0)
+            state_tensor = (
+                torch.FloatTensor(state).to(self.device).unsqueeze(0)
+            )
             mean, std = self.actor_net(state_tensor)
             dist = Normal(mean, std)
             action = dist.sample()
             log_prob = dist.log_prob(action).sum(dim=-1)
             action = action.cpu().data.numpy().flatten()
-            log_prob = log_prob.cpu().numpy()  # Keep as scalar, no need to flatten
+            log_prob = (
+                log_prob.cpu().numpy()
+            )  # Keep as scalar, no need to flatten
         self.actor_net.train()
         return action, log_prob
 
@@ -57,7 +65,8 @@ class PPO:
         discounted_reward = 0.0
         for i in reversed(range(len(batch_rewards))):
             discounted_reward = (
-                batch_rewards[i] + self.gamma * (1 - batch_dones[i]) * discounted_reward
+                batch_rewards[i]
+                + self.gamma * (1 - batch_dones[i]) * discounted_reward
             )
             rtgs[i] = discounted_reward
         return rtgs.to(self.device)
@@ -76,7 +85,9 @@ class PPO:
         v, _ = self._evaluate_policy(states, actions)
 
         advantages = rtgs.detach() - v.detach()
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-10)
+        advantages = (advantages - advantages.mean()) / (
+            advantages.std() + 1e-10
+        )
 
         for _ in range(self.updates_per_iteration):
             current_v, curr_log_probs = self._evaluate_policy(states, actions)
@@ -87,10 +98,13 @@ class PPO:
             # Finding Surrogate Loss
             surrogate_loss_one = ratios * (advantages.detach())
             surrogate_loss_two = (
-                torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages
+                torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip)
+                * advantages
             )
 
-            actor_loss = -torch.min(surrogate_loss_one, surrogate_loss_two).mean()
+            actor_loss = -torch.min(
+                surrogate_loss_one, surrogate_loss_two
+            ).mean()
             critic_loss = F.mse_loss(current_v, (rtgs.detach()))
 
             self.actor_net_optimiser.zero_grad()
@@ -106,8 +120,12 @@ class PPO:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
-        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        torch.save(
+            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
+        )
+        torch.save(
+            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
+        )
 
     def load_models(self, filename: str, filepath: str) -> None:
         self.actor_net.load_state_dict(

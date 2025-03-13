@@ -4,7 +4,10 @@ from torch import nn
 
 class Network(nn.Module):
     def __init__(
-        self, observation_size: int, num_actions: int, hidden_size: list[int] = None
+        self,
+        observation_size: int,
+        num_actions: int,
+        hidden_size: list[int] = None,
     ):
         super().__init__()
         if hidden_size is None:

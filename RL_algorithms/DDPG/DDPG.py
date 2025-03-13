@@ -8,7 +8,9 @@ from RL_algorithms.DDPG.networks import Actor, Critic
 
 class DDPG:
     def __init__(self, observation_size, action_num, hyperparameters):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_actor_net = copy.deepcopy(self.actor_net).to(self.device)
@@ -118,8 +120,12 @@ class DDPG:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
-        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        torch.save(
+            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
+        )
+        torch.save(
+            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
+        )
 
     def load_models(self, filename: str, filepath: str) -> None:
         self.actor_net.load_state_dict(
