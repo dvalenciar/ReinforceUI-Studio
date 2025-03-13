@@ -119,6 +119,8 @@ class CTD4:
         fusion_std = torch.sqrt(fusion_variance)
         return fusion_mean, fusion_std
 
+    # todo check if the _private functions here are used correctly...
+
     def _kalman(
         self, u_set: list[torch.Tensor], std_set: list[torch.Tensor]
     ) -> tuple[torch.Tensor, torch.Tensor]:
