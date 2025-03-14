@@ -1,1 +1,1 @@
-from .SAC import SAC
+from .SAC import SAC  # noqa: F401, D104

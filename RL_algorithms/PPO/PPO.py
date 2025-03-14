@@ -1,14 +1,35 @@
+"""Algorithm name: PPO.
+
+Paper Name: Proximal Policy Optimization Algorithms
+Paper link: https://arxiv.org/abs/1707.06347
+Taxonomy: On policy > Policy Based > Continuous action space
+"""
+
 import os
 import numpy as np
 import torch
-import torch.nn.functional as F
+from RL_memory.memory_buffer import MemoryBuffer
+import torch.nn.functional as functional
 from torch.distributions import Normal
 from RL_algorithms.PPO.networks import Actor, Critic
 
 
 class PPO:
-    def __init__(self, observation_size, action_num, hyperparameters):
+    def __init__(
+        self, observation_size: int, action_num: int, hyperparameters: dict
+    ) -> None:
+        """Initialize PPO agent.
 
+        Args:
+            observation_size: Dimension of the state space
+            action_num: Dimension of the action space
+            hyperparameters: Dictionary containing algorithm parameters:
+                gamma: Discount factor
+                actor_lr: Learning rate for the actor network
+                critic_lr: Learning rate for the critic network
+                eps_clip: Clipping parameter for PPO
+                updates_per_iteration: Number of updates per iteration
+        """
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu"
         )
@@ -35,6 +56,14 @@ class PPO:
     def select_action_from_policy(
         self, state: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
+        """Select action from policy.
+
+        Args:
+            state: Current state of the environment
+
+        Returns:
+            tuple[np.ndarray, np.ndarray]: Tuple containing the action and log probability
+        """
         self.actor_net.eval()
         with torch.no_grad():
             state_tensor = (
@@ -45,13 +74,22 @@ class PPO:
             action = dist.sample()
             log_prob = dist.log_prob(action).sum(dim=-1)
             action = action.cpu().data.numpy().flatten()
-            log_prob = (
-                log_prob.cpu().numpy()
-            )  # Keep as scalar, no need to flatten
+            log_prob = log_prob.cpu().numpy()
         self.actor_net.train()
         return action, log_prob
 
-    def _evaluate_policy(self, state, action):
+    def _evaluate_policy(
+        self, state: torch.Tensor, action: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Evaluate policy.
+
+        Args:
+            state: Current state of the environment
+            action: Action taken by the agent
+
+        Returns:
+            tuple[torch.Tensor, torch.Tensor]: Tuple containing the value and log probability
+        """
         v = self.critic_net(state).squeeze()
         mean, std = self.actor_net(state)
         dist = Normal(mean, std)
@@ -61,6 +99,15 @@ class PPO:
     def _calculate_rewards_to_go(
         self, batch_rewards: torch.Tensor, batch_dones: torch.Tensor
     ) -> torch.Tensor:
+        """Calculate rewards to go.
+
+        Args:
+            batch_rewards: Batch of rewards
+            batch_dones: Batch of terminal states
+
+        Returns:
+            torch.Tensor: Rewards to go
+        """
         rtgs = torch.zeros_like(batch_rewards)
         discounted_reward = 0.0
         for i in reversed(range(len(batch_rewards))):
@@ -71,7 +118,14 @@ class PPO:
             rtgs[i] = discounted_reward
         return rtgs.to(self.device)
 
-    def train_policy(self, memory):
+    def train_policy(self, memory: MemoryBuffer) -> None:
+        """Train policy using experiences from memory buffer.
+
+        Note: PPO use the whole memory buffer to train the policy then flushes it.
+
+        Args:
+            memory: Memory buffer containing experiences
+        """
         experiences = memory.return_flushed_memory()
         states, actions, rewards, _, dones, log_probs = experiences
 
@@ -105,7 +159,7 @@ class PPO:
             actor_loss = -torch.min(
                 surrogate_loss_one, surrogate_loss_two
             ).mean()
-            critic_loss = F.mse_loss(current_v, (rtgs.detach()))
+            critic_loss = functional.mse_loss(current_v, (rtgs.detach()))
 
             self.actor_net_optimiser.zero_grad()
             actor_loss.backward()
@@ -116,6 +170,12 @@ class PPO:
             self.critic_net_optimiser.step()
 
     def save_models(self, filename: str, filepath: str) -> None:
+        """Save actor and critic networks to files.
+
+        Args:
+            filename: Base name for the saved model files
+            filepath: Directory path where models will be saved
+        """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
             os.makedirs(filepath)
@@ -128,6 +188,12 @@ class PPO:
         )
 
     def load_models(self, filename: str, filepath: str) -> None:
+        """Load models previously saved for this algorithm.
+
+        Args:
+            filename: Filename of the models, without extension
+            filepath: Path to the saved models, usually located in user's home directory
+        """
         self.actor_net.load_state_dict(
             torch.load(
                 f"{filepath}/{filename}_actor.pht",

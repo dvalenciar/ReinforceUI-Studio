@@ -1,14 +1,35 @@
+"""Algorithm name: TD3.
+
+Paper Name: Addressing Function Approximation Error in Actor-Critic Methods
+Paper link: https://arxiv.org/abs/1802.09477
+Taxonomy: Off policy > Actor-Critic > Continuous action space
+"""
+
 import copy
 import os
 import numpy as np
+from RL_memory.memory_buffer import MemoryBuffer
+
 import torch
-import torch.nn.functional as F
+import torch.nn.functional as functional
 from RL_algorithms.TD3.networks import Actor, Critic
 
 
 class TD3:
-    def __init__(self, observation_size, action_num, hyperparameters):
+    def __init__(
+        self, observation_size: int, action_num: int, hyperparameters: dict
+    ) -> None:
+        """Initialize the TD3 agent.
 
+        Args:
+            observation_size: Dimension of the state space
+            action_num: Dimension of the action space
+            hyperparameters: Dictionary containing algorithm parameters:
+                - gamma: Discount factor
+                - tau: Soft update parameter
+                - actor_lr: Learning rate for actor network
+                - critic_lr: Learning rate for critic networks
+        """
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu"
         )
@@ -42,7 +63,16 @@ class TD3:
         evaluation: bool = False,
         noise_scale: float = 0.1,
     ) -> np.ndarray:
+        """Select an action from the policy network.
 
+        Args:
+            state: Current state of the environment
+            evaluation: When False, no exploration noise is added
+            noise_scale: Scale of the exploration noise
+
+        Returns:
+            np.ndarray: Action array to be applied to the environment.
+        """
         self.actor_net.eval()
         with torch.no_grad():
             state_tensor = torch.FloatTensor(state).to(self.device)
@@ -86,8 +116,8 @@ class TD3:
 
         q_values_one, q_values_two = self.critic_net(states, actions)
 
-        critic_loss_one = F.mse_loss(q_values_one, q_target)
-        critic_loss_two = F.mse_loss(q_values_two, q_target)
+        critic_loss_one = functional.mse_loss(q_values_one, q_target)
+        critic_loss_two = functional.mse_loss(q_values_two, q_target)
         critic_loss_total = critic_loss_one + critic_loss_two
 
         self.critic_net_optimiser.zero_grad()
@@ -107,7 +137,13 @@ class TD3:
         self.actor_net_optimiser.step()
         return actor_loss.item()
 
-    def train_policy(self, memory, batch_size):
+    def train_policy(self, memory: MemoryBuffer, batch_size: int) -> None:
+        """Train actor and critic networks using experiences from memory.
+
+        Args:
+            memory: Replay buffer containing experiences
+            batch_size: Number of experiences to sample
+        """
         self.learn_counter += 1
 
         experiences = memory.sample_experience(batch_size)
@@ -148,6 +184,12 @@ class TD3:
                 )
 
     def save_models(self, filename: str, filepath: str) -> None:
+        """Save actor and critic networks to files.
+
+        Args:
+            filename: Base name for the saved model files
+            filepath: Directory path where models will be saved
+        """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
             os.makedirs(filepath)
@@ -160,6 +202,12 @@ class TD3:
         )
 
     def load_models(self, filename: str, filepath: str) -> None:
+        """Load models previously saved for this algorithm.
+
+        Args:
+            filename: Filename of the models, without extension
+            filepath: Path to the saved models, usually located in user's home directory
+        """
         self.actor_net.load_state_dict(
             torch.load(
                 f"{filepath}/{filename}_actor.pht",

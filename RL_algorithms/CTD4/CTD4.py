@@ -1,5 +1,6 @@
-"""Paper Name:CTD4 (A Deep Continuous Distributional Actor-Critic Agent with a Kalman Fusion of Multiple Critics).
+"""Algorithm name: CTD4
 
+Paper Name: A Deep Continuous Distributional Actor-Critic Agent with a Kalman Fusion of Multiple Critics.
 Paper link: https://arxiv.org/abs/2405.02576
 Taxonomy: Off policy > Actor-Critic > Continuous action space
 """
@@ -21,9 +22,9 @@ class CTD4:
         Args:
             observation_size: Dimension of the state space
             action_num: Dimension of the action space
-            hyperparameters: Dictionary containing algorithm parameters like:
+            hyperparameters: Dictionary containing algorithm parameters:
                 gamma: Discount factor
-                tau: Target networks update rate
+                tau: Soft update parameter
                 actor_lr: Learning rate for actor network
                 critic_lr: Learning rate for critic networks
                 ensemble_size: Number of critic networks in the ensemble
@@ -82,7 +83,7 @@ class CTD4:
 
         Args:
             state: Input state
-            evaluation: When True, no exploration noise is added
+            evaluation: When False, no exploration noise is added
             noise_scale: Scale of the exploration noise
 
         Returns:
@@ -119,12 +120,10 @@ class CTD4:
         fusion_std = torch.sqrt(fusion_variance)
         return fusion_mean, fusion_std
 
-    # todo check if the _private functions here are used correctly...
-
     def _kalman(
         self, u_set: list[torch.Tensor], std_set: list[torch.Tensor]
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        # Kalman fusion
+
         if len(u_set) == 0 or len(std_set) == 0:
             raise ValueError("Input lists must not be empty.")
         if len(u_set) == 1:
