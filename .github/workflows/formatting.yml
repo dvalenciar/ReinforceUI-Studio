@@ -42,5 +42,5 @@ jobs:
       run: |
         echo "❌ Format check failed. Please format your code manually:"
         echo "1. Run 'black --line-length 79 .' to format code"
-        echo "2. Run 'flake8' to check for remaining issues"
+        echo "2. Run 'flake8 .' to check for remaining issues"
         echo "3. Fix any remaining issues and commit changes"

@@ -6,8 +6,7 @@ import random
 def normalize_action(
     action: float, max_action_value: float, min_action_value: float
 ) -> float:
-    """
-    Normalize the given action value within the specified range.
+    """Normalize the given action value within the specified range.
 
     Args:
         action (float): The action value to be normalized.
@@ -31,8 +30,7 @@ def normalize_action(
 def denormalize_action(
     action: float, max_action_value: float, min_action_value: float
 ) -> float:
-    """
-    Denormalize the given action value within the specified range.
+    """Denormalize the given action value within the specified range.
 
     Args:
         action (float): The action value to be denormalized.
@@ -53,8 +51,12 @@ def denormalize_action(
     return action_denormalize
 
 
-def set_seed(seed: int):
-    # set seen for reproducibility
+def set_seed(seed: int) -> None:
+    """Set seen for reproducibility
+
+    Args:
+        seed (int): seed value
+    """
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
