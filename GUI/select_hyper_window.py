@@ -27,9 +27,13 @@ class SelectHyperWindow(QDialog):
 
         layout = QVBoxLayout()
 
-        title_label = QLabel(f"Custom Hyperparameters for {selected_algorithm}", self)
+        title_label = QLabel(
+            f"Custom Hyperparameters for {selected_algorithm}", self
+        )
         title_label.setAlignment(Qt.AlignCenter)
-        title_label.setStyleSheet("color: #E0E0E0; font-size: 16px; font-weight: bold;")
+        title_label.setStyleSheet(
+            "color: #E0E0E0; font-size: 16px; font-weight: bold;"
+        )
         layout.addWidget(title_label)
 
         self.load_hyperparameters(selected_algorithm)
@@ -82,8 +86,12 @@ class SelectHyperWindow(QDialog):
                 algorithms = config.get("algorithms", [])
                 for algo in algorithms:
                     if algo["name"] == algorithm_name:
-                        self.default_hyperparameters = algo.get("hyperparameters", {})
-                        self.hyperparameters = self.default_hyperparameters.copy()
+                        self.default_hyperparameters = algo.get(
+                            "hyperparameters", {}
+                        )
+                        self.hyperparameters = (
+                            self.default_hyperparameters.copy()
+                        )
                         break
         except FileNotFoundError:
             print("Algorithm config file not found.")
@@ -135,7 +143,9 @@ class SelectHyperWindow(QDialog):
             input_field = self.hyperparam_fields[param_name]
             input_field.setText(str(default_value))
 
-        print(f"Reset hyperparameters for {self.selected_algorithm} to defaults.")
+        print(
+            f"Reset hyperparameters for {self.selected_algorithm} to defaults."
+        )
 
     @staticmethod
     def apply_button_style(button):

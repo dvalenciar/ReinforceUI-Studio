@@ -29,7 +29,7 @@ jobs:
 
     - name: Check with flake8
       run: |
-        flake8 . --count --statistics --show-source
+        flake8 . --statistics --show-source
         # Will fail if code doesn't meet flake8 standards
 
     - name: Summary (Success)

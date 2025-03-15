@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import QApplication
 from GUI.welcome_window import WelcomeWindow
 
 
-def main():
+def main() -> None:
+    """Run the main function."""
     app = QApplication(sys.argv)
     window = WelcomeWindow()
     window.show()
