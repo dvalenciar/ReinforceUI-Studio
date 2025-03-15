@@ -97,7 +97,7 @@ class DMControlEnvironment:
         return observation
 
     def step(
-        self, action: float
+        self, action: int
     ) -> tuple:  # todo check if action should be float or np.ndarray
         """Take a step in the environment.
 

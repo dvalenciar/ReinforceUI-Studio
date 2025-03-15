@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
@@ -53,7 +55,7 @@ class GymEnvironment:
         """
         return self.env.observation_space.shape[0]
 
-    def action_num(self) -> int:
+    def action_num(self) -> Any:
         """Get the number of actions.
 
         Returns:
