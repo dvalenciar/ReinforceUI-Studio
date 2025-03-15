@@ -98,7 +98,7 @@ class DMControlEnvironment:
 
     def step(
         self, action: int
-    ) -> tuple:  # todo check if action should be float or np.ndarray
+    ) -> tuple:
         """Take a step in the environment.
 
         Args:
