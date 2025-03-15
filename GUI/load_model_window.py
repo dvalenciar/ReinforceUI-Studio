@@ -66,7 +66,9 @@ class LoadConfigWindow(QDialog):
         self.models_log_status = QLabel("models_log: ❌", self)
         self.info_display = QLabel("", self)
         self.config_status.setStyleSheet("color: #E0E0E0; font-size: 15px;")
-        self.models_log_status.setStyleSheet("color: #E0E0E0; font-size: 15px;")
+        self.models_log_status.setStyleSheet(
+            "color: #E0E0E0; font-size: 15px;"
+        )
         self.info_display.setStyleSheet("color: #E0E0E0; font-size: 15px;")
         main_layout.addWidget(self.config_status)
         main_layout.addWidget(self.models_log_status)
@@ -119,7 +121,9 @@ class LoadConfigWindow(QDialog):
         self.move(frame_geometry.topLeft())
 
     def load_directory(self):
-        directory = QFileDialog.getExistingDirectory(self, "Select Directory", "")
+        directory = QFileDialog.getExistingDirectory(
+            self, "Select Directory", ""
+        )
         if directory:
             config_path = os.path.join(directory, "config.json")
             models_log_path = os.path.join(directory, "models_log")
@@ -127,7 +131,9 @@ class LoadConfigWindow(QDialog):
             config_exists = os.path.exists(config_path)
             models_log_exists = os.path.exists(models_log_path)
 
-            self.config_status.setText(f"Config.json: {'✔️' if config_exists else '❌'}")
+            self.config_status.setText(
+                f"Config.json: {'✔️' if config_exists else '❌'}"
+            )
             self.models_log_status.setText(
                 f"models_log: {'✔️' if models_log_exists else '❌'}"
             )
@@ -145,7 +151,9 @@ class LoadConfigWindow(QDialog):
             if config_exists and models_log_exists:
                 with open(config_path, "r") as file:
                     config_data = json.load(file)
-                    selected_platform = config_data.get("selected_platform", "N/A")
+                    selected_platform = config_data.get(
+                        "selected_platform", "N/A"
+                    )
                     selected_environment = config_data.get(
                         "selected_environment", "N/A"
                     )
@@ -154,10 +162,14 @@ class LoadConfigWindow(QDialog):
                         f"Platform: {selected_platform}\nEnvironment: {selected_environment}\nAlgorithm: {algorithm}"
                     )
                     self.info_display.setAlignment(Qt.AlignCenter)
-                    self.info_display.setStyleSheet("color: #00FF00; font-size: 16px;")
+                    self.info_display.setStyleSheet(
+                        "color: #00FF00; font-size: 16px;"
+                    )
 
                     # Create Test Policy button
-                    test_policy_button = self.create_button("Test Policy", 250, 50)
+                    test_policy_button = self.create_button(
+                        "Test Policy", 250, 50
+                    )
                     self.apply_button_style(test_policy_button)
                     self.button_layout.addWidget(test_policy_button)
                     test_policy_button.clicked.connect(

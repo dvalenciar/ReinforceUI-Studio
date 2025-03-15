@@ -1,1 +1,1 @@
-from .TQC import TQC
+from .TQC import TQC  # noqa: F401, D104

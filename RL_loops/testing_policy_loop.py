@@ -1,8 +1,29 @@
+from typing import Any
 from RL_helpers.util import set_seed
 
 
-def policy_loop_test(env, rl_agent, logger, number_test_episodes=1, algo_name=None):
-    rl_agent.load_models(filename="model", filepath=f"{logger.log_dir}/models_log")
+def policy_loop_test(
+    env: Any,
+    rl_agent: Any,
+    logger: Any,
+    number_test_episodes: int = 1,
+    algo_name: str = None,
+) -> None:
+    """Test the policy of a reinforcement learning agent.
+
+    This function tests the policy of a reinforcement learning agent
+    over a specified number of episodes and records the test metrics.
+
+    Args:
+        env: The environment in which the agent is tested.
+        rl_agent: The reinforcement learning agent being tested.
+        logger: The logger for recording test metrics.
+        number_test_episodes: The number of test episodes. Defaults to 1.
+        algo_name: The name of the algorithm used by the agent. Defaults to None.
+    """
+    rl_agent.load_models(
+        filename="model", filepath=f"{logger.log_dir}/models_log"
+    )
     logger.start_video_record(env.render_frame())
     for episode in range(number_test_episodes):
         state = env.reset()
@@ -15,14 +36,27 @@ def policy_loop_test(env, rl_agent, logger, number_test_episodes=1, algo_name=No
             elif algo_name == "DQN":
                 action = rl_agent.select_action_from_policy(state)
             else:
-                action = rl_agent.select_action_from_policy(state, evaluation=True)
+                action = rl_agent.select_action_from_policy(
+                    state, evaluation=True
+                )
             state, reward, done, truncated = env.step(action)
             episode_reward += reward
             logger.record_video_frame(env.render_frame())
     logger.end_video_record()
 
 
-def policy_from_model_load_test(config_data, models_log_path):
+def policy_from_model_load_test(
+    config_data: dict, models_log_path: str
+) -> None:
+    """Test the policy of a loaded model.
+
+    This function tests the policy of a reinforcement learning agent
+    loaded from a model file over a single episode.
+
+    Args:
+        config_data: The configuration data for the environment and agent.
+        models_log_path: The path to the directory containing the model files.
+    """
     from RL_loops.training_policy_loop import (
         import_algorithm_instance,
         create_environment_instance,
@@ -32,7 +66,9 @@ def policy_from_model_load_test(config_data, models_log_path):
     algorithm, algorithm_name = import_algorithm_instance(config_data)
     env = create_environment_instance(config_data, render_mode="human")
     rl_agent = algorithm(
-        env.observation_space(), env.action_num(), config_data.get("Hyperparameters")
+        env.observation_space(),
+        env.action_num(),
+        config_data.get("Hyperparameters"),
     )
     rl_agent.load_models(filename="model", filepath=models_log_path)
     for episode in range(1):
@@ -46,7 +82,9 @@ def policy_from_model_load_test(config_data, models_log_path):
             elif algorithm_name == "DQN":
                 action = rl_agent.select_action_from_policy(state)
             else:
-                action = rl_agent.select_action_from_policy(state, evaluation=True)
+                action = rl_agent.select_action_from_policy(
+                    state, evaluation=True
+                )
             state, reward, done, truncated = env.step(action)
             episode_reward += reward
             env.render_frame()

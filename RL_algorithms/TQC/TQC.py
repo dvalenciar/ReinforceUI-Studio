@@ -1,32 +1,61 @@
+"""Algorithm name: TQC
+
+Paper Name: Controlling Overestimation Bias with Truncated Mixture of Continuous Distributional Quantile Critics
+Paper link: https://arxiv.org/abs/2005.04269
+Taxonomy: Off policy > Actor-Critic > Continuous action space
+"""
+
 import copy
 import os
 import numpy as np
 import torch
+from RL_memory.memory_buffer import MemoryBuffer
 from RL_algorithms.TQC.networks import Actor, Critic
 
 
 class TQC:
-    def __init__(self, observation_size, action_num, hyperparameters):
+    def __init__(
+        self, observation_size: int, action_num: int, hyperparameters: dict
+    ) -> None:
+        """Initializes the TQC algorithm.
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        Args:
+            observation_size (int): The size of the observation space.
+            action_num (int): The number of actions.
+            hyperparameters (dict): The hyperparameters used to initialize the algorithm:
+                "log_std_bounds" (list): The bounds for the log standard deviation.
+                "n_quantiles" (int): The number of quantiles.
+                "num_critics" (int): The number of critics.
+                "gamma" (float): The discount factor.
+                "tau" (float): The target network update rate.
+                "top_quantiles_to_drop" (int): The number of top quantiles to drop.
+                "actor_lr" (float): The actor learning rate.
+                "critic_lr" (float): The critic learning rate.
+                "alpha_lr" (float): The alpha learning rate.
+        """
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         log_std_bounds = list(hyperparameters.get("log_std_bounds"))
-        num_quantiles = int(hyperparameters.get("n_quantiles"))
+        n_quantiles = int(hyperparameters.get("n_quantiles"))
         num_critics = int(hyperparameters.get("num_critics"))
+
+        self.gamma = float(hyperparameters.get("gamma"))
+        self.tau = float(hyperparameters.get("tau"))
+        self.top_quantiles_to_drop = int(
+            hyperparameters.get("top_quantiles_to_drop")
+        )
+        self.actor_lr = float(hyperparameters.get("actor_lr"))
+        self.critic_lr = float(hyperparameters.get("critic_lr"))
+        self.alpha_lr = float(hyperparameters.get("alpha_lr"))
 
         self.actor_net = Actor(
             observation_size, action_num, log_std_bounds=log_std_bounds
         ).to(self.device)
         self.critic_net = Critic(
-            observation_size, action_num, num_quantiles, num_critics
+            observation_size, action_num, n_quantiles, num_critics
         ).to(self.device)
         self.target_critic_net = copy.deepcopy(self.critic_net).to(self.device)
-
-        self.gamma = float(hyperparameters.get("gamma"))
-        self.tau = float(hyperparameters.get("tau"))
-        self.top_quantiles_to_drop = int(hyperparameters.get("top_quantiles_to_drop"))
-        self.actor_lr = float(hyperparameters.get("actor_lr"))
-        self.critic_lr = float(hyperparameters.get("critic_lr"))
-        self.alpha_lr = float(hyperparameters.get("alpha_lr"))
 
         self.learn_counter = 0
         self.policy_update_freq = 1
@@ -47,13 +76,30 @@ class TQC:
         init_temperature = 1.0
         self.log_alpha = torch.tensor(np.log(init_temperature)).to(self.device)
         self.log_alpha.requires_grad = True
-        self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=self.alpha_lr)
+        self.log_alpha_optimizer = torch.optim.Adam(
+            [self.log_alpha], lr=self.alpha_lr
+        )
 
     def select_action_from_policy(
-        self, state: np.ndarray, evaluation: bool = False, noise_scale: float = 0
+        self,
+        state: np.ndarray,
+        evaluation: bool = False,
+        noise_scale: float = 0,
     ) -> np.ndarray:
-        # note that when evaluating this algorithm we need to select tanh(mean) as action
-        # so _, _, action = self.actor_net(state_tensor)
+        """Select action from policy.
+
+        Args:
+            state: Input state
+            evaluation: When True, the policy is being evaluated
+            noise_scale: No use in this algorithm
+
+        Note:
+            when evaluating this algorithm we need to select tanh(mean) as action
+            so _, _, action = self.actor_net(state_tensor)
+
+        Returns:
+            Action array to be applied to the environment
+        """
         self.actor_net.eval()
         with torch.no_grad():
             state_tensor = torch.FloatTensor(state)
@@ -76,13 +122,13 @@ class TQC:
 
     @property
     def alpha(self) -> torch.Tensor:
+        """Returns the exponential of self.log_alpha"""
         return self.log_alpha.exp()
 
     def quantile_huber_loss_f(
         self, quantiles: torch.Tensor, samples: torch.Tensor
     ) -> torch.Tensor:
-        """
-        Calculates the quantile Huber loss for a given set of quantiles and samples.
+        """Calculates the quantile Huber loss for a given set of quantiles and samples.
 
         Args:
             quantiles (torch.Tensor): A tensor of shape (batch_size, num_nets, num_quantiles) representing the quantiles.
@@ -97,7 +143,9 @@ class TQC:
         )  # batch x nets x quantiles x samples
         abs_pairwise_delta = torch.abs(pairwise_delta)
         huber_loss = torch.where(
-            abs_pairwise_delta > 1, abs_pairwise_delta - 0.5, pairwise_delta**2 * 0.5
+            abs_pairwise_delta > 1,
+            abs_pairwise_delta - 0.5,
+            pairwise_delta**2 * 0.5,
         )
 
         n_quantiles = quantiles.shape[2]
@@ -152,14 +200,18 @@ class TQC:
     def _update_actor(self, states: torch.Tensor) -> tuple[float, float]:
         new_action, log_pi, _ = self.actor_net(states)
 
-        mean_qf_pi = self.critic_net(states, new_action).mean(2).mean(1, keepdim=True)
+        mean_qf_pi = (
+            self.critic_net(states, new_action).mean(2).mean(1, keepdim=True)
+        )
         actor_loss = (self.alpha * log_pi - mean_qf_pi).mean()
 
         self.actor_net_optimiser.zero_grad()
         actor_loss.backward()
         self.actor_net_optimiser.step()
 
-        alpha_loss = -self.log_alpha * (log_pi + self.target_entropy).detach().mean()
+        alpha_loss = (
+            -self.log_alpha * (log_pi + self.target_entropy).detach().mean()
+        )
 
         # update the temperature
         self.log_alpha_optimizer.zero_grad()
@@ -168,7 +220,13 @@ class TQC:
 
         return actor_loss.item(), alpha_loss.item()
 
-    def train_policy(self, memory, batch_size: int) -> None:
+    def train_policy(self, memory: MemoryBuffer, batch_size: int) -> None:
+        """Train actor and critic networks using experiences from memory.
+
+        Args:
+            memory: Replay buffer containing experiences
+            batch_size: Number of experiences to sample
+        """
         self.learn_counter += 1
 
         experiences = memory.sample_experience(batch_size)
@@ -181,7 +239,6 @@ class TQC:
         next_states = torch.FloatTensor(next_states).to(self.device)
         dones = torch.FloatTensor(dones).to(self.device)
 
-        # Reshape to batch_size x whatever
         rewards = rewards.reshape(batch_size, 1)
         dones = dones.reshape(batch_size, 1)
 
@@ -193,21 +250,38 @@ class TQC:
 
         if self.learn_counter % self.policy_update_freq == 0:
             for param, target_param in zip(
-                self.critic_net.parameters(), self.target_critic_net.parameters()
+                self.critic_net.parameters(),
+                self.target_critic_net.parameters(),
             ):
                 target_param.data.copy_(
                     self.tau * param.data + (1 - self.tau) * target_param.data
                 )
 
     def save_models(self, filename: str, filepath: str) -> None:
+        """Save actor and critic networks to files.
+
+        Args:
+            filename: Base name for the saved model files
+            filepath: Directory path where models will be saved
+        """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
-        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        torch.save(
+            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
+        )
+        torch.save(
+            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
+        )
 
     def load_models(self, filename: str, filepath: str) -> None:
+        """Load models previously saved for this algorithm.
+
+        Args:
+            filename: Filename of the models, without extension
+            filepath: Path to the saved models, usually located in user's home directory
+        """
         self.actor_net.load_state_dict(
             torch.load(
                 f"{filepath}/{filename}_actor.pht",

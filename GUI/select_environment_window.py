@@ -83,7 +83,9 @@ class SelectEnvironmentWindow(QDialog):
                 config = yaml.safe_load(file)
                 platforms = config.get("platforms", {})
                 if self.algorithm_selected == "DQN":
-                    return platforms.get(platform, {}).get("discrete_environments", [])
+                    return platforms.get(platform, {}).get(
+                        "discrete_environments", []
+                    )
                 return platforms.get(platform, {}).get("environments", [])
         except FileNotFoundError:
             return []
@@ -97,7 +99,9 @@ class SelectEnvironmentWindow(QDialog):
         selected_env = self.env_combo.currentText()
         self.user_selections["selected_environment"] = selected_env
 
-        self.select_alg_window = TrainingWindow(self.show, self.user_selections)
+        self.select_alg_window = TrainingWindow(
+            self.show, self.user_selections
+        )
         self.select_alg_window.show()
 
     @staticmethod

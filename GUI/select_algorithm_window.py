@@ -168,12 +168,16 @@ class SelectAlgorithmWindow(QDialog):
                 self.user_selections["Hyperparameters"] = {}
             self.user_selections["Algorithm"] = selected_algo
             self.close()
-            self.platform_window = PlatformConfigWindow(self.show, self.user_selections)
+            self.platform_window = PlatformConfigWindow(
+                self.show, self.user_selections
+            )
             self.platform_window.show()
         else:
             self.user_selections["Algorithm"] = self.algo_combo.currentText()
             self.close()
-            self.platform_window = PlatformConfigWindow(self.show, self.user_selections)
+            self.platform_window = PlatformConfigWindow(
+                self.show, self.user_selections
+            )
             self.platform_window.show()
 
     def set_active_button(self, active_button, inactive_button):

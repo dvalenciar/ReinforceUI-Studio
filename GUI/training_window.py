@@ -19,7 +19,9 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal, QThread
 from PyQt5.QtGui import QDesktopServices
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg as FigureCanvas,
+)
 from matplotlib.figure import Figure
 from RL_loops.training_policy_loop import training_loop
 
@@ -53,7 +55,9 @@ class TrainingWindow(QMainWindow):
         self.update_episode_steps_signal.connect(self.update_episode_steps)
         self.update_plot_signal.connect(self.update_plot)
         self.update_plot_eval_signal.connect(self.update_plot_eval)
-        self.training_completed_signal.connect(self.show_training_completed_message)
+        self.training_completed_signal.connect(
+            self.show_training_completed_message
+        )
 
     def show_training_completed_message(self, completion_flag):
         msg_box = QMessageBox(self)
@@ -71,7 +75,9 @@ class TrainingWindow(QMainWindow):
         msg_box.setStyleSheet(self.get_message_box_style())
 
         # Add custom button
-        see_log_button = msg_box.addButton("See log folder", QMessageBox.AcceptRole)
+        see_log_button = msg_box.addButton(
+            "See log folder", QMessageBox.AcceptRole
+        )
         msg_box.exec_()
 
         if msg_box.clickedButton() == see_log_button:
@@ -84,16 +90,22 @@ class TrainingWindow(QMainWindow):
         )
 
     def update_plot(self, data_plot):
-        self.training_figure.plot_data(data_plot, "Training Curve", "Episode Reward")
+        self.training_figure.plot_data(
+            data_plot, "Training Curve", "Episode Reward"
+        )
 
     def update_episode_steps(self, steps):
         self.info_labels["Episode Steps"].setText(f"Episode Steps: {steps}")
 
     def update_time_remaining(self, time_remaining):
-        self.info_labels["Time Remaining"].setText(f"Time Remaining: {time_remaining}")
+        self.info_labels["Time Remaining"].setText(
+            f"Time Remaining: {time_remaining}"
+        )
 
     def update_episode_label(self, episode):
-        self.info_labels["Episode Number"].setText(f"Episode Number: {episode}")
+        self.info_labels["Episode Number"].setText(
+            f"Episode Number: {episode}"
+        )
 
     def update_reward_label(self, reward):
         self.info_labels["Episode Reward"].setText(f"Episode Reward: {reward}")
@@ -115,7 +127,9 @@ class TrainingWindow(QMainWindow):
         container.setLayout(main_layout)
 
         top_layout = QHBoxLayout()
-        top_layout.addWidget(self.create_button("Back", self.back_to_selection))
+        top_layout.addWidget(
+            self.create_button("Back", self.back_to_selection)
+        )
         top_layout.addStretch()
         main_layout.addLayout(top_layout)
 
@@ -259,7 +273,9 @@ class TrainingWindow(QMainWindow):
         }
         row, col = 0, 0
         for label, widget in inputs.items():
-            self.input_layout.addWidget(self.create_label(label, "white", 14), row, col)
+            self.input_layout.addWidget(
+                self.create_label(label, "white", 14), row, col
+            )
             widget.setText(default_values.get(label, ""))
             widget.setStyleSheet(
                 "QLineEdit { background-color: #444444; color: white; font-size: 14px; padding: 5px; border: 1px solid white; }"
@@ -301,12 +317,17 @@ class TrainingWindow(QMainWindow):
         for key, value in self.previous_selections.items():
             if key in display_names:
                 summary_layout.addWidget(
-                    self.create_label(f"{display_names[key]}: {value}", "white", 14),
+                    self.create_label(
+                        f"{display_names[key]}: {value}", "white", 14
+                    ),
                     alignment=Qt.AlignLeft,
                 )
         summary_layout.addWidget(
             self.create_button(
-                "View Hyperparameters", self.show_summary_hyperparameters, 200, 30
+                "View Hyperparameters",
+                self.show_summary_hyperparameters,
+                200,
+                30,
             )
         )
         return summary_layout
@@ -334,7 +355,9 @@ class TrainingWindow(QMainWindow):
             for sub_key, sub_value in values.items()
         ]
         selections = "\n".join(lines)
-        self.show_message_box("Hyperparameters", selections, QMessageBox.Information)
+        self.show_message_box(
+            "Hyperparameters", selections, QMessageBox.Information
+        )
 
     def lock_inputs(self):
         for widget in self.training_inputs.values():
@@ -365,10 +388,13 @@ class TrainingWindow(QMainWindow):
             self.lock_inputs()
             self.create_log_folder()
             training_params = {
-                label: widget.text() for label, widget in self.training_inputs.items()
+                label: widget.text()
+                for label, widget in self.training_inputs.items()
             }
             config_data = {**self.previous_selections, **training_params}
-            self.training_thread = TrainingThread(self, config_data, self.folder_name)
+            self.training_thread = TrainingThread(
+                self, config_data, self.folder_name
+            )
             self.training_thread.start()
 
     def create_log_folder(self):
@@ -377,10 +403,13 @@ class TrainingWindow(QMainWindow):
         self.folder_name = os.path.join(home_dir, f"training_log_{timestamp}")
         os.makedirs(self.folder_name, exist_ok=True)
         training_params = {
-            label: widget.text() for label, widget in self.training_inputs.items()
+            label: widget.text()
+            for label, widget in self.training_inputs.items()
         }
         config_data = {**self.previous_selections, **training_params}
-        with open(os.path.join(self.folder_name, "config.json"), "w") as config_file:
+        with open(
+            os.path.join(self.folder_name, "config.json"), "w"
+        ) as config_file:
             json.dump(config_data, config_file, indent=4)
 
     def stop_training(self):
@@ -406,7 +435,9 @@ class TrainingWindow(QMainWindow):
 
     def all_inputs_filled(self):
         for label, widget in self.training_inputs.items():
-            if self.previous_selections.get("Algorithm") == "PPO" and label in [
+            if self.previous_selections.get(
+                "Algorithm"
+            ) == "PPO" and label in [
                 "Exploration Steps",
                 "Batch Size",
                 "G Value",
@@ -549,7 +580,9 @@ class MatplotlibCanvas(FigureCanvas):
         super().__init__(self.figure)
 
         # Create an axis for the plot
-        self.ax = self.figure.add_subplot(111, facecolor="black", frameon=False)
+        self.ax = self.figure.add_subplot(
+            111, facecolor="black", frameon=False
+        )
         self.clear_data()
 
     def plot_data(self, data_plot, title, y_label):

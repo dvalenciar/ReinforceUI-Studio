@@ -1,1 +1,1 @@
-from .network import Network
+from .network import Network  # noqa: F401, D104

@@ -54,7 +54,9 @@ class PlatformConfigWindow(QDialog):
         main_layout.addWidget(welcome_label)
 
         platforms_layout = QHBoxLayout()
-        spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        spacer = QSpacerItem(
+            40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum
+        )
         platforms_layout.addItem(spacer)
 
         platforms = [

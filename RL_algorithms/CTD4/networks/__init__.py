@@ -1,2 +1,2 @@
-from .actor import Actor
-from .critic import Critic
+from .actor import Actor  # noqa: F401, D104
+from .critic import Critic  # noqa: F401

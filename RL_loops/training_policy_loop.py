@@ -1,6 +1,7 @@
 import time
 import importlib
 import random
+from typing import Any
 from RL_memory.memory_buffer import MemoryBuffer
 from RL_environment.gym_env import GymEnvironment
 from RL_environment.dmcs_env import DMControlEnvironment
@@ -10,16 +11,38 @@ from RL_loops.evaluate_policy_loop import evaluate_policy_loop
 from RL_loops.testing_policy_loop import policy_loop_test
 
 
-def import_algorithm_instance(config_data):
+def import_algorithm_instance(config_data: dict) -> tuple:
+    """Import the algorithm instance.
+
+    Args:
+        config_data: The configuration data for the algorithm.
+
+    Returns:
+        tuple: A tuple containing the algorithm class and its name.
+    """
     algorithm_name = config_data.get("Algorithm")
-    algorithm_module = importlib.import_module(f"RL_algorithms.{algorithm_name}")
+    algorithm_module = importlib.import_module(
+        f"RL_algorithms.{algorithm_name}"
+    )
     algorithm_class = getattr(algorithm_module, algorithm_name)
     return algorithm_class, algorithm_name
 
 
 def create_environment_instance(
-    config_data, render_mode="rgb_array", evaluation_env=False
-):
+    config_data: dict,
+    render_mode: str = "rgb_array",
+    evaluation_env: bool = False,
+) -> Any:
+    """Create an environment instance.
+
+    Args:
+        config_data: The configuration data for the environment.
+        render_mode: The mode for rendering frames. Defaults to "rgb_array".
+        evaluation_env: Whether the environment is for evaluation. Defaults to False.
+
+    Returns:
+        Any: The created environment instance.
+    """
     platform_name = config_data.get("selected_platform")
     env_name = config_data.get("selected_environment")
     seed = (
@@ -37,7 +60,20 @@ def create_environment_instance(
     return environment
 
 
-def training_loop(config_data, training_window, log_folder_path, is_running):
+def training_loop(  # noqa: C901
+    config_data: dict,
+    training_window: Any,
+    log_folder_path: str,
+    is_running: bool,
+) -> None:
+    """Run the training loop for the reinforcement learning agent.
+
+    Args:
+        config_data: The configuration data for the training.
+        training_window: The training window for updating progress.
+        log_folder_path: The path to the log folder.
+        is_running: A callable to check if the training is running.
+    """
     set_seed(int(config_data.get("Seed")))
     algorithm, algorithm_name = import_algorithm_instance(config_data)
 
@@ -49,7 +85,9 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
     )
 
     rl_agent = algorithm(
-        env.observation_space(), env.action_num(), config_data.get("Hyperparameters")
+        env.observation_space(),
+        env.action_num(),
+        config_data.get("Hyperparameters"),
     )
     memory = MemoryBuffer(
         env.observation_space(),
@@ -80,8 +118,12 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
         )
     elif is_dqn:
         exploration_rate = 1
-        epsilon_min = float(config_data.get("Hyperparameters").get("epsilon_min"))
-        epsilon_decay = float(config_data.get("Hyperparameters").get("epsilon_decay"))
+        epsilon_min = float(
+            config_data.get("Hyperparameters").get("epsilon_min")
+        )
+        epsilon_decay = float(
+            config_data.get("Hyperparameters").get("epsilon_decay")
+        )
         G = int(config_data.get("G Value", 1))
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
@@ -124,7 +166,9 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
 
         # Store experience in memory
         if is_ppo:
-            memory.add_experience(state, action, reward, next_state, done, log_prob)
+            memory.add_experience(
+                state, action, reward, next_state, done, log_prob
+            )
         else:
             memory.add_experience(state, action, reward, next_state, done)
 
@@ -139,7 +183,11 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
             for _ in range(G):
                 rl_agent.train_policy(memory, batch_size)
 
-        elif not is_ppo and not is_dqn and total_step_counter >= steps_exploration:
+        elif (
+            not is_ppo
+            and not is_dqn
+            and total_step_counter >= steps_exploration
+        ):
             for _ in range(G):
                 rl_agent.train_policy(memory, batch_size)
 
@@ -151,7 +199,9 @@ def training_loop(config_data, training_window, log_folder_path, is_running):
             remaining_episodes = (
                 steps_training - total_step_counter - 1
             ) // episode_timesteps
-            estimated_time_remaining = average_episode_time * remaining_episodes
+            estimated_time_remaining = (
+                average_episode_time * remaining_episodes
+            )
             episode_time_str = time.strftime(
                 "%H:%M:%S", time.gmtime(max(0, estimated_time_remaining))
             )
