@@ -1,0 +1,7 @@
+[flake8]
+max-line-length = 79
+ignore = E203, W503, E501,  D101, D100, D415, ANN101, ANN102, ANN401
+docstring-convention = google
+max-complexity = 10
+
+exclude = GUI/

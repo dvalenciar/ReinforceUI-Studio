@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout test code
       uses: actions/checkout@v3
 
     - name: Set up Python
@@ -29,7 +29,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -e .
-        pip install pytest black
+        pip install pytest
 
     - name: Set QT environment to headless
       run: |
@@ -38,7 +38,3 @@ jobs:
     - name: Run tests
       run: |
         pytest
-
-    - name: Auto-format and check code
-      run: |
-        black --check . && black .

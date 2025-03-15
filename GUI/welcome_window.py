@@ -51,7 +51,10 @@ class WelcomeWindow(QMainWindow):
             QIcon("media_resources/icon_custom_config.png"),
         )
         load_button = self.create_button(
-            "Load Pre-trained Model", 250, 50, QIcon("media_resources/icon_config.png")
+            "Load Pre-trained Model",
+            250,
+            50,
+            QIcon("media_resources/icon_config.png"),
         )
 
         button_layout.addWidget(manual_button)
@@ -92,7 +95,9 @@ class WelcomeWindow(QMainWindow):
         if self.sender().text() == "Load Pre-trained Model":
             self.user_selections["setup_choice"] = "load_model"
             self.close()
-            self.load_config_window = LoadConfigWindow(self.show, self.user_selections)
+            self.load_config_window = LoadConfigWindow(
+                self.show, self.user_selections
+            )
             self.load_config_window.show()
         else:
             self.user_selections["setup_choice"] = "train_model"

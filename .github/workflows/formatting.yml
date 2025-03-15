@@ -1,0 +1,46 @@
+name: Code Format Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 flake8-annotations flake8-docstrings flake8-annotations
+
+    - name: Check with flake8
+      run: |
+        flake8 . --statistics --show-source
+        # Will fail if code doesn't meet flake8 standards
+
+    - name: Summary (Success)
+      if: success()
+      run: |
+        echo "✅ Format check completed. No issues found, well done!"
+
+    - name: Summary (Failure)
+      if: failure()
+      run: |
+        echo "❌ Format check failed. Please format your code manually:"
+        echo "1. Run 'black --line-length 79 .' to format code"
+        echo "2. Run 'flake8 .' to check for remaining issues"
+        echo "3. Fix any remaining issues and commit changes"

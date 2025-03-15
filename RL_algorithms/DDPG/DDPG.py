@@ -1,14 +1,37 @@
+"""Algorithm Name: DDPG: Deep Deterministic Policy Gradient.
+
+Paper name: Continuous control with deep reinforcement learning.
+Paper link: https://arxiv.org/abs/1509.02971
+Taxonomy: Off policy > Actor-Critic > Continuous action space
+"""
+
 import copy
 import os
 import numpy as np
 import torch
-import torch.nn.functional as F
+import torch.nn.functional as functional
+from RL_memory.memory_buffer import MemoryBuffer
 from RL_algorithms.DDPG.networks import Actor, Critic
 
 
 class DDPG:
-    def __init__(self, observation_size, action_num, hyperparameters):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    def __init__(
+        self, observation_size: int, action_num: int, hyperparameters: dict
+    ) -> None:
+        """Initialize the DDPG agent.
+
+        Args:
+            observation_size: Dimension of the state space
+            action_num: Dimension of the action space
+            hyperparameters: Dictionary containing algorithm parameters like:
+                gamma: Discount factor
+                tau: Target networks update rate
+                actor_lr: Learning rate for actor network
+                critic_lr: Learning rate for critic networks
+        """
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_actor_net = copy.deepcopy(self.actor_net).to(self.device)
@@ -31,7 +54,15 @@ class DDPG:
         state: np.ndarray,
         evaluation: bool = False,
     ) -> np.ndarray:
+        """Select action based on current policy.
 
+        Args:
+            state: Current state of the environment.
+            evaluation: Flag to indicate whether to use exploration. Defaults to False, no used in this algorithm.
+
+        Returns:
+            Action to take in the environment as numpy array.
+        """
         self.actor_net.eval()
         with torch.no_grad():
             state_tensor = torch.FloatTensor(state).to(self.device)
@@ -59,7 +90,7 @@ class DDPG:
 
         q_values = self.critic_net(states, actions)
 
-        critic_loss = F.mse_loss(q_values, q_target)
+        critic_loss = functional.mse_loss(q_values, q_target)
         self.critic_net_optimiser.zero_grad()
         critic_loss.backward()
         self.critic_net_optimiser.step()
@@ -77,7 +108,13 @@ class DDPG:
 
         return actor_loss.item()
 
-    def train_policy(self, memory, batch_size):
+    def train_policy(self, memory: MemoryBuffer, batch_size: int) -> None:
+        """Train actor and critic networks using experiences from memory.
+
+        Args:
+            memory: Replay buffer containing experiences
+            batch_size: Number of experiences to sample
+        """
         experiences = memory.sample_experience(batch_size)
         (states, actions, rewards, next_states, dones) = experiences
 
@@ -114,14 +151,30 @@ class DDPG:
             )
 
     def save_models(self, filename: str, filepath: str) -> None:
+        """Save actor and critic networks to files.
+
+        Args:
+            filename: Base name for the saved model files
+            filepath: Directory path where models will be saved
+        """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
-        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        torch.save(
+            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
+        )
+        torch.save(
+            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
+        )
 
     def load_models(self, filename: str, filepath: str) -> None:
+        """Load models previously saved for this algorithm.
+
+        Args:
+            filename: Filename of the models, without extension
+            filepath: Path to the saved models, usually located in user's home directory
+        """
         self.actor_net.load_state_dict(
             torch.load(
                 f"{filepath}/{filename}_actor.pht",

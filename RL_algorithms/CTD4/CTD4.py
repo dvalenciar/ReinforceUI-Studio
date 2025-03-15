@@ -1,13 +1,38 @@
+"""Algorithm name: CTD4
+
+Paper Name: A Deep Continuous Distributional Actor-Critic Agent with a Kalman Fusion of Multiple Critics.
+Paper link: https://arxiv.org/abs/2405.02576
+Taxonomy: Off policy > Actor-Critic > Continuous action space
+"""
+
 import copy
 import os
 import numpy as np
 import torch
+from RL_memory.memory_buffer import MemoryBuffer
 from RL_algorithms.CTD4.networks import Actor, Critic
 
 
 class CTD4:
-    def __init__(self, observation_size, action_num, hyperparameters):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    def __init__(
+        self, observation_size: int, action_num: int, hyperparameters: dict
+    ) -> None:
+        """Initialize the CTD4 agent.
+
+        Args:
+            observation_size: Dimension of the state space
+            action_num: Dimension of the action space
+            hyperparameters: Dictionary containing algorithm parameters:
+                gamma: Discount factor
+                tau: Soft update parameter
+                actor_lr: Learning rate for actor network
+                critic_lr: Learning rate for critic networks
+                ensemble_size: Number of critic networks in the ensemble
+                policy_noise_decay: Decay rate for target policy noise
+        """
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         self.gamma = float(hyperparameters.get("gamma"))
         self.tau = float(hyperparameters.get("tau"))
         self.actor_lr = float(hyperparameters.get("actor_lr"))
@@ -29,7 +54,9 @@ class CTD4:
 
         self.noise_clip = 0.5
         self.target_policy_noise_scale = 0.2
-        self.policy_noise_decay = float(hyperparameters.get("policy_noise_decay"))
+        self.policy_noise_decay = float(
+            hyperparameters.get("policy_noise_decay")
+        )
         self.min_policy_noise = 0.0
 
         self.learn_counter = 0
@@ -47,8 +74,21 @@ class CTD4:
         ]
 
     def select_action_from_policy(
-        self, state: np.ndarray, evaluation: bool = False, noise_scale: float = 0.1
+        self,
+        state: np.ndarray,
+        evaluation: bool = False,
+        noise_scale: float = 0.1,
     ) -> np.ndarray:
+        """Select action from policy.
+
+        Args:
+            state: Input state
+            evaluation: When False, no exploration noise is added
+            noise_scale: Scale of the exploration noise
+
+        Returns:
+            Action array to be applied to the environment
+        """
         self.actor_net.eval()
         with torch.no_grad():
             state_tensor = torch.FloatTensor(state).to(self.device)
@@ -56,7 +96,9 @@ class CTD4:
             action = self.actor_net(state_tensor)
             action = action.cpu().data.numpy().flatten()
             if not evaluation:
-                noise = np.random.normal(0, scale=noise_scale, size=self.action_num)
+                noise = np.random.normal(
+                    0, scale=noise_scale, size=self.action_num
+                )
                 action = action + noise
                 action = np.clip(action, -1, 1)
         self.actor_net.train()
@@ -72,14 +114,16 @@ class CTD4:
 
         kalman_gain = (std_1**2) / (std_1**2 + std_2**2)
         fusion_mean = mean_1 + kalman_gain * (mean_2 - mean_1)
-        fusion_variance = (1 - kalman_gain) * std_1**2 + kalman_gain * std_2**2 + 1e-6
+        fusion_variance = (
+            (1 - kalman_gain) * std_1**2 + kalman_gain * std_2**2 + 1e-6
+        )
         fusion_std = torch.sqrt(fusion_variance)
         return fusion_mean, fusion_std
 
     def _kalman(
         self, u_set: list[torch.Tensor], std_set: list[torch.Tensor]
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        # Kalman fusion
+
         if len(u_set) == 0 or len(std_set) == 0:
             raise ValueError("Input lists must not be empty.")
         if len(u_set) == 1:
@@ -107,7 +151,9 @@ class CTD4:
             target_noise = self.target_policy_noise_scale * torch.randn_like(
                 next_actions
             )
-            target_noise = torch.clamp(target_noise, -self.noise_clip, self.noise_clip)
+            target_noise = torch.clamp(
+                target_noise, -self.noise_clip, self.noise_clip
+            )
             next_actions = next_actions + target_noise
             next_actions = torch.clamp(next_actions, min=-1, max=1)
 
@@ -169,7 +215,13 @@ class CTD4:
 
         return actor_loss.item()
 
-    def train_policy(self, memory, batch_size):
+    def train_policy(self, memory: MemoryBuffer, batch_size: int) -> None:
+        """Train actor and critic networks using experiences from memory.
+
+        Args:
+            memory: Replay buffer containing experiences
+            batch_size: Number of experiences to sample
+        """
         self.learn_counter += 1
 
         self.target_policy_noise_scale *= self.policy_noise_decay
@@ -204,7 +256,8 @@ class CTD4:
                     critic_net.parameters(), target_critic_net.parameters()
                 ):
                     target_param.data.copy_(
-                        self.tau * param.data + (1 - self.tau) * target_param.data
+                        self.tau * param.data
+                        + (1 - self.tau) * target_param.data
                     )
 
             for param, target_param in zip(
@@ -215,17 +268,31 @@ class CTD4:
                 )
 
     def save_models(self, filename: str, filepath: str) -> None:
+        """Save actor and critic networks to files.
+
+        Args:
+            filename: Base name for the saved model files
+            filepath: Directory path where models will be saved
+        """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
+        torch.save(
+            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
+        )
         torch.save(
             self.ensemble_critics.state_dict(),
             f"{filepath}/{filename}_ensemble_critic.pht",
         )
 
     def load_models(self, filename: str, filepath: str) -> None:
+        """Load models previously saved for this algorithm.
+
+        Args:
+            filename: Filename of the models, without extension
+            filepath: Path to the saved models, usually located in user's home directory
+        """
         self.actor_net.load_state_dict(
             torch.load(
                 f"{filepath}/{filename}_actor.pht",

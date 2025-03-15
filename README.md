@@ -14,8 +14,8 @@ ReinforceUI Studio
     <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status">
   </a>
 
-  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/main.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?label=Black&branch=main" alt="Black Status">
+  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Linting&branch=main" alt="Linting Status">
   </a>
   
   <a href="https://docs.reinforceui-studio.com/">
