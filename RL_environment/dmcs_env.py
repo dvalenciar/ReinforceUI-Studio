@@ -64,7 +64,7 @@ class DMControlEnvironment:
         observation_size = sum(
             np.prod(spec.shape) for spec in observation_spec.values()
         )
-        return observation_size
+        return int(observation_size)
 
     def action_num(self) -> int:
         """Get the number of actions.

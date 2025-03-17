@@ -3,7 +3,6 @@ import json
 from datetime import datetime
 from PyQt5.QtWidgets import QStackedWidget
 from PyQt5.QtWidgets import (
-    QMainWindow,
     QLabel,
     QVBoxLayout,
     QHBoxLayout,
@@ -17,16 +16,15 @@ from PyQt5.QtWidgets import (
     QDesktopWidget,
     QSpacerItem,
 )
-from PyQt5.QtCore import Qt, QUrl, pyqtSignal, QThread
+from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QDesktopServices
-from matplotlib.backends.backend_qt5agg import (
-    FigureCanvasQTAgg as FigureCanvas,
-)
-from matplotlib.figure import Figure
-from RL_loops.training_policy_loop import training_loop
+from GUI.ui_utils import PlotCanvas, TrainingThread
+from GUI.ui_base_window import BaseWindow
+from GUI.ui_utils import create_button
+from GUI.ui_styles import Styles
 
 
-class TrainingWindow(QMainWindow):
+class TrainingWindow(BaseWindow):
     update_plot_signal = pyqtSignal(object)
     update_plot_eval_signal = pyqtSignal(object)
     update_progress_signal = pyqtSignal(int)
@@ -37,14 +35,101 @@ class TrainingWindow(QMainWindow):
     update_episode_steps_signal = pyqtSignal(int)
     training_completed_signal = pyqtSignal(bool)
 
-    def __init__(self, algorithm_window, previous_selections):
-        super().__init__()
-        self.folder_name = None
-        self.training_start = None
-        self.algorithm_window = algorithm_window
+    def __init__(self, previous_window, previous_selections):
+        super().__init__("Training Configuration Window", 1100, 700)
+        self.previous_window = previous_window
         self.previous_selections = previous_selections
         self.init_ui()
         self.connect_signals()
+
+    def init_ui(self):
+        main_layout = QVBoxLayout()
+        container = QWidget()
+        container.setLayout(main_layout)
+
+        top_layout = QHBoxLayout()
+        top_layout.addWidget(self.create_button("Back", self.back_to_selection))
+        top_layout.addStretch()
+        main_layout.addLayout(top_layout)
+
+        main_layout.addWidget(self.create_label("Summary of Selections", "yellow", 16, True),alignment=Qt.AlignLeft)
+        main_layout.addLayout(self.create_summary_layout())
+        main_layout.addWidget(self.create_separator())
+
+        middle_layout = QHBoxLayout()
+        self.left_layout = QVBoxLayout()
+        self.left_layout.addWidget(
+            self.create_label("Training parameters", "yellow", 16, True),
+            alignment=Qt.AlignLeft,
+        )
+        self.input_layout = QGridLayout()
+        self.training_inputs = self.create_input_fields()
+        self.left_layout.addLayout(self.input_layout)
+        self.left_layout.addItem(QSpacerItem(20, 180))
+        self.left_layout.addLayout(self.create_button_layout())
+        self.left_layout.addWidget(self.create_separator())
+        middle_layout.addLayout(self.left_layout)
+        middle_layout.addWidget(self.create_separator(vertical=True))
+
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(
+            self.create_label("Training/Evaluation Curves", "yellow", 18, True)
+        )
+
+        # Create QStackedWidget to hold both plots
+        self.plot_stack = QStackedWidget()
+        self.training_figure = PlotCanvas()
+        self.evaluation_figure = PlotCanvas()
+
+        self.plot_stack.addWidget(self.training_figure)
+        self.plot_stack.addWidget(self.evaluation_figure)
+        right_layout.addWidget(self.plot_stack)
+
+        arrow_layout = QHBoxLayout()
+        self.view_training_button = self.create_button(
+            "View Training Curve", self.show_training_curve
+        )
+        self.view_evaluation_button = self.create_button(
+            "View Evaluation Curve", self.show_evaluation_curve
+        )
+        arrow_layout.addWidget(self.view_training_button)
+        arrow_layout.addWidget(self.view_evaluation_button)
+        right_layout.addLayout(arrow_layout)
+        middle_layout.addLayout(right_layout)
+        main_layout.addLayout(middle_layout)
+
+        bottom_layout = QHBoxLayout()
+        self.info_labels = self.create_info_labels()
+        for label in self.info_labels.values():
+            bottom_layout.addWidget(label)
+        main_layout.addLayout(bottom_layout)
+
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setStyleSheet(
+            "QProgressBar { background-color: #444444; color: white; border: 2px solid white; border-radius: 5px; text-align: center; } QProgressBar::chunk { background-color: #2a9d8f; width: 20px; }"
+        )
+        self.progress_bar.setFixedHeight(30)
+        self.progress_bar.setValue(0)
+        main_layout.addWidget(self.progress_bar)
+
+        main_layout.addWidget(
+            self.create_button("View Log Folder", self.open_log_file),
+            alignment=Qt.AlignLeft,
+        )
+        self.setCentralWidget(container)
+
+        # Set the training curve as the default view
+        self.show_training_curve()
+
+        # Check if the algorithm is PPO and adjust input fields accordingly
+        if self.previous_selections.get("Algorithm") == "PPO":
+            self.training_inputs["Exploration Steps"].setText("")
+            self.training_inputs["Exploration Steps"].setReadOnly(True)
+            self.training_inputs["Batch Size"].setText("")
+            self.training_inputs["Batch Size"].setReadOnly(True)
+            self.training_inputs["G Value"].setText("")
+            self.training_inputs["G Value"].setReadOnly(True)
+
 
     def connect_signals(self):
         self.update_progress_signal.connect(self.update_progress_bar)
@@ -116,103 +201,6 @@ class TrainingWindow(QMainWindow):
     def update_progress_bar(self, value):
         self.progress_bar.setValue(value)
 
-    def init_ui(self):
-        self.setWindowTitle("Training Configuration Window")
-        self.setFixedSize(1100, 700)
-        self.setStyleSheet("background-color: #121212;")
-        self.center()
-
-        main_layout = QVBoxLayout()
-        container = QWidget()
-        container.setLayout(main_layout)
-
-        top_layout = QHBoxLayout()
-        top_layout.addWidget(
-            self.create_button("Back", self.back_to_selection)
-        )
-        top_layout.addStretch()
-        main_layout.addLayout(top_layout)
-
-        main_layout.addWidget(
-            self.create_label("Summary of Selections", "yellow", 16, True),
-            alignment=Qt.AlignLeft,
-        )
-        main_layout.addLayout(self.create_summary_layout())
-        main_layout.addWidget(self.create_separator())
-
-        middle_layout = QHBoxLayout()
-        self.left_layout = QVBoxLayout()
-        self.left_layout.addWidget(
-            self.create_label("Training parameters", "yellow", 16, True),
-            alignment=Qt.AlignLeft,
-        )
-        self.input_layout = QGridLayout()
-        self.training_inputs = self.create_input_fields()
-        self.left_layout.addLayout(self.input_layout)
-        self.left_layout.addItem(QSpacerItem(20, 180))
-        self.left_layout.addLayout(self.create_button_layout())
-        self.left_layout.addWidget(self.create_separator())
-        middle_layout.addLayout(self.left_layout)
-        middle_layout.addWidget(self.create_separator(vertical=True))
-
-        right_layout = QVBoxLayout()
-        right_layout.addWidget(
-            self.create_label("Training/Evaluation Curves", "yellow", 18, True)
-        )
-
-        # Create QStackedWidget to hold both plots
-        self.plot_stack = QStackedWidget()
-        self.training_figure = MatplotlibCanvas()
-        self.evaluation_figure = MatplotlibCanvas()
-
-        self.plot_stack.addWidget(self.training_figure)
-        self.plot_stack.addWidget(self.evaluation_figure)
-        right_layout.addWidget(self.plot_stack)
-
-        arrow_layout = QHBoxLayout()
-        self.view_training_button = self.create_button(
-            "View Training Curve", self.show_training_curve
-        )
-        self.view_evaluation_button = self.create_button(
-            "View Evaluation Curve", self.show_evaluation_curve
-        )
-        arrow_layout.addWidget(self.view_training_button)
-        arrow_layout.addWidget(self.view_evaluation_button)
-        right_layout.addLayout(arrow_layout)
-        middle_layout.addLayout(right_layout)
-        main_layout.addLayout(middle_layout)
-
-        bottom_layout = QHBoxLayout()
-        self.info_labels = self.create_info_labels()
-        for label in self.info_labels.values():
-            bottom_layout.addWidget(label)
-        main_layout.addLayout(bottom_layout)
-
-        self.progress_bar = QProgressBar(self)
-        self.progress_bar.setStyleSheet(
-            "QProgressBar { background-color: #444444; color: white; border: 2px solid white; border-radius: 5px; text-align: center; } QProgressBar::chunk { background-color: #2a9d8f; width: 20px; }"
-        )
-        self.progress_bar.setFixedHeight(30)
-        self.progress_bar.setValue(0)
-        main_layout.addWidget(self.progress_bar)
-
-        main_layout.addWidget(
-            self.create_button("View Log Folder", self.open_log_file),
-            alignment=Qt.AlignLeft,
-        )
-        self.setCentralWidget(container)
-
-        # Set the training curve as the default view
-        self.show_training_curve()
-
-        # Check if the algorithm is PPO and adjust input fields accordingly
-        if self.previous_selections.get("Algorithm") == "PPO":
-            self.training_inputs["Exploration Steps"].setText("")
-            self.training_inputs["Exploration Steps"].setReadOnly(True)
-            self.training_inputs["Batch Size"].setText("")
-            self.training_inputs["Batch Size"].setReadOnly(True)
-            self.training_inputs["G Value"].setText("")
-            self.training_inputs["G Value"].setReadOnly(True)
 
     def show_training_curve(self):
         self.plot_stack.setCurrentWidget(self.training_figure)
@@ -262,9 +250,9 @@ class TrainingWindow(QMainWindow):
             "Seed": QLineEdit(self),
         }
         default_values = {
-            "Training Steps": "100000",
+            "Training Steps": "1000000",
             "Exploration Steps": "1000",
-            "Batch Size": "32",
+            "Batch Size": "128",
             "G Value": "1",
             "Evaluation Interval": "1000",
             "Evaluation Episodes": "10",
@@ -431,7 +419,7 @@ class TrainingWindow(QMainWindow):
             )
             return
         self.close()
-        self.algorithm_window()
+        self.previous_window()
 
     def all_inputs_filled(self):
         for label, widget in self.training_inputs.items():
@@ -552,67 +540,4 @@ class TrainingWindow(QMainWindow):
         )
 
 
-class TrainingThread(QThread):
-    def __init__(self, training_window, config_data, log_folder):
-        super().__init__()
-        self.config_data = config_data
-        self.training_window = training_window
-        self.log_folder = log_folder
-        self._is_running = True
 
-    def run(self):
-        print("Training thread started")
-        training_loop(
-            self.config_data,
-            self.training_window,
-            self.log_folder,
-            is_running=lambda: self._is_running,
-        )
-
-    def stop(self):
-        self._is_running = False
-
-
-class MatplotlibCanvas(FigureCanvas):
-    def __init__(self):
-        # Create a Matplotlib figure
-        self.figure = Figure(facecolor="black")
-        super().__init__(self.figure)
-
-        # Create an axis for the plot
-        self.ax = self.figure.add_subplot(
-            111, facecolor="black", frameon=False
-        )
-        self.clear_data()
-
-    def plot_data(self, data_plot, title, y_label):
-        self.ax.clear()
-        self.ax.set_title(title, color="white", fontsize=12)
-        self.ax.set_xlabel("Steps", color="white", fontsize=11, labelpad=1)
-        self.ax.set_ylabel(y_label, color="white", fontsize=11, labelpad=1)
-        self.ax.tick_params(axis="x", colors="white", labelsize=10)
-        self.ax.tick_params(axis="y", colors="white", labelsize=10)
-        self.ax.grid(True, color="gray", linestyle="--", linewidth=0.5)
-        self.ax.plot(
-            data_plot["Total Timesteps"],
-            data_plot[y_label],
-            color="#32CD32",
-            linewidth=2,
-        )
-        self.draw()
-
-    def clear_data(self):
-        self.ax.clear()
-        self.ax.grid(False)
-        self.ax.tick_params(axis="x", colors="black", labelsize=10)
-        self.ax.tick_params(axis="y", colors="black", labelsize=10)
-        self.ax.text(
-            0.5,
-            0.5,
-            "Reward Curves will be displayed here soon",
-            ha="center",
-            va="center",
-            fontsize=12,
-            color="gray",
-        )
-        self.draw()
