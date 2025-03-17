@@ -39,8 +39,21 @@ class TrainingWindow(BaseWindow):
         super().__init__("Training Configuration Window", 1100, 700)
         self.previous_window = previous_window
         self.previous_selections = previous_selections
+        self.folder_name = None
+        self.training_start = None
+        self.default_values = {
+            "Training Steps": "1000000",
+            "Exploration Steps": "1000",
+            "Batch Size": "128",
+            "G Value": "1",
+            "Evaluation Interval": "1000",
+            "Evaluation Episodes": "10",
+            "Log Interval": "1000",
+            "Seed": "0",
+        }
         self.init_ui()
         self.connect_signals()
+
 
     def init_ui(self):
         main_layout = QVBoxLayout()
@@ -48,7 +61,7 @@ class TrainingWindow(BaseWindow):
         container.setLayout(main_layout)
 
         top_layout = QHBoxLayout()
-        top_layout.addWidget(self.create_button("Back", self.back_to_selection))
+        top_layout.addWidget(self.create_button_style("Back", self.back_to_selection))
         top_layout.addStretch()
         main_layout.addLayout(top_layout)
 
@@ -86,10 +99,10 @@ class TrainingWindow(BaseWindow):
         right_layout.addWidget(self.plot_stack)
 
         arrow_layout = QHBoxLayout()
-        self.view_training_button = self.create_button(
+        self.view_training_button = self.create_button_style(
             "View Training Curve", self.show_training_curve
         )
-        self.view_evaluation_button = self.create_button(
+        self.view_evaluation_button = self.create_button_style(
             "View Evaluation Curve", self.show_evaluation_curve
         )
         arrow_layout.addWidget(self.view_training_button)
@@ -113,7 +126,7 @@ class TrainingWindow(BaseWindow):
         main_layout.addWidget(self.progress_bar)
 
         main_layout.addWidget(
-            self.create_button("View Log Folder", self.open_log_file),
+            self.create_button_style("View Log Folder", self.open_log_file),
             alignment=Qt.AlignLeft,
         )
         self.setCentralWidget(container)
@@ -129,6 +142,7 @@ class TrainingWindow(BaseWindow):
             self.training_inputs["Batch Size"].setReadOnly(True)
             self.training_inputs["G Value"].setText("")
             self.training_inputs["G Value"].setReadOnly(True)
+
 
 
     def connect_signals(self):
@@ -214,7 +228,7 @@ class TrainingWindow(BaseWindow):
             self.view_evaluation_button, self.view_training_button
         )
 
-    def create_button(
+    def create_button_style(
         self,
         text,
         callback=None,
@@ -249,22 +263,13 @@ class TrainingWindow(BaseWindow):
             "Log Interval": QLineEdit(self),
             "Seed": QLineEdit(self),
         }
-        default_values = {
-            "Training Steps": "1000000",
-            "Exploration Steps": "1000",
-            "Batch Size": "128",
-            "G Value": "1",
-            "Evaluation Interval": "1000",
-            "Evaluation Episodes": "10",
-            "Log Interval": "1000",
-            "Seed": "0",
-        }
+
         row, col = 0, 0
         for label, widget in inputs.items():
             self.input_layout.addWidget(
                 self.create_label(label, "white", 14), row, col
             )
-            widget.setText(default_values.get(label, ""))
+            widget.setText(self.default_values.get(label, ""))
             widget.setStyleSheet(
                 "QLineEdit { background-color: #444444; color: white; font-size: 14px; padding: 5px; border: 1px solid white; }"
             )
@@ -311,7 +316,7 @@ class TrainingWindow(BaseWindow):
                     alignment=Qt.AlignLeft,
                 )
         summary_layout.addWidget(
-            self.create_button(
+            self.create_button_style(
                 "View Hyperparameters",
                 self.show_summary_hyperparameters,
                 200,
@@ -323,12 +328,12 @@ class TrainingWindow(BaseWindow):
     def create_button_layout(self):
         button_layout = QHBoxLayout()
         button_layout.addWidget(
-            self.create_button(
+            self.create_button_style(
                 "Start", self.start_training, style="background-color: green;"
             )
         )
         button_layout.addWidget(
-            self.create_button(
+            self.create_button_style(
                 "Stop", self.stop_training, style="background-color: red;"
             )
         )
@@ -474,18 +479,8 @@ class TrainingWindow(BaseWindow):
         # Reset all input fields to their default values
         self.folder_name = None
 
-        default_values = {
-            "Training Steps": "100000",
-            "Exploration Steps": "1000",
-            "Batch Size": "32",
-            "G Value": "1",
-            "Evaluation Interval": "1000",
-            "Evaluation Episodes": "10",
-            "Log Interval": "1000",
-            "Seed": "0",
-        }
         for field, widget in self.training_inputs.items():
-            widget.setText(default_values.get(field, ""))
+            widget.setText(self.default_values.get(field, ""))
 
         # Reset progress bar
         self.progress_bar.setValue(0)
