@@ -54,18 +54,22 @@ class TrainingWindow(BaseWindow):
         self.init_ui()
         self.connect_signals()
 
-
     def init_ui(self):
         main_layout = QVBoxLayout()
         container = QWidget()
         container.setLayout(main_layout)
 
         top_layout = QHBoxLayout()
-        top_layout.addWidget(self.create_button_style("Back", self.back_to_selection))
+        top_layout.addWidget(
+            self.create_button_style("Back", self.back_to_selection)
+        )
         top_layout.addStretch()
         main_layout.addLayout(top_layout)
 
-        main_layout.addWidget(self.create_label("Summary of Selections", "yellow", 16, True),alignment=Qt.AlignLeft)
+        main_layout.addWidget(
+            self.create_label("Summary of Selections", "yellow", 16, True),
+            alignment=Qt.AlignLeft,
+        )
         main_layout.addLayout(self.create_summary_layout())
         main_layout.addWidget(self.create_separator())
 
@@ -118,9 +122,7 @@ class TrainingWindow(BaseWindow):
         main_layout.addLayout(bottom_layout)
 
         self.progress_bar = QProgressBar(self)
-        self.progress_bar.setStyleSheet(
-            "QProgressBar { background-color: #444444; color: white; border: 2px solid white; border-radius: 5px; text-align: center; } QProgressBar::chunk { background-color: #2a9d8f; width: 20px; }"
-        )
+        self.progress_bar.setStyleSheet(Styles.PROGRESS_BAR)
         self.progress_bar.setFixedHeight(30)
         self.progress_bar.setValue(0)
         main_layout.addWidget(self.progress_bar)
@@ -142,8 +144,6 @@ class TrainingWindow(BaseWindow):
             self.training_inputs["Batch Size"].setReadOnly(True)
             self.training_inputs["G Value"].setText("")
             self.training_inputs["G Value"].setReadOnly(True)
-
-
 
     def connect_signals(self):
         self.update_progress_signal.connect(self.update_progress_bar)
@@ -171,7 +171,7 @@ class TrainingWindow(BaseWindow):
             if completion_flag
             else "The training process has been interrupted."
         )
-        msg_box.setStyleSheet(self.get_message_box_style())
+        msg_box.setStyleSheet(Styles.MESSAGE_BOX)
 
         # Add custom button
         see_log_button = msg_box.addButton(
@@ -215,7 +215,6 @@ class TrainingWindow(BaseWindow):
     def update_progress_bar(self, value):
         self.progress_bar.setValue(value)
 
-
     def show_training_curve(self):
         self.plot_stack.setCurrentWidget(self.training_figure)
         self.update_button_styles(
@@ -238,7 +237,11 @@ class TrainingWindow(BaseWindow):
     ):
         button = QPushButton(text, self)
         button.setStyleSheet(
-            f"QPushButton {{ {style} color: white; font-size: 14px; padding: 5px 15px; border-radius: 5px; border: 1px solid white; }} QPushButton:hover {{ background-color: #555555; }}"
+            f"QPushButton {{ {style} "
+            f"color: white; "
+            f"font-size: 14px; padding: 5px 15px; "
+            f"border-radius: 5px; border: 1px solid white; }} "
+            f"QPushButton:hover {{ background-color: #555555; }}"
         )
         if width and height:
             button.setFixedSize(width, height)
@@ -270,9 +273,7 @@ class TrainingWindow(BaseWindow):
                 self.create_label(label, "white", 14), row, col
             )
             widget.setText(self.default_values.get(label, ""))
-            widget.setStyleSheet(
-                "QLineEdit { background-color: #444444; color: white; font-size: 14px; padding: 5px; border: 1px solid white; }"
-            )
+            widget.setStyleSheet(Styles.LINE_EDIT)
             self.input_layout.addWidget(widget, row + 1, col)
             widget.returnPressed.connect(self.lock_inputs)
             col += 1
@@ -462,7 +463,7 @@ class TrainingWindow(BaseWindow):
         msg_box.setIcon(icon)
         msg_box.setWindowTitle(title)
         msg_box.setText(text)
-        msg_box.setStyleSheet(self.get_message_box_style())
+        msg_box.setStyleSheet(Styles.MESSAGE_BOX)
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec_()
 
@@ -471,7 +472,7 @@ class TrainingWindow(BaseWindow):
         confirm_msg.setIcon(QMessageBox.Warning)
         confirm_msg.setWindowTitle(title)
         confirm_msg.setText(text)
-        confirm_msg.setStyleSheet(self.get_message_box_style())
+        confirm_msg.setStyleSheet(Styles.MESSAGE_BOX)
         confirm_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         return confirm_msg.exec_() == QMessageBox.Yes
 
@@ -512,27 +513,6 @@ class TrainingWindow(BaseWindow):
         self.training_start = False
 
     @staticmethod
-    def get_message_box_style():
-        return (
-            "QMessageBox { background-color: black; color: white; } "
-            "QMessageBox QLabel { color: white; } "
-            "QMessageBox QPushButton { background-color: #444444; color: white; font-size: 14px; padding: 5px 15px; border-radius: 5px; border: 1px solid white; } "
-            "QMessageBox QPushButton:hover { background-color: #555555; }"
-        )
-
-    @staticmethod
     def update_button_styles(active_button, inactive_button):
-        active_button.setStyleSheet(
-            """
-            QPushButton { background-color: #2a9d8f; color: white; font-size: 14px; padding: 5px 15px; border-radius: 5px; border: 1px solid white; }
-        """
-        )
-        inactive_button.setStyleSheet(
-            """
-            QPushButton { background-color: #444444; color: white; font-size: 14px; padding: 5px 15px; border-radius: 5px; border: 1px solid white; }
-            QPushButton:hover { background-color: #555555; }
-        """
-        )
-
-
-
+        active_button.setStyleSheet(Styles.ACTIVE_BUTTON)
+        inactive_button.setStyleSheet(Styles.INACTIVE_BUTTON)

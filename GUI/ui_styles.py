@@ -23,6 +23,30 @@ class Styles:
         }
     """
 
+    ACTIVE_BUTTON = """
+        QPushButton { 
+            background-color: #2a9d8f; 
+            color: white; 
+            font-size: 14px; 
+            padding: 5px 15px; 
+            border-radius: 5px; 
+            border: 1px solid white; 
+        }
+    """
+
+    INACTIVE_BUTTON = """
+        QPushButton { 
+            background-color: #444444; 
+            color: white; font-size: 14px; 
+            padding: 5px 15px; 
+            border-radius: 5px; 
+            border: 1px solid white; 
+        }
+        QPushButton:hover { 
+            background-color: #555555; 
+        }
+    """
+
     TRANSPARENT_BUTTON = """
         QPushButton {
             background-color: transparent;
@@ -71,6 +95,7 @@ class Styles:
         QMessageBox QPushButton:hover { background-color: #555555; }
     """
 
+
     LINE_EDIT = """
         QLineEdit {
             background-color: #444444;
@@ -79,4 +104,15 @@ class Styles:
             padding: 5px;
             border: 1px solid white;
         }
+    """
+
+    PROGRESS_BAR = """
+        QProgressBar {
+            background-color: #444444;
+            color: white;
+            border: 2px solid white;
+            border-radius: 5px;
+            text-align: center;
+        }
+        QProgressBar::chunk { background-color: #2a9d8f; width: 20px; }
     """

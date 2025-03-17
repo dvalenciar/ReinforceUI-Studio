@@ -12,7 +12,9 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 import json
 import os
-
+from GUI.ui_base_window import BaseWindow
+from GUI.ui_utils import create_button
+from GUI.ui_styles import Styles
 from RL_loops.testing_policy_loop import policy_from_model_load_test
 
 
@@ -98,21 +100,7 @@ class LoadConfigWindow(QDialog):
 
     @staticmethod
     def apply_button_style(button):
-        button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #444444;
-                color: white;
-                font-size: 16px;
-                padding: 10px 20px;
-                border-radius: 10px;
-                border: 1px solid white;
-            }
-            QPushButton:hover {
-                background-color: #555555;
-            }
-        """
-        )
+        button.setStyleSheet(Styles.BUTTON)
 
     def center(self):
         screen_geometry = QDesktopWidget().availableGeometry().center()
