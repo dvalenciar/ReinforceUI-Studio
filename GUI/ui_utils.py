@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import QPushButton
-from PyQt5.QtGui import QIcon
 from GUI.ui_styles import Styles
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
@@ -28,11 +27,10 @@ class TrainingThread(QThread):
         self._is_running = False
 
 
-
 class PlotCanvas(FigureCanvasQTAgg):
     """A canvas for plotting training progress."""
 
-    def __init__(self, width=10, height=4, dpi=100):
+    def __init__(self, width: int = 10, height: int = 4, dpi: int = 100):
         """Initialize the plot canvas.
 
         Args:
@@ -42,8 +40,10 @@ class PlotCanvas(FigureCanvasQTAgg):
         """
         self.figure = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.figure)
-        self.figure.set_facecolor('black')
-        self.ax = self.figure.add_subplot(111, facecolor="black", frameon=False)
+        self.figure.set_facecolor("black")
+        self.ax = self.figure.add_subplot(
+            111, facecolor="black", frameon=False
+        )
         self.clear_data()
 
     def plot_data(self, data_plot: dict, title: str, y_label: str) -> None:
@@ -87,9 +87,8 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.draw()
 
 
-
 def create_button(
-    parent, text, width=270, height=50, icon=None, transparent=False
+    parent, text=" ", width=270, height=50, icon=None, transparent=False
 ) -> QPushButton:
     """Create a standardized button with consistent styling.
 

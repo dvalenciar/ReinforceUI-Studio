@@ -170,8 +170,8 @@ class SelectAlgorithmWindow(BaseWindow):
         msg_box.exec_()
 
     def set_active_button(
-        self, active_button, inactive_button
-    ) -> None:  # noqa
+        self, active_button, inactive_button  # noqa
+    ) -> None:
         """Visually highlight the selected option button."""
         active_button.setStyleSheet(Styles.SELECTED_BUTTON)
         inactive_button.setStyleSheet(Styles.BUTTON)

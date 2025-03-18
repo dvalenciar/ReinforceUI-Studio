@@ -95,7 +95,6 @@ class Styles:
         QMessageBox QPushButton:hover { background-color: #555555; }
     """
 
-
     LINE_EDIT = """
         QLineEdit {
             background-color: #444444;

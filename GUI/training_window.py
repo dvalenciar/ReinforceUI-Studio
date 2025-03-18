@@ -1,8 +1,8 @@
 import os
 import json
 from datetime import datetime
-from PyQt5.QtWidgets import QStackedWidget
 from PyQt5.QtWidgets import (
+    QStackedWidget,
     QLabel,
     QVBoxLayout,
     QHBoxLayout,
@@ -13,14 +13,12 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QMessageBox,
     QFrame,
-    QDesktopWidget,
     QSpacerItem,
 )
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QDesktopServices
 from GUI.ui_utils import PlotCanvas, TrainingThread
 from GUI.ui_base_window import BaseWindow
-from GUI.ui_utils import create_button
 from GUI.ui_styles import Styles
 
 
@@ -35,12 +33,14 @@ class TrainingWindow(BaseWindow):
     update_episode_steps_signal = pyqtSignal(int)
     training_completed_signal = pyqtSignal(bool)
 
-    def __init__(self, previous_window, previous_selections):
+    def __init__(self, previous_window, previous_selections) -> None:  # noqa
+        """Initialize the TrainingWindow class"""
         super().__init__("Training Configuration Window", 1100, 700)
-        self.previous_window = previous_window
-        self.previous_selections = previous_selections
+
         self.folder_name = None
         self.training_start = None
+        self.previous_window = previous_window
+        self.previous_selections = previous_selections
         self.default_values = {
             "Training Steps": "1000000",
             "Exploration Steps": "1000",
@@ -54,18 +54,32 @@ class TrainingWindow(BaseWindow):
         self.init_ui()
         self.connect_signals()
 
-    def init_ui(self):
+    def connect_signals(self) -> None:
+        """Connect signals to their respective slots"""
+        signals = [
+            (self.update_progress_signal, self.update_progress_bar),
+            (self.update_step_signal, self.update_step_label),
+            (self.update_reward_signal, self.update_reward_label),
+            (self.update_episode_signal, self.update_episode_label),
+            (self.update_time_remaining_signal, self.update_time_remaining),
+            (self.update_episode_steps_signal, self.update_episode_steps),
+            (self.update_plot_signal, self.update_plot),
+            (self.update_plot_eval_signal, self.update_plot_eval),
+            (
+                self.training_completed_signal,
+                self.show_training_completed_message,
+            ),
+        ]
+        for signal, slot in signals:
+            signal.connect(slot)
+
+    def init_ui(self) -> None:
+        """Initialize the UI of the TrainingWindow"""
         main_layout = QVBoxLayout()
         container = QWidget()
         container.setLayout(main_layout)
 
-        top_layout = QHBoxLayout()
-        top_layout.addWidget(
-            self.create_button_style("Back", self.back_to_selection)
-        )
-        top_layout.addStretch()
-        main_layout.addLayout(top_layout)
-
+        main_layout.addLayout(self.create_top_layout())
         main_layout.addWidget(
             self.create_label("Summary of Selections", "yellow", 16, True),
             alignment=Qt.AlignLeft,
@@ -74,91 +88,186 @@ class TrainingWindow(BaseWindow):
         main_layout.addWidget(self.create_separator())
 
         middle_layout = QHBoxLayout()
-        self.left_layout = QVBoxLayout()
-        self.left_layout.addWidget(
+        middle_layout.addLayout(self.create_left_layout())
+        middle_layout.addWidget(self.create_separator(vertical=True))
+        middle_layout.addLayout(self.create_right_layout())
+        main_layout.addLayout(middle_layout)
+
+        main_layout.addLayout(self.create_bottom_layout())
+        main_layout.addWidget(self.create_progress_bar())
+        main_layout.addWidget(
+            self.create_button("View Log Folder", self.open_log_file),
+            alignment=Qt.AlignLeft,
+        )
+
+        self.setCentralWidget(container)
+        self.show_training_curve()
+        self.adjust_for_ppo()
+
+    def create_top_layout(self) -> QVBoxLayout:
+        """Create the top layout of the TrainingWindow"""
+        layout = QHBoxLayout()
+        layout.addWidget(self.create_button("Back", self.back_to_selection))
+        layout.addStretch()
+        return layout
+
+    def create_left_layout(self) -> QVBoxLayout:
+
+        layout = QVBoxLayout()
+        layout.addWidget(
             self.create_label("Training parameters", "yellow", 16, True),
             alignment=Qt.AlignLeft,
         )
         self.input_layout = QGridLayout()
         self.training_inputs = self.create_input_fields()
-        self.left_layout.addLayout(self.input_layout)
-        self.left_layout.addItem(QSpacerItem(20, 180))
-        self.left_layout.addLayout(self.create_button_layout())
-        self.left_layout.addWidget(self.create_separator())
-        middle_layout.addLayout(self.left_layout)
-        middle_layout.addWidget(self.create_separator(vertical=True))
+        layout.addLayout(self.input_layout)
+        layout.addItem(QSpacerItem(20, 180))
+        layout.addLayout(self.create_button_layout())
+        layout.addWidget(self.create_separator())
+        return layout
 
-        right_layout = QVBoxLayout()
-        right_layout.addWidget(
+    def create_right_layout(self) -> QVBoxLayout:
+        layout = QVBoxLayout()
+        layout.addWidget(
             self.create_label("Training/Evaluation Curves", "yellow", 18, True)
         )
-
-        # Create QStackedWidget to hold both plots
         self.plot_stack = QStackedWidget()
         self.training_figure = PlotCanvas()
         self.evaluation_figure = PlotCanvas()
-
         self.plot_stack.addWidget(self.training_figure)
         self.plot_stack.addWidget(self.evaluation_figure)
-        right_layout.addWidget(self.plot_stack)
+        layout.addWidget(self.plot_stack)
+        layout.addLayout(self.create_arrow_layout())
+        return layout
 
-        arrow_layout = QHBoxLayout()
-        self.view_training_button = self.create_button_style(
-            "View Training Curve", self.show_training_curve
-        )
-        self.view_evaluation_button = self.create_button_style(
-            "View Evaluation Curve", self.show_evaluation_curve
-        )
-        arrow_layout.addWidget(self.view_training_button)
-        arrow_layout.addWidget(self.view_evaluation_button)
-        right_layout.addLayout(arrow_layout)
-        middle_layout.addLayout(right_layout)
-        main_layout.addLayout(middle_layout)
-
-        bottom_layout = QHBoxLayout()
+    def create_bottom_layout(self) -> QHBoxLayout:
+        layout = QHBoxLayout()
         self.info_labels = self.create_info_labels()
         for label in self.info_labels.values():
-            bottom_layout.addWidget(label)
-        main_layout.addLayout(bottom_layout)
+            layout.addWidget(label)
+        return layout
 
+    def create_arrow_layout(self) -> QHBoxLayout:
+        layout = QHBoxLayout()
+        self.view_training_button = self.create_button(
+            "View Training Curve", self.show_training_curve
+        )
+        self.view_evaluation_button = self.create_button(
+            "View Evaluation Curve", self.show_evaluation_curve
+        )
+        layout.addWidget(self.view_training_button)
+        layout.addWidget(self.view_evaluation_button)
+        return layout
+
+    def create_button_layout(self) -> QHBoxLayout:
+        layout = QHBoxLayout()
+        layout.addWidget(
+            self.create_button(
+                "Start", self.start_training, style="background-color: green;"
+            )
+        )
+        layout.addWidget(
+            self.create_button(
+                "Stop", self.stop_training, style="background-color: red;"
+            )
+        )
+        return layout
+
+    def create_button(
+        self,
+        text: str,
+        callback=None,
+        style="background-color: #444444;",
+        width: int = None,
+        height: int = None,
+    ):
+        button = QPushButton(text, self)
+        button.setStyleSheet(
+            f"QPushButton {{ {style} color: white; font-size: 14px; padding: 5px 15px; "
+            f"border-radius: 5px; border: 1px solid white; }} "
+            f"QPushButton:hover {{ background-color: #555555; }}"
+        )
+        if width and height:
+            button.setFixedSize(width, height)
+        if callback:
+            button.clicked.connect(callback)
+        return button
+
+    def create_separator(self, vertical=False) -> QFrame:
+        separator = QFrame()
+        separator.setFrameShape(QFrame.VLine if vertical else QFrame.HLine)
+        separator.setStyleSheet("color: white; border: 1px solid white;")
+        return separator
+
+    def create_input_fields(self) -> dict:
+        inputs = {label: QLineEdit(self) for label in self.default_values}
+        row, col = 0, 0
+        for label, widget in inputs.items():
+            self.input_layout.addWidget(
+                self.create_label(label, "white", 14), row, col
+            )
+            widget.setText(self.default_values.get(label, ""))
+            widget.setStyleSheet(Styles.LINE_EDIT)
+            self.input_layout.addWidget(widget, row + 1, col)
+            widget.returnPressed.connect(self.lock_inputs)
+            col += 1
+            if col >= 2:
+                col = 0
+                row += 2
+        return inputs
+
+    def create_info_labels(self) -> dict:
+        labels = {
+            "Time Remaining": QLabel("Time Remaining: N/A", self),
+            "Total Steps": QLabel("Total Steps: 0", self),
+            "Episode Number": QLabel("Episode Number: 0", self),
+            "Episode Reward": QLabel("Episode Reward: 0", self),
+            "Episode Steps": QLabel("Episode Steps: 0", self),
+        }
+        for label in labels.values():
+            label.setStyleSheet("color: white; font-size: 14px;")
+        return labels
+
+    def create_label(self, text, color, size, bold=False):
+        label = QLabel(text, self)
+        label.setStyleSheet(
+            f"color: {color}; font-size: {size}px; {'font-weight: bold;' if bold else ''}"
+        )
+        return label
+
+    def create_summary_layout(self):
+        layout = QHBoxLayout()
+        display_names = {
+            "selected_platform": "Platform",
+            "selected_environment": "Environment",
+            "Algorithm": "Algorithm",
+        }
+        for key, value in self.previous_selections.items():
+            if key in display_names:
+                layout.addWidget(
+                    self.create_label(
+                        f"{display_names[key]}: {value}", "white", 14
+                    ),
+                    alignment=Qt.AlignLeft,
+                )
+        layout.addWidget(
+            self.create_button(
+                text="View Hyperparameters",
+                callback=self.show_summary_hyperparameters,
+                width=200,
+                height=30,
+            )
+        )
+        return layout
+
+    def create_progress_bar(self) -> QProgressBar:
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setStyleSheet(Styles.PROGRESS_BAR)
         self.progress_bar.setFixedHeight(30)
         self.progress_bar.setValue(0)
-        main_layout.addWidget(self.progress_bar)
+        return self.progress_bar
 
-        main_layout.addWidget(
-            self.create_button_style("View Log Folder", self.open_log_file),
-            alignment=Qt.AlignLeft,
-        )
-        self.setCentralWidget(container)
-
-        # Set the training curve as the default view
-        self.show_training_curve()
-
-        # Check if the algorithm is PPO and adjust input fields accordingly
-        if self.previous_selections.get("Algorithm") == "PPO":
-            self.training_inputs["Exploration Steps"].setText("")
-            self.training_inputs["Exploration Steps"].setReadOnly(True)
-            self.training_inputs["Batch Size"].setText("")
-            self.training_inputs["Batch Size"].setReadOnly(True)
-            self.training_inputs["G Value"].setText("")
-            self.training_inputs["G Value"].setReadOnly(True)
-
-    def connect_signals(self):
-        self.update_progress_signal.connect(self.update_progress_bar)
-        self.update_step_signal.connect(self.update_step_label)
-        self.update_reward_signal.connect(self.update_reward_label)
-        self.update_episode_signal.connect(self.update_episode_label)
-        self.update_time_remaining_signal.connect(self.update_time_remaining)
-        self.update_episode_steps_signal.connect(self.update_episode_steps)
-        self.update_plot_signal.connect(self.update_plot)
-        self.update_plot_eval_signal.connect(self.update_plot_eval)
-        self.training_completed_signal.connect(
-            self.show_training_completed_message
-        )
-
-    def show_training_completed_message(self, completion_flag):
+    def show_training_completed_message(self, completion_flag) -> None:
         msg_box = QMessageBox(self)
         msg_box.setIcon(
             QMessageBox.Information if completion_flag else QMessageBox.Warning
@@ -172,13 +281,10 @@ class TrainingWindow(BaseWindow):
             else "The training process has been interrupted."
         )
         msg_box.setStyleSheet(Styles.MESSAGE_BOX)
-
-        # Add custom button
         see_log_button = msg_box.addButton(
             "See log folder", QMessageBox.AcceptRole
         )
         msg_box.exec_()
-
         if msg_box.clickedButton() == see_log_button:
             self.open_log_file()
         self.reset_training_window()
@@ -227,119 +333,6 @@ class TrainingWindow(BaseWindow):
             self.view_evaluation_button, self.view_training_button
         )
 
-    def create_button_style(
-        self,
-        text,
-        callback=None,
-        width=None,
-        height=None,
-        style="background-color: #444444;",
-    ):
-        button = QPushButton(text, self)
-        button.setStyleSheet(
-            f"QPushButton {{ {style} "
-            f"color: white; "
-            f"font-size: 14px; padding: 5px 15px; "
-            f"border-radius: 5px; border: 1px solid white; }} "
-            f"QPushButton:hover {{ background-color: #555555; }}"
-        )
-        if width and height:
-            button.setFixedSize(width, height)
-        if callback:
-            button.clicked.connect(callback)
-        return button
-
-    def create_separator(self, vertical=False):
-        separator = QFrame()
-        separator.setFrameShape(QFrame.VLine if vertical else QFrame.HLine)
-        separator.setStyleSheet("color: white; border: 1px solid white;")
-        return separator
-
-    def create_input_fields(self):
-        inputs = {
-            "Training Steps": QLineEdit(self),
-            "Exploration Steps": QLineEdit(self),
-            "Batch Size": QLineEdit(self),
-            "G Value": QLineEdit(self),
-            "Evaluation Interval": QLineEdit(self),
-            "Evaluation Episodes": QLineEdit(self),
-            "Log Interval": QLineEdit(self),
-            "Seed": QLineEdit(self),
-        }
-
-        row, col = 0, 0
-        for label, widget in inputs.items():
-            self.input_layout.addWidget(
-                self.create_label(label, "white", 14), row, col
-            )
-            widget.setText(self.default_values.get(label, ""))
-            widget.setStyleSheet(Styles.LINE_EDIT)
-            self.input_layout.addWidget(widget, row + 1, col)
-            widget.returnPressed.connect(self.lock_inputs)
-            col += 1
-            if col >= 2:
-                col = 0
-                row += 2
-        return inputs
-
-    def create_info_labels(self):
-        labels = {
-            "Time Remaining": QLabel("Time Remaining: N/A", self),
-            "Total Steps": QLabel("Total Steps: 0", self),
-            "Episode Number": QLabel("Episode Number: 0", self),
-            "Episode Reward": QLabel("Episode Reward: 0", self),
-            "Episode Steps": QLabel("Episode Steps: 0", self),
-        }
-        for label in labels.values():
-            label.setStyleSheet("color: white; font-size: 14px;")
-        return labels
-
-    def create_label(self, text, color, size, bold=False):
-        label = QLabel(text, self)
-        label.setStyleSheet(
-            f"color: {color}; font-size: {size}px; {'font-weight: bold;' if bold else ''}"
-        )
-        return label
-
-    def create_summary_layout(self):
-        summary_layout = QHBoxLayout()
-        display_names = {
-            "selected_platform": "Platform",
-            "selected_environment": "Environment",
-            "Algorithm": "Algorithm",
-        }
-        for key, value in self.previous_selections.items():
-            if key in display_names:
-                summary_layout.addWidget(
-                    self.create_label(
-                        f"{display_names[key]}: {value}", "white", 14
-                    ),
-                    alignment=Qt.AlignLeft,
-                )
-        summary_layout.addWidget(
-            self.create_button_style(
-                "View Hyperparameters",
-                self.show_summary_hyperparameters,
-                200,
-                30,
-            )
-        )
-        return summary_layout
-
-    def create_button_layout(self):
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(
-            self.create_button_style(
-                "Start", self.start_training, style="background-color: green;"
-            )
-        )
-        button_layout.addWidget(
-            self.create_button_style(
-                "Stop", self.stop_training, style="background-color: red;"
-            )
-        )
-        return button_layout
-
     def show_summary_hyperparameters(self):
         relevant_keys = ["Hyperparameters"]
         lines = [
@@ -360,13 +353,6 @@ class TrainingWindow(BaseWindow):
     def start_training(self):
         if self.training_start:
             return
-
-        # Check if the algorithm is PPO and handle input fields accordingly
-        if self.previous_selections.get("Algorithm") == "PPO":
-            self.training_inputs["Exploration Steps"].setText("")
-            self.training_inputs["Batch Size"].setText("")
-            self.training_inputs["G Value"].setText("")
-
         if not self.all_inputs_filled():
             self.show_message_box(
                 "Input Error",
@@ -374,7 +360,6 @@ class TrainingWindow(BaseWindow):
                 QMessageBox.Warning,
             )
             return
-
         if self.show_confirmation(
             "Confirm Training", "The training will start. Are you sure?"
         ):
@@ -412,7 +397,7 @@ class TrainingWindow(BaseWindow):
         ):
             self.training_start = False
             self.training_thread.stop()
-            self.training_thread.wait()  # Wait for the thread to finish
+            self.training_thread.wait()
             for widget in self.training_inputs.values():
                 widget.setReadOnly(False)
 
@@ -441,14 +426,7 @@ class TrainingWindow(BaseWindow):
                 return False
         return True
 
-    def center(self):
-        screen_geometry = QDesktopWidget().availableGeometry().center()
-        frame_geometry = self.frameGeometry()
-        frame_geometry.moveCenter(screen_geometry)
-        self.move(frame_geometry.topLeft())
-
     def open_log_file(self):
-        # if hasattr(self, 'folder_name') and os.path.exists(self.folder_name):
         if not self.folder_name:
             self.show_message_box(
                 "Log Folder",
@@ -477,40 +455,24 @@ class TrainingWindow(BaseWindow):
         return confirm_msg.exec_() == QMessageBox.Yes
 
     def reset_training_window(self):
-        # Reset all input fields to their default values
         self.folder_name = None
-
         for field, widget in self.training_inputs.items():
             widget.setText(self.default_values.get(field, ""))
-
-        # Reset progress bar
         self.progress_bar.setValue(0)
-
-        # Clear plots
         self.training_figure.clear_data()
         self.evaluation_figure.clear_data()
-
-        # Reset info labels
-        self.info_labels["Time Remaining"].setText("Time Remaining: N/A")
-        self.info_labels["Total Steps"].setText("Total Steps: 0")
-        self.info_labels["Episode Number"].setText("Episode Number: 0")
-        self.info_labels["Episode Reward"].setText("Episode Reward: 0")
-        self.info_labels["Episode Steps"].setText("Episode Steps: 0")
-
-        # Unlock input fields
+        for label in self.info_labels.values():
+            label.setText(label.text().split(":")[0] + ": 0")
         for widget in self.training_inputs.values():
             widget.setReadOnly(False)
-
-        if self.previous_selections.get("Algorithm") == "PPO":
-            self.training_inputs["Exploration Steps"].setText("")
-            self.training_inputs["Exploration Steps"].setReadOnly(True)
-            self.training_inputs["Batch Size"].setText("")
-            self.training_inputs["Batch Size"].setReadOnly(True)
-            self.training_inputs["G Value"].setText("")
-            self.training_inputs["G Value"].setReadOnly(True)
-
-        # Reset training start flag
+        self.adjust_for_ppo()
         self.training_start = False
+
+    def adjust_for_ppo(self):
+        if self.previous_selections.get("Algorithm") == "PPO":
+            for field in ["Exploration Steps", "Batch Size", "G Value"]:
+                self.training_inputs[field].setText("")
+                self.training_inputs[field].setReadOnly(True)
 
     @staticmethod
     def update_button_styles(active_button, inactive_button):
