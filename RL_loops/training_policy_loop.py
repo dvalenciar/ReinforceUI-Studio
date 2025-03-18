@@ -124,11 +124,11 @@ def training_loop(  # noqa: C901
         epsilon_decay = float(
             config_data.get("Hyperparameters").get("epsilon_decay")
         )
-        G = int(config_data.get("G Value", 1))
+        G = int(config_data.get("G Value", 1))  # noqa: N806
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
     else:
-        G = int(config_data.get("G Value", 1))
+        G = int(config_data.get("G Value", 1))   # noqa: N806
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
 
@@ -155,7 +155,7 @@ def training_loop(  # noqa: C901
                     action = env.sample_action()
                 else:
                     action = rl_agent.select_action_from_policy(state)
-        else:
+        if not is_ppo and not is_dqn:
             if total_step_counter < steps_exploration:
                 action = env.sample_action()
             else:

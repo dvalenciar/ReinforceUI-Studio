@@ -15,7 +15,7 @@ ReinforceUI Studio
   </a>
 
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Linting&branch=main" alt="Linting Status">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Formatting&branch=main" alt="Formatting Status">
   </a>
   
   <a href="https://docs.reinforceui-studio.com/">
