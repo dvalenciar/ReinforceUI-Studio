@@ -1,28 +1,26 @@
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
-    QMainWindow,
-    QPushButton,
     QLabel,
     QVBoxLayout,
     QHBoxLayout,
     QWidget,
-    QDesktopWidget,
 )
-from PyQt5.QtCore import Qt
+
+from GUI.ui_base_window import BaseWindow
+from GUI.ui_utils import create_button
+from GUI.ui_styles import Styles
 from GUI.select_algorithm_window import SelectAlgorithmWindow
 from GUI.load_model_window import LoadConfigWindow
 
 
-class WelcomeWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+class WelcomeWindow(BaseWindow):
+    def __init__(self) -> None:
+        """Initialize the WelcomeWindow class."""
+        super().__init__("RL Configuration Guide")
         self.load_config_window = None
         self.platform_config_window = None
         self.user_selections = {"setup_choice": ""}
-        self.setWindowTitle("RL Configuration Guide")
-        self.setFixedSize(900, 230)
-        self.setStyleSheet("background-color: #121212;")
-        self.center()
 
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
@@ -34,27 +32,25 @@ class WelcomeWindow(QMainWindow):
             " \n Press select one of the following options to get started:\n",
             self,
         )
-
         welcome_label.setWordWrap(True)
         welcome_label.setAlignment(Qt.AlignCenter)
-        welcome_label.setStyleSheet(
-            "color: #E0E0E0; font-size: 18px; font-weight: bold;"
-        )
+        welcome_label.setStyleSheet(Styles.WELCOME_LABEL)
         main_layout.addWidget(welcome_label)
 
+        # Button layout
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(25)  # Increase the separation between buttons
-        manual_button = self.create_button(
+        button_layout.setSpacing(25)
+
+        manual_button = create_button(
+            self,
             "Start Training Configuration",
-            250,
-            50,
-            QIcon("media_resources/icon_custom_config.png"),
+            icon=QIcon("media_resources/icon_custom_config.png"),
         )
-        load_button = self.create_button(
+
+        load_button = create_button(
+            self,
             "Load Pre-trained Model",
-            250,
-            50,
-            QIcon("media_resources/icon_config.png"),
+            icon=QIcon("media_resources/icon_config.png"),
         )
 
         button_layout.addWidget(manual_button)
@@ -68,30 +64,8 @@ class WelcomeWindow(QMainWindow):
         manual_button.clicked.connect(self.open_manual_configuration)
         load_button.clicked.connect(self.open_manual_configuration)
 
-    def create_button(self, text, width, height, icon=None):
-        button = QPushButton(text, self)
-        button.setFixedSize(width, height)
-        if icon:
-            button.setIcon(icon)
-            button.setStyleSheet("background-color: transparent;")
-        button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #444444;
-                color: white;
-                font-size: 15px;
-                padding: 10px 20px;
-                border-radius: 10px;
-                border: 1px solid white;
-            }
-            QPushButton:hover {
-                background-color: #555555;
-            }
-        """
-        )
-        return button
-
-    def open_manual_configuration(self):
+    def open_manual_configuration(self) -> None:
+        """Open the manual configuration window."""
         if self.sender().text() == "Load Pre-trained Model":
             self.user_selections["setup_choice"] = "load_model"
             self.close()
@@ -106,9 +80,3 @@ class WelcomeWindow(QMainWindow):
                 self.show, self.user_selections
             )
             self.platform_config_window.show()
-
-    def center(self):
-        screen_geometry = QDesktopWidget().availableGeometry().center()
-        frame_geometry = self.frameGeometry()
-        frame_geometry.moveCenter(screen_geometry)
-        self.move(frame_geometry.topLeft())
