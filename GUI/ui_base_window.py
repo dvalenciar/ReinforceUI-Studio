@@ -17,7 +17,7 @@ class BaseWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle(title)
         self.setFixedSize(width, height)
-        self.setStyleSheet("background-color: #121212;")
+        self.setStyleSheet("background-color: white;")
         self.center()
 
     def center(self) -> None:

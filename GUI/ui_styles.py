@@ -4,22 +4,26 @@ class Styles:
     MAIN_BACKGROUND = "background-color: #121212;"
 
     WELCOME_LABEL = """
-        color: #E0E0E0;
+        color: #black;
         font-size: 18px;
         font-weight: bold;
+        padding: 10px;
+        
     """
 
     BUTTON = """
         QPushButton {
-            background-color: #444444;
-            color: white;
+            background-color: #E3F2FD;
+            color: #0D47A1;
             font-size: 15px;
             padding: 10px 20px;
-            border-radius: 10px;
-            border: 1px solid white;
+            border-radius: 20px;
+            border: 1.2px solid #1976D2;
+          
         }
         QPushButton:hover {
-            background-color: #555555;
+            background-color: #1976D2;
+            color: white;
         }
     """
 
