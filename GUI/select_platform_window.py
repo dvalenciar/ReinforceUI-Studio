@@ -18,7 +18,7 @@ from GUI.select_environment_window import SelectEnvironmentWindow
 
 class PlatformConfigWindow(BaseWindow):
     def __init__(self, algorithm_window, user_selections) -> None:  # noqa
-        super().__init__("RL Training Platform Selection", 1000, 430)
+        super().__init__("RL Training Platform Selection", 900, 400)
 
         self.algorithm_window = algorithm_window
         self.user_selections = user_selections

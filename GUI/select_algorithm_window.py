@@ -21,7 +21,7 @@ from GUI.select_platform_window import PlatformConfigWindow
 class SelectAlgorithmWindow(BaseWindow):
     def __init__(self, welcome_window, user_selections) -> None:  # noqa
         """Initialize the SelectAlgorithmWindow class"""
-        super().__init__("Select Algorithm", 500, 300)
+        super().__init__("Select Algorithm", 900, 300)
 
         self.welcome_window = welcome_window
         self.user_selections = user_selections
@@ -37,7 +37,7 @@ class SelectAlgorithmWindow(BaseWindow):
         # Navigation buttons (Back/Next)
         button_layout = QHBoxLayout()
 
-        back_button = create_button(self, "Back", width=100, height=35)
+        back_button = create_button(self, "Back", width=120, height=50)
         back_button.clicked.connect(self.open_welcome_window)
         button_layout.addWidget(back_button)
 
@@ -45,7 +45,7 @@ class SelectAlgorithmWindow(BaseWindow):
             QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         )
 
-        next_button = create_button(self, "Next", width=100, height=35)
+        next_button = create_button(self, "Next", width=120, height=50)
         next_button.clicked.connect(self.confirm_selection)
         button_layout.addWidget(next_button)
 
@@ -70,17 +70,17 @@ class SelectAlgorithmWindow(BaseWindow):
             "Would you like to use the default hyperparameters?", self
         )
         hyperparam_label.setAlignment(Qt.AlignCenter)
-        hyperparam_label.setStyleSheet("color: white; font-size: 14px;")
+        hyperparam_label.setStyleSheet(Styles.TEXT_LABEL)
         layout.addWidget(hyperparam_label)
 
         button_layout_hyperparams = QHBoxLayout()
 
-        self.yes_button = create_button(self, "Yes", width=120, height=40)
+        self.yes_button = create_button(self, "Yes", width=270, height=50)
         self.yes_button.clicked.connect(self.use_default_hyperparams)
         button_layout_hyperparams.addWidget(self.yes_button)
 
         self.custom_button = create_button(
-            self, "Custom", width=120, height=40
+            self, "Custom", width=270, height=50
         )
         self.custom_button.clicked.connect(self.open_custom_hyperparams_window)
         button_layout_hyperparams.addWidget(self.custom_button)

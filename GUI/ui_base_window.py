@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
-
+from GUI.ui_styles import Styles
 
 class BaseWindow(QMainWindow):
     """Base window class with common functionality for all windows."""
@@ -17,7 +17,7 @@ class BaseWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle(title)
         self.setFixedSize(width, height)
-        self.setStyleSheet("background-color: white;")
+        self.setStyleSheet(Styles.MAIN_BACKGROUND)
         self.center()
 
     def center(self) -> None:

@@ -1,28 +1,32 @@
 class Styles:
     """Central location for all styling in the application."""
 
-    MAIN_BACKGROUND = "background-color: #121212;"
+    MAIN_BACKGROUND = "background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
 
     WELCOME_LABEL = """
-        color: #black;
+        color: #333333;
         font-size: 18px;
         font-weight: bold;
+        padding: 10px;    
+    """
+
+    TEXT_LABEL = """
+        color: #555555;
+        font-size: 16px;
         padding: 10px;
-        
     """
 
     BUTTON = """
         QPushButton {
-            background-color: #E3F2FD;
-            color: #0D47A1;
+            background-color: #E3F2FD; /* Light Blue */
+            color: #0D47A1; /* Dark Blue Text */
             font-size: 15px;
             padding: 10px 20px;
-            border-radius: 20px;
-            border: 1.2px solid #1976D2;
-          
+            border-radius: 17px;
+            border: 1.1px solid #1976D2;
         }
         QPushButton:hover {
-            background-color: #1976D2;
+            background-color: #1976D2; /* Medium Blue */
             color: white;
         }
     """
@@ -67,22 +71,45 @@ class Styles:
 
     SELECTED_BUTTON = """
         QPushButton {
-            background-color: #2a9d8f;
+            background-color: #1976D2; /* Medium Blue - Matches Hover Effect */
             color: white;
-            font-size: 16px;
+            font-size: 15px;
             padding: 10px 20px;
-            border-radius: 10px;
-            border: 2px solid white;
+            border-radius: 17px;
+            border: 2px solid #0D47A1; /* Darker Blue Border */
+        }
+
+        QPushButton:hover {
+            background-color: #1565C0; /* Slightly Darker Blue */
         }
     """
 
     COMBO_BOX = """
         QComboBox {
-            background-color: #444444;
-            color: white;
+            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
+            color: #0D47A1; /* Dark Blue Text - Matches Button */
             font-size: 16px;
-            padding: 0px;
-            border: 1px solid white;
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid #1976D2; /* Matches Button Border */
+        }
+
+        QComboBox:hover {
+            background-color: #BBDEFB; /* Softer Blue on Hover */
+        }
+        
+        QComboBox::drop-down {
+            border: none;
+            background-color: #1976D2; /* Medium Blue */
+            width: 20px;
+        }
+    
+        QComboBox QAbstractItemView {
+            background-color: white;
+            color: #0D47A1;
+            border: 1px solid #1976D2;
+            selection-background-color: #1976D2; /* Highlighted item */
+            selection-color: white;
         }
     """
 
