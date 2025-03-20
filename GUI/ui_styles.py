@@ -44,6 +44,36 @@ class Styles:
         }
     """
 
+    START_BUTTON = """
+        QPushButton {
+            background-color: #388E3C; /* Green */
+            color: white;
+            font-size: 14px;
+            padding: 5px 15px;
+            border-radius: 5px;
+            border: 1px solid #388E3C;
+        }
+        QPushButton:hover {
+            background-color: #2E7D32; /* Darker Green */
+             border: 1px solid #1976D2;
+        }
+    """
+
+    STOP_BUTTON = """
+        QPushButton {
+            background-color: #D32F2F; /* Red */
+            color: white;
+            font-size: 14px;
+            padding: 5px 15px;
+            border-radius: 5px;
+            border: 1px solid #D32F2F;
+        }
+        QPushButton:hover {
+            background-color: #B71C1C; /* Darker Red */
+            border: 1px solid #FF6F61;
+        }
+    """
+
     ACTIVE_BUTTON = """
         QPushButton { 
             background-color: #2a9d8f; 
@@ -65,20 +95,6 @@ class Styles:
         }
         QPushButton:hover { 
             background-color: #555555; 
-        }
-    """
-
-    TRANSPARENT_BUTTON = """
-        QPushButton {
-            background-color: transparent;
-            color: white;
-            font-size: 15px;
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 1px solid white;
-        }
-        QPushButton:hover {
-            background-color: rgba(255, 255, 255, 0.1);
         }
     """
 

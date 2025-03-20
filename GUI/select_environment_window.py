@@ -18,7 +18,7 @@ from GUI.training_window import TrainingWindow
 
 class SelectEnvironmentWindow(BaseWindow):
     def __init__(self, platform_window, user_selections) -> None:  # noqa
-        super().__init__("Select Environment", 600, 300)
+        super().__init__("Select Environment", 900, 300)
 
         self.platform_window = platform_window
         self.user_selections = user_selections

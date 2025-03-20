@@ -88,7 +88,7 @@ class PlotCanvas(FigureCanvasQTAgg):
 
 
 def create_button(
-    parent, text=" ", width=270, height=50, icon=None, transparent=False
+    parent, text=" ", width=270, height=50, icon=None,
 ) -> QPushButton:
     """Create a standardized button with consistent styling.
 
@@ -98,7 +98,6 @@ def create_button(
         width: Button width
         height: Button height
         icon: Optional QIcon
-        transparent: Whether to use transparent styling
 
     Returns:
         QPushButton: Styled button
@@ -109,7 +108,34 @@ def create_button(
     if icon:
         button.setIcon(icon)
 
-    button.setStyleSheet(
-        Styles.TRANSPARENT_BUTTON if transparent else Styles.BUTTON
-    )
+    button.setStyleSheet(Styles.BUTTON)
+    return button
+
+
+def create_activation_button(
+    parent, text=" ", width=150, height=50, icon=None, start_button=False
+) -> QPushButton:
+    """Create a standardized activation button with consistent styling.
+
+    Args:
+        parent: Parent widget
+        text: Button text
+        width: Button width
+        height: Button height
+        icon: Optional QIcon
+        start_button: Flag to determine if the button is a start button
+
+    Returns:
+        QPushButton: Styled button
+    """
+    button = QPushButton(text, parent)
+    button.setFixedSize(width, height)
+
+    if icon:
+        button.setIcon(icon)
+
+    if start_button:
+        button.setStyleSheet(Styles.START_BUTTON)
+    else:
+        button.setStyleSheet(Styles.STOP_BUTTON)
     return button
