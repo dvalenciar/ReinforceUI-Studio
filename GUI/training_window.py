@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QGridLayout,
-    QPushButton,
     QProgressBar,
     QWidget,
     QLineEdit,
@@ -84,7 +83,7 @@ class TrainingWindow(BaseWindow):
         main_layout.addLayout(self.create_back_button_layout())
 
         summary_level = QLabel("ReinforceUI-Studio", self)
-        summary_level.setStyleSheet(Styles.WELCOME_LABEL)
+        summary_level.setStyleSheet(Styles.BIG_TITLE_LABEL)
         summary_level.setAlignment(Qt.AlignCenter)
 
         main_layout.addWidget(summary_level)
@@ -102,10 +101,10 @@ class TrainingWindow(BaseWindow):
 
         open_log_file_button = create_button(self, "Open Log Folder",  width=200, height=50)
         open_log_file_button.clicked.connect(self.open_log_file)
-        main_layout.addWidget(open_log_file_button, alignment=Qt.AlignLeft)
+        main_layout.addWidget(open_log_file_button, alignment=Qt.AlignRight)
 
         self.setCentralWidget(container)
-        # self.show_training_curve()
+        self.show_training_curve()
         self.adjust_for_ppo()
 
     def create_back_button_layout(self) -> QHBoxLayout:
@@ -126,7 +125,7 @@ class TrainingWindow(BaseWindow):
         self.training_inputs = self.create_input_fields()
         layout.addLayout(self.input_layout)
         layout.addItem(QSpacerItem(20, 180))
-        layout.addLayout(self.create_button_layout())
+        layout.addLayout(self.create_start_stop_button_layout())
         layout.addWidget(self.create_separator())
         return layout
 
@@ -134,7 +133,7 @@ class TrainingWindow(BaseWindow):
         layout = QVBoxLayout()
         subtitle_label = QLabel("Training/Evaluation Curves", self)
         subtitle_label.setStyleSheet(Styles.SUBTITLE_LABEL)
-        layout.addWidget(subtitle_label)
+        layout.addWidget(subtitle_label, alignment=Qt.AlignCenter)
 
         self.plot_stack = QStackedWidget()
         self.training_figure = PlotCanvas()
@@ -155,46 +154,23 @@ class TrainingWindow(BaseWindow):
 
     def create_selection_plot_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
-
-        view_training_button = create_button(self, "View Training Curve")
-        view_training_button.clicked.connect(self.show_training_curve)
-
-        view_evaluation_button = create_button(self, "View Evaluation Curve")
-        view_training_button.clicked.connect(self.show_evaluation_curve)
-
-        button_layout.addWidget(view_training_button)
-        button_layout.addWidget(view_evaluation_button)
-
+        self.view_training_button = create_button(self, "View Training Curve")
+        self.view_training_button.clicked.connect(self.show_training_curve)
+        button_layout.addWidget(self.view_training_button)
+        self.view_evaluation_button = create_button(self, "View Evaluation Curve")
+        self.view_evaluation_button.clicked.connect(self.show_evaluation_curve)
+        button_layout.addWidget(self.view_evaluation_button)
         return button_layout
 
-    def create_button_layout(self) -> QHBoxLayout:
+    def create_start_stop_button_layout(self) -> QHBoxLayout:
         layout = QHBoxLayout()
-
         start_button = create_activation_button(self, "Start", width=150, height=30, start_button=True)
         start_button.clicked.connect(self.start_training)
         layout.addWidget(start_button)
-
-
         stop_button = create_activation_button(self, "Stop", width=150, height=30, start_button = False)
         stop_button.clicked.connect(self.stop_training)
         layout.addWidget(stop_button)
-
         return layout
-
-    def create_activation_button(
-        self,
-        text: str,
-        callback=None,
-        style="background-color: #444444;",
-    ):
-        button = QPushButton(text, self)
-        button.setStyleSheet(
-            f"QPushButton {{ {style} color: white; font-size: 14px; padding: 5px 15px; "
-            "border-radius: 5px; border: 1px solid white;"
-            "QPushButton:hover {background-color: #555555;}"
-        )
-        button.clicked.connect(callback)
-        return button
 
     def create_separator(self, vertical=False) -> QFrame:
         separator = QFrame()
@@ -232,20 +208,12 @@ class TrainingWindow(BaseWindow):
             label.setStyleSheet(Styles.TEXT_LABEL)
         return labels
 
-    def create_label(self, text, color, size, bold=False):
-        label = QLabel(text, self)
-        label.setStyleSheet(
-            f"color: {color}; font-size: {size}px; {'font-weight: bold;' if bold else ''}"
-        )
-        return label
-
     def create_summary_layout(self):
         layout = QHBoxLayout()
         display_names = {
             "Algorithm": "Algorithm",
             "selected_environment": "Environment",
             "selected_platform": "Platform",
-
         }
         for key, value in self.previous_selections.items():
             if key in display_names:
@@ -253,7 +221,7 @@ class TrainingWindow(BaseWindow):
                 label.setStyleSheet(Styles.TEXT_LABEL)
                 layout.addWidget(label, alignment=Qt.AlignCenter)
 
-        view_hyper_button = create_button(self, "View Hyperparameters", width=200, height=50)
+        view_hyper_button = create_button(self, "View Hyperparameters", width=215, height=40)
         view_hyper_button.clicked.connect(self.show_summary_hyperparameters)
         layout.addWidget(view_hyper_button, alignment=Qt.AlignRight)
         return layout
@@ -321,9 +289,11 @@ class TrainingWindow(BaseWindow):
 
     def show_training_curve(self):
         self.plot_stack.setCurrentWidget(self.training_figure)
+        self.update_button_styles(self.view_training_button, self.view_evaluation_button)
 
     def show_evaluation_curve(self):
         self.plot_stack.setCurrentWidget(self.evaluation_figure)
+        self.update_button_styles(self.view_evaluation_button, self.view_training_button)
 
     def show_summary_hyperparameters(self):
         relevant_keys = ["Hyperparameters"]
@@ -474,5 +444,5 @@ class TrainingWindow(BaseWindow):
 
     @staticmethod
     def update_button_styles(active_button, inactive_button):
-        active_button.setStyleSheet(Styles.ACTIVE_BUTTON)
-        inactive_button.setStyleSheet(Styles.INACTIVE_BUTTON)
+        active_button.setStyleSheet(Styles.SELECTED_BUTTON)
+        inactive_button.setStyleSheet(Styles.BUTTON)

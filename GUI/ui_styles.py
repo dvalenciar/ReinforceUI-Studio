@@ -3,6 +3,14 @@ class Styles:
 
     MAIN_BACKGROUND = "background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
 
+
+    BIG_TITLE_LABEL = """
+        color: #333333;
+        font-size: 24px;
+        font-weight: bold;
+        padding: 10px;
+    """
+
     WELCOME_LABEL = """
         color: #333333;
         font-size: 20px;
@@ -74,30 +82,6 @@ class Styles:
         }
     """
 
-    ACTIVE_BUTTON = """
-        QPushButton { 
-            background-color: #2a9d8f; 
-            color: white; 
-            font-size: 14px; 
-            padding: 5px 15px; 
-            border-radius: 5px; 
-            border: 1px solid white; 
-        }
-    """
-
-    INACTIVE_BUTTON = """
-        QPushButton { 
-            background-color: #444444; 
-            color: white; font-size: 14px; 
-            padding: 5px 15px; 
-            border-radius: 5px; 
-            border: 1px solid white; 
-        }
-        QPushButton:hover { 
-            background-color: #555555; 
-        }
-    """
-
     SELECTED_BUTTON = """
         QPushButton {
             background-color: #1976D2; /* Medium Blue - Matches Hover Effect */
@@ -112,7 +96,6 @@ class Styles:
             background-color: #1565C0; /* Slightly Darker Blue */
         }
     """
-
 
     COMBO_BOX = """
         QComboBox {
