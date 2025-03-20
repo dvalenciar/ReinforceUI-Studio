@@ -58,7 +58,7 @@ class Styles:
             color: white;
             font-size: 14px;
             padding: 5px 15px;
-            border-radius: 5px;
+            border-radius: 6px;
             border: 1px solid #388E3C;
         }
         QPushButton:hover {
@@ -73,7 +73,7 @@ class Styles:
             color: white;
             font-size: 14px;
             padding: 5px 15px;
-            border-radius: 5px;
+            border-radius: 6px;
             border: 1px solid #D32F2F;
         }
         QPushButton:hover {

@@ -55,7 +55,8 @@ class LoadConfigWindow(BaseWindow):
         main_layout.addWidget(welcome_load_screen_message)
 
         note_message = QLabel(
-            "Note: This Directory should contain the model files and the model configuration file. \n"
+            "Note: The directory should contain the model files and the model configuration file. \n"
+        
             "Ideally, this directory should be created by the ReinforceUI Studio to avoid any errors.",
             self,
         )

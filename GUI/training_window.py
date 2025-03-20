@@ -99,7 +99,7 @@ class TrainingWindow(BaseWindow):
         main_layout.addLayout(self.create_bottom_layout())
         main_layout.addWidget(self.create_progress_bar())
 
-        open_log_file_button = create_button(self, "Open Log Folder",  width=200, height=50)
+        open_log_file_button = create_button(self, "Open Log Folder",  width=200, height=40)
         open_log_file_button.clicked.connect(self.open_log_file)
         main_layout.addWidget(open_log_file_button, alignment=Qt.AlignRight)
 
@@ -154,20 +154,20 @@ class TrainingWindow(BaseWindow):
 
     def create_selection_plot_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
-        self.view_training_button = create_button(self, "View Training Curve")
+        self.view_training_button = create_button(self, "View Training Curve", width=350, height=40)
         self.view_training_button.clicked.connect(self.show_training_curve)
         button_layout.addWidget(self.view_training_button)
-        self.view_evaluation_button = create_button(self, "View Evaluation Curve")
+        self.view_evaluation_button = create_button(self, "View Evaluation Curve", width=350, height=40)
         self.view_evaluation_button.clicked.connect(self.show_evaluation_curve)
         button_layout.addWidget(self.view_evaluation_button)
         return button_layout
 
     def create_start_stop_button_layout(self) -> QHBoxLayout:
         layout = QHBoxLayout()
-        start_button = create_activation_button(self, "Start", width=150, height=30, start_button=True)
+        start_button = create_activation_button(self, "Start", width=160, height=35, start_button=True)
         start_button.clicked.connect(self.start_training)
         layout.addWidget(start_button)
-        stop_button = create_activation_button(self, "Stop", width=150, height=30, start_button = False)
+        stop_button = create_activation_button(self, "Stop", width=160, height=35, start_button = False)
         stop_button.clicked.connect(self.stop_training)
         layout.addWidget(stop_button)
         return layout
@@ -307,12 +307,6 @@ class TrainingWindow(BaseWindow):
         self.show_message_box(
             "Hyperparameters", selections, QMessageBox.Information
         )
-
-    def handle_button_click(self, button) -> None:  # noqa
-        if self.selected_button:
-            self.selected_button.setStyleSheet(Styles.BUTTON)
-        self.selected_button = button
-        button.setStyleSheet(Styles.SELECTED_BUTTON)
 
     def lock_inputs(self):
         for widget in self.training_inputs.values():
