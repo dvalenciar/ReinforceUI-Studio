@@ -20,6 +20,7 @@ from PyQt5.QtGui import QDesktopServices
 from GUI.ui_utils import PlotCanvas, TrainingThread
 from GUI.ui_base_window import BaseWindow
 from GUI.ui_styles import Styles
+from GUI.ui_utils import create_button
 
 
 class TrainingWindow(BaseWindow):
@@ -35,7 +36,7 @@ class TrainingWindow(BaseWindow):
 
     def __init__(self, previous_window, previous_selections) -> None:  # noqa
         """Initialize the TrainingWindow class"""
-        super().__init__("Training Configuration Window", 1100, 700)
+        super().__init__("Training Configuration Window", 1200, 800)
 
         self.folder_name = None
         self.training_start = None
@@ -79,11 +80,14 @@ class TrainingWindow(BaseWindow):
         container = QWidget()
         container.setLayout(main_layout)
 
-        main_layout.addLayout(self.create_top_layout())
-        main_layout.addWidget(
-            self.create_label("Summary of Selections", "yellow", 16, True),
-            alignment=Qt.AlignLeft,
-        )
+        main_layout.addLayout(self.create_back_button_layout())
+
+        summary_level = QLabel("ReinforceUI-Studio", self)
+        summary_level.setStyleSheet(Styles.WELCOME_LABEL)
+        summary_level.setStyleSheet("font-size: 35px;")
+        summary_level.setAlignment(Qt.AlignCenter)
+
+        main_layout.addWidget(summary_level)
         main_layout.addLayout(self.create_summary_layout())
         main_layout.addWidget(self.create_separator())
 
@@ -95,29 +99,29 @@ class TrainingWindow(BaseWindow):
 
         main_layout.addLayout(self.create_bottom_layout())
         main_layout.addWidget(self.create_progress_bar())
-        main_layout.addWidget(
-            self.create_button("View Log Folder", self.open_log_file),
-            alignment=Qt.AlignLeft,
-        )
+
+        open_log_file_button = create_button(self, "Open Log Folder",  width=200, height=50)
+        open_log_file_button.clicked.connect(self.open_log_file)
+        main_layout.addWidget(open_log_file_button, alignment=Qt.AlignLeft)
 
         self.setCentralWidget(container)
         self.show_training_curve()
         self.adjust_for_ppo()
 
-    def create_top_layout(self) -> QVBoxLayout:
-        """Create the top layout of the TrainingWindow"""
-        layout = QHBoxLayout()
-        layout.addWidget(self.create_button("Back", self.back_to_selection))
-        layout.addStretch()
-        return layout
+    def create_back_button_layout(self) -> QHBoxLayout:
+        button_layout = QHBoxLayout()
+        back_button = create_button(self, "Back", width=200, height=50)
+        back_button.clicked.connect(self.back_to_selection)
+        button_layout.addWidget(back_button, alignment=Qt.AlignLeft)
+        return button_layout
 
     def create_left_layout(self) -> QVBoxLayout:
-
         layout = QVBoxLayout()
-        layout.addWidget(
-            self.create_label("Training parameters", "yellow", 16, True),
-            alignment=Qt.AlignLeft,
-        )
+        label = QLabel("Training Parameters", self)
+        label.setStyleSheet(Styles.SUBTITLE_LABEL)
+        label.setAlignment(Qt.AlignLeft)
+        layout.addWidget(label)
+
         self.input_layout = QGridLayout()
         self.training_inputs = self.create_input_fields()
         layout.addLayout(self.input_layout)
@@ -128,16 +132,18 @@ class TrainingWindow(BaseWindow):
 
     def create_right_layout(self) -> QVBoxLayout:
         layout = QVBoxLayout()
-        layout.addWidget(
-            self.create_label("Training/Evaluation Curves", "yellow", 18, True)
-        )
+        subtitle_label = QLabel("Training/Evaluation Curves", self)
+        subtitle_label.setStyleSheet(Styles.SUBTITLE_LABEL)
+        layout.addWidget(subtitle_label)
+
         self.plot_stack = QStackedWidget()
         self.training_figure = PlotCanvas()
         self.evaluation_figure = PlotCanvas()
         self.plot_stack.addWidget(self.training_figure)
         self.plot_stack.addWidget(self.evaluation_figure)
         layout.addWidget(self.plot_stack)
-        layout.addLayout(self.create_arrow_layout())
+        layout.addLayout(self.create_selection_plot_layout())
+        layout.addWidget(self.create_separator())
         return layout
 
     def create_bottom_layout(self) -> QHBoxLayout:
@@ -147,33 +153,43 @@ class TrainingWindow(BaseWindow):
             layout.addWidget(label)
         return layout
 
-    def create_arrow_layout(self) -> QHBoxLayout:
-        layout = QHBoxLayout()
-        self.view_training_button = self.create_button(
-            "View Training Curve", self.show_training_curve
-        )
-        self.view_evaluation_button = self.create_button(
-            "View Evaluation Curve", self.show_evaluation_curve
-        )
-        layout.addWidget(self.view_training_button)
-        layout.addWidget(self.view_evaluation_button)
-        return layout
+    def create_selection_plot_layout(self) -> QHBoxLayout:
+        button_layout = QHBoxLayout()
+
+        view_training_button = create_button(self, "View Training Curve")
+        view_training_button.clicked.connect(self.show_training_curve)
+        button_layout.addWidget(view_training_button)
+
+        view_evaluation_button = create_button(self, "View Evaluation Curve")
+        view_evaluation_button.clicked.connect(self.show_evaluation_curve)
+        button_layout.addWidget(view_evaluation_button)
+
+        return button_layout
 
     def create_button_layout(self) -> QHBoxLayout:
         layout = QHBoxLayout()
+
+        # start_button = create_button(self, "Start", width=100, height=50)
+        # start_button.clicked.connect(self.start_training)
+        # layout.addWidget(start_button)
+        #
+        # stop_button = create_button(self, "Stop", width=200, height=50)
+        # stop_button.clicked.connect(self.stop_training)
+        # layout.addWidget(stop_button)
+
         layout.addWidget(
-            self.create_button(
+            self.create_activation_button(
                 "Start", self.start_training, style="background-color: green;"
             )
         )
         layout.addWidget(
-            self.create_button(
+            self.create_activation_button(
                 "Stop", self.stop_training, style="background-color: red;"
             )
         )
         return layout
 
-    def create_button(
+    def create_activation_button(
         self,
         text: str,
         callback=None,
@@ -196,18 +212,19 @@ class TrainingWindow(BaseWindow):
     def create_separator(self, vertical=False) -> QFrame:
         separator = QFrame()
         separator.setFrameShape(QFrame.VLine if vertical else QFrame.HLine)
-        separator.setStyleSheet("color: white; border: 1px solid white;")
+        separator.setStyleSheet(Styles.SEPARATOR_LINE)
         return separator
 
     def create_input_fields(self) -> dict:
         inputs = {label: QLineEdit(self) for label in self.default_values}
         row, col = 0, 0
         for label, widget in inputs.items():
-            self.input_layout.addWidget(
-                self.create_label(label, "white", 14), row, col
-            )
+            text_label = QLabel(label, self)
+            text_label.setStyleSheet(Styles.TEXT_LABEL)
+            self.input_layout.addWidget(text_label, row, col)
             widget.setText(self.default_values.get(label, ""))
             widget.setStyleSheet(Styles.LINE_EDIT)
+
             self.input_layout.addWidget(widget, row + 1, col)
             widget.returnPressed.connect(self.lock_inputs)
             col += 1
@@ -225,7 +242,7 @@ class TrainingWindow(BaseWindow):
             "Episode Steps": QLabel("Episode Steps: 0", self),
         }
         for label in labels.values():
-            label.setStyleSheet("color: white; font-size: 14px;")
+            label.setStyleSheet(Styles.TEXT_LABEL)
         return labels
 
     def create_label(self, text, color, size, bold=False):
@@ -244,20 +261,13 @@ class TrainingWindow(BaseWindow):
         }
         for key, value in self.previous_selections.items():
             if key in display_names:
-                layout.addWidget(
-                    self.create_label(
-                        f"{display_names[key]}: {value}", "white", 14
-                    ),
-                    alignment=Qt.AlignLeft,
-                )
-        layout.addWidget(
-            self.create_button(
-                text="View Hyperparameters",
-                callback=self.show_summary_hyperparameters,
-                width=200,
-                height=30,
-            )
-        )
+                label = QLabel(f"{display_names[key]}: {value}", self)
+                label.setStyleSheet(Styles.TEXT_LABEL)
+                layout.addWidget(label, alignment=Qt.AlignLeft)
+
+        view_hyper_button = create_button(self, "View Hyperparameters", width=250, height=50)
+        view_hyper_button.clicked.connect(self.show_summary_hyperparameters)
+        layout.addWidget(view_hyper_button, alignment=Qt.AlignLeft)
         return layout
 
     def create_progress_bar(self) -> QProgressBar:
@@ -323,15 +333,17 @@ class TrainingWindow(BaseWindow):
 
     def show_training_curve(self):
         self.plot_stack.setCurrentWidget(self.training_figure)
-        self.update_button_styles(
-            self.view_training_button, self.view_evaluation_button
-        )
+        # fixme - update button styles
+        # self.update_button_styles(
+        #     self.view_training_button, self.view_evaluation_button
+        # )
 
     def show_evaluation_curve(self):
         self.plot_stack.setCurrentWidget(self.evaluation_figure)
-        self.update_button_styles(
-            self.view_evaluation_button, self.view_training_button
-        )
+        # fixme - update button styles
+        # self.update_button_styles(
+        #     self.view_evaluation_button, self.view_training_button
+        # )
 
     def show_summary_hyperparameters(self):
         relevant_keys = ["Hyperparameters"]

@@ -5,16 +5,29 @@ class Styles:
 
     WELCOME_LABEL = """
         color: #333333;
-        font-size: 18px;
+        font-size: 20px;
         font-weight: bold;
         padding: 10px;    
+    """
+
+    SUBTITLE_LABEL = """
+        color: #333333;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px;
     """
 
     TEXT_LABEL = """
         color: #555555;
         font-size: 16px;
-        padding: 10px;
+        padding: 1px;
     """
+
+    SEPARATOR_LINE = """
+        color: #1976D2;
+        border: 1px solid #1976D2;
+    """
+
 
     BUTTON = """
         QPushButton {
@@ -84,9 +97,10 @@ class Styles:
         }
     """
 
+
     COMBO_BOX = """
         QComboBox {
-            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
+            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);
             color: #0D47A1; /* Dark Blue Text - Matches Button */
             font-size: 16px;
             padding: 5px;
@@ -98,12 +112,6 @@ class Styles:
             background-color: #BBDEFB; /* Softer Blue on Hover */
         }
         
-        QComboBox::drop-down {
-            border: none;
-            background-color: #1976D2; /* Medium Blue */
-            width: 20px;
-        }
-    
         QComboBox QAbstractItemView {
             background-color: white;
             color: #0D47A1;
@@ -114,35 +122,59 @@ class Styles:
     """
 
     MESSAGE_BOX = """
-        QMessageBox { background-color: black; color: white; }
-        QMessageBox QLabel { color: white; }
+        QMessageBox {
+            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);
+            color: #0D47A1; /* Dark Blue Text */
+            border: 1px solid #1976D2; /* Matches Button Border */
+        }
+
+        QMessageBox QLabel {
+            color: #0D47A1; /* Dark Blue Text */
+            font-size: 16px;
+        }
+
         QMessageBox QPushButton {
-            background-color: #444444;
-            color: white; font-size: 14px;
+            background-color: #1976D2; /* Medium Blue - Matches Button */
+            color: white;
+            font-size: 14px;
             padding: 5px 15px;
             border-radius: 5px;
-            border: 1px solid white;
+            border: 1px solid #0D47A1; /* Dark Blue Border */
         }
-        QMessageBox QPushButton:hover { background-color: #555555; }
+
+        QMessageBox QPushButton:hover {
+            background-color: #1565C0; /* Slightly Darker Blue */
+        }
     """
 
     LINE_EDIT = """
         QLineEdit {
-            background-color: #444444;
-            color: white;
+            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);
+            color: #0D47A1; /* Dark Blue Text */
             font-size: 16px;
-            padding: 5px;
-            border: 1px solid white;
+            padding: 2px;
+            border-radius: 5px;
+            border: 1px solid #1976D2; /* Matches Button Border */
+        }
+
+        QLineEdit:focus {
+            border: 2px solid #1565C0; /* Slightly Darker Blue on Focus */
         }
     """
 
     PROGRESS_BAR = """
         QProgressBar {
-            background-color: #444444;
-            color: white;
-            border: 2px solid white;
+            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);
+            color: #0D47A1; /* Dark Blue Text */
+            border: 2px solid #1976D2; /* Medium Blue Border */
             border-radius: 5px;
             text-align: center;
         }
-        QProgressBar::chunk { background-color: #2a9d8f; width: 20px; }
+
+        QProgressBar::chunk {
+            background-color: #1976D2; /* Medium Blue - Matches Buttons */
+            width: 20px;
+        }
     """
+
+
