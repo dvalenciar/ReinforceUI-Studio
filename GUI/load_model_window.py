@@ -36,7 +36,7 @@ class LoadConfigWindow(BaseWindow):
 
         # Top layout with Back button
         top_layout = QHBoxLayout()
-        back_button = create_button(self, "Back", width=100, height=35)
+        back_button = create_button(self, "Back", width=120, height=50)
         back_button.clicked.connect(self.back_main_window)
         top_layout.addWidget(back_button, alignment=Qt.AlignLeft)
         top_layout.addItem(
@@ -55,24 +55,22 @@ class LoadConfigWindow(BaseWindow):
         main_layout.addWidget(welcome_load_screen_message)
 
         note_message = QLabel(
-            "Note: This Directory should contain the model files and the model configuration file. \n"
+            "Note: The directory should contain the model files and the model configuration file. \n"
             "Ideally, this directory should be created by the ReinforceUI Studio to avoid any errors.",
             self,
         )
         note_message.setWordWrap(True)
         note_message.setAlignment(Qt.AlignCenter)
-        note_message.setStyleSheet("color: #E0E0E0; font-size: 15px;")
+        note_message.setStyleSheet(Styles.TEXT_LABEL)
         main_layout.addWidget(note_message)
 
         # Status labels
         self.config_status = QLabel("Config.json: ❌", self)
         self.models_log_status = QLabel("models_log: ❌", self)
         self.info_display = QLabel("", self)
-        self.config_status.setStyleSheet("color: #E0E0E0; font-size: 15px;")
-        self.models_log_status.setStyleSheet(
-            "color: #E0E0E0; font-size: 15px;"
-        )
-        self.info_display.setStyleSheet("color: #E0E0E0; font-size: 15px;")
+        self.config_status.setStyleSheet(Styles.TEXT_LABEL)
+        self.models_log_status.setStyleSheet(Styles.TEXT_LABEL)
+        self.info_display.setStyleSheet(Styles.TEXT_LABEL)
         main_layout.addWidget(self.config_status)
         main_layout.addWidget(self.models_log_status)
         main_layout.addWidget(self.info_display)
@@ -130,14 +128,14 @@ class LoadConfigWindow(BaseWindow):
             f"models_log: {'✔️' if models_log_exists else '❌'}"
         )
         self.config_status.setStyleSheet(
-            "color: green; font-size: 16px;"
+            "color: #2E7D32; font-size: 16px;  /* Darker Green */"
             if config_exists
-            else "color: red; font-size: 16px;"
+            else "color: #D32F2F; font-size: 16px;"
         )
         self.models_log_status.setStyleSheet(
-            "color: green; font-size: 16px;"
+            "color: #2E7D32; font-size: 16px;"
             if models_log_exists
-            else "color: red; font-size: 16px;"
+            else "color: #D32F2F; font-size: 16px;"
         )
 
     def _load_config_and_display(
@@ -163,7 +161,7 @@ class LoadConfigWindow(BaseWindow):
                 f"Algorithm: {algorithm}"
             )
             self.info_display.setAlignment(Qt.AlignCenter)
-            self.info_display.setStyleSheet("color: #00FF00; font-size: 16px;")
+            self.info_display.setStyleSheet("color: #2E7D32; font-size: 16px;")
 
             # Create Test Policy button if it doesn't exist
             if not self.test_policy_button:

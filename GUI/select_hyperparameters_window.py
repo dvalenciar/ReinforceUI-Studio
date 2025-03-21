@@ -18,7 +18,7 @@ from GUI.ui_styles import Styles
 
 class SelectHyperWindow(BaseWindow):
     def __init__(self, selected_algorithm, callback) -> None:  # noqa
-        super().__init__(f"Hyperparameters for {selected_algorithm}", 400, 500)
+        super().__init__(f"Hyperparameters for {selected_algorithm}", 400, 800)
 
         self.selected_algorithm = selected_algorithm
         self.callback = callback
@@ -44,7 +44,7 @@ class SelectHyperWindow(BaseWindow):
         # Create input fields for each hyperparameter
         for param_name, default_value in self.default_hyperparameters.items():
             param_label = QLabel(param_name, self)
-            param_label.setStyleSheet("color: white; font-size: 14px;")
+            param_label.setStyleSheet(Styles.TEXT_LABEL)
             layout.addWidget(param_label)
 
             param_input = QLineEdit(str(default_value), self)
@@ -55,7 +55,7 @@ class SelectHyperWindow(BaseWindow):
         # Action buttons
         button_layout = QHBoxLayout()
 
-        reset_button = create_button(self, "Reset", width=120, height=40)
+        reset_button = create_button(self, "Reset", width=120, height=50)
         reset_button.clicked.connect(self.reset_to_defaults)
         button_layout.addWidget(reset_button)
 
@@ -63,7 +63,7 @@ class SelectHyperWindow(BaseWindow):
             QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         )
 
-        confirm_button = create_button(self, "Confirm", width=120, height=40)
+        confirm_button = create_button(self, "Confirm", width=120, height=50)
         confirm_button.clicked.connect(self.confirm_changes)
         button_layout.addWidget(confirm_button)
 
