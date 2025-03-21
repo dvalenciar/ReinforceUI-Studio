@@ -18,7 +18,7 @@ from GUI.select_environment_window import SelectEnvironmentWindow
 
 class PlatformConfigWindow(BaseWindow):
     def __init__(self, algorithm_window, user_selections) -> None:  # noqa
-        super().__init__("RL Training Platform Selection", 1000, 430)
+        super().__init__("RL Training Platform Selection", 900, 400)
 
         self.algorithm_window = algorithm_window
         self.user_selections = user_selections
@@ -33,7 +33,7 @@ class PlatformConfigWindow(BaseWindow):
         # Navigation buttons
         buttons_layout = QHBoxLayout()
 
-        back_button = create_button(self, "Back", width=100, height=35)
+        back_button = create_button(self, "Back", width=120, height=50)
         back_button.clicked.connect(self.open_algorithm_window)
         buttons_layout.addWidget(back_button, alignment=Qt.AlignLeft)
 
@@ -41,7 +41,7 @@ class PlatformConfigWindow(BaseWindow):
             QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         )
 
-        next_button = create_button(self, "Next", width=100, height=35)
+        next_button = create_button(self, "Next", width=100, height=50)
         next_button.clicked.connect(self.open_select_environment)
         buttons_layout.addWidget(next_button, alignment=Qt.AlignRight)
 
@@ -82,7 +82,7 @@ class PlatformConfigWindow(BaseWindow):
                 2,
                 {
                     "name": "MuJoCo",
-                    "gif": "media_resources/half_cheetah",
+                    "gif": "media_resources/half_cheetah.gif",
                     "is_gif": True,
                 },
             )

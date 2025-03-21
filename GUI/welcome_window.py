@@ -28,8 +28,7 @@ class WelcomeWindow(BaseWindow):
 
         welcome_label = QLabel(
             "Welcome to the ReinforceUI Studio!! \n"
-            "Easily configure RL environments, select algorithms, and monitor training. \n"
-            " \n Press select one of the following options to get started:\n",
+            " \n Press select one of the following options to get started\n",
             self,
         )
         welcome_label.setWordWrap(True)

@@ -18,7 +18,7 @@ from GUI.training_window import TrainingWindow
 
 class SelectEnvironmentWindow(BaseWindow):
     def __init__(self, platform_window, user_selections) -> None:  # noqa
-        super().__init__("Select Environment", 500, 300)
+        super().__init__("Select Environment", 900, 300)
 
         self.platform_window = platform_window
         self.user_selections = user_selections
@@ -32,8 +32,7 @@ class SelectEnvironmentWindow(BaseWindow):
 
         # Navigation buttons
         button_layout = QHBoxLayout()
-
-        back_button = create_button(self, "Back", width=100, height=35)
+        back_button = create_button(self, "Back", width=120, height=50)
         back_button.clicked.connect(self.open_platform_selection)
         button_layout.addWidget(back_button)
 
@@ -41,7 +40,7 @@ class SelectEnvironmentWindow(BaseWindow):
             QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         )
 
-        next_button = create_button(self, "Next", width=100, height=35)
+        next_button = create_button(self, "Next", width=120, height=50)
         next_button.clicked.connect(self.confirm_selection)
         button_layout.addWidget(next_button)
 
@@ -61,7 +60,6 @@ class SelectEnvironmentWindow(BaseWindow):
         self.env_combo.addItems(environments)
         self.env_combo.setStyleSheet(Styles.COMBO_BOX)
         layout.addWidget(self.env_combo)
-        self.env_combo.setFixedHeight(35)
 
         main_widget.setLayout(layout)
 
