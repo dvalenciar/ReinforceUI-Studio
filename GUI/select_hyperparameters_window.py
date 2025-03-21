@@ -18,7 +18,7 @@ from GUI.ui_styles import Styles
 
 class SelectHyperWindow(BaseWindow):
     def __init__(self, selected_algorithm, callback) -> None:  # noqa
-        super().__init__(f"Hyperparameters for {selected_algorithm}", 400, 650)
+        super().__init__(f"Hyperparameters for {selected_algorithm}", 400, 800)
 
         self.selected_algorithm = selected_algorithm
         self.callback = callback

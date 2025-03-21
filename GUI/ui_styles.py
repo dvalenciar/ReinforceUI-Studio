@@ -3,22 +3,24 @@ class Styles:
 
     # Color palette - centralized for easy theme changes
     COLORS = {
-        "primary": "#1976D2",        # Medium blue (primary brand color)
-        "primary_dark": "#0D47A1",   # Dark blue for text and borders
+        "primary": "#1976D2",  # Medium blue (primary brand color)
+        "primary_dark": "#0D47A1",  # Dark blue for text and borders
         "primary_light": "#BBDEFB",  # Light blue for hover states
-        "background": "#F0F8FF",     # Very light blue for backgrounds
-        "success": "#388E3C",        # Green for positive actions
+        "background": "#F0F8FF",  # Very light blue for backgrounds
+        "success": "#388E3C",  # Green for positive actions
         "success_hover": "#2E7D32",  # Darker green for hover
-        "danger": "#D32F2F",         # Red for negative/warning actions
-        "danger_hover": "#B71C1C",   # Darker red for hover
-        "text_primary": "#333333",   # Dark gray for primary text
-        "text_secondary": "#555555", # Medium gray for secondary text
-        "white": "#FFFFFF"           # White for text on dark backgrounds
+        "danger": "#D32F2F",  # Red for negative/warning actions
+        "danger_hover": "#B71C1C",  # Darker red for hover
+        "text_primary": "#333333",  # Dark gray for primary text
+        "text_secondary": "#555555",  # Medium gray for secondary text
+        "white": "#FFFFFF",  # White for text on dark backgrounds
     }
 
     # Base gradients
     BG_GRADIENT = f"background: linear-gradient(to bottom, {COLORS['background']}, #E3F2FD);"
-    WIDGET_GRADIENT = f"background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
+    WIDGET_GRADIENT = (
+        f"background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
+    )
 
     # Common properties
     FONT_FAMILY = "font-family: Arial, sans-serif;"

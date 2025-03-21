@@ -128,7 +128,7 @@ def training_loop(  # noqa: C901
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
     else:
-        G = int(config_data.get("G Value", 1))   # noqa: N806
+        G = int(config_data.get("G Value", 1))  # noqa: N806
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
 

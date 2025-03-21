@@ -99,7 +99,9 @@ class TrainingWindow(BaseWindow):
         main_layout.addLayout(self.create_bottom_layout())
         main_layout.addWidget(self.create_progress_bar())
 
-        open_log_file_button = create_button(self, "Open Log Folder",  width=200, height=40)
+        open_log_file_button = create_button(
+            self, "Open Log Folder", width=200, height=40
+        )
         open_log_file_button.clicked.connect(self.open_log_file)
         main_layout.addWidget(open_log_file_button, alignment=Qt.AlignRight)
 
@@ -154,20 +156,28 @@ class TrainingWindow(BaseWindow):
 
     def create_selection_plot_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
-        self.view_training_button = create_button(self, "View Training Curve", width=350, height=40)
+        self.view_training_button = create_button(
+            self, "View Training Curve", width=350, height=40
+        )
         self.view_training_button.clicked.connect(self.show_training_curve)
         button_layout.addWidget(self.view_training_button)
-        self.view_evaluation_button = create_button(self, "View Evaluation Curve", width=350, height=40)
+        self.view_evaluation_button = create_button(
+            self, "View Evaluation Curve", width=350, height=40
+        )
         self.view_evaluation_button.clicked.connect(self.show_evaluation_curve)
         button_layout.addWidget(self.view_evaluation_button)
         return button_layout
 
     def create_start_stop_button_layout(self) -> QHBoxLayout:
         layout = QHBoxLayout()
-        start_button = create_activation_button(self, "Start", width=160, height=35, start_button=True)
+        start_button = create_activation_button(
+            self, "Start", width=160, height=35, start_button=True
+        )
         start_button.clicked.connect(self.start_training)
         layout.addWidget(start_button)
-        stop_button = create_activation_button(self, "Stop", width=160, height=35, start_button = False)
+        stop_button = create_activation_button(
+            self, "Stop", width=160, height=35, start_button=False
+        )
         stop_button.clicked.connect(self.stop_training)
         layout.addWidget(stop_button)
         return layout
@@ -221,7 +231,9 @@ class TrainingWindow(BaseWindow):
                 label.setStyleSheet(Styles.TEXT_LABEL)
                 layout.addWidget(label, alignment=Qt.AlignCenter)
 
-        view_hyper_button = create_button(self, "View Hyperparameters", width=215, height=40)
+        view_hyper_button = create_button(
+            self, "View Hyperparameters", width=215, height=40
+        )
         view_hyper_button.clicked.connect(self.show_summary_hyperparameters)
         layout.addWidget(view_hyper_button, alignment=Qt.AlignRight)
         return layout
@@ -289,11 +301,15 @@ class TrainingWindow(BaseWindow):
 
     def show_training_curve(self):
         self.plot_stack.setCurrentWidget(self.training_figure)
-        self.update_button_styles(self.view_training_button, self.view_evaluation_button)
+        self.update_button_styles(
+            self.view_training_button, self.view_evaluation_button
+        )
 
     def show_evaluation_curve(self):
         self.plot_stack.setCurrentWidget(self.evaluation_figure)
-        self.update_button_styles(self.view_evaluation_button, self.view_training_button)
+        self.update_button_styles(
+            self.view_evaluation_button, self.view_training_button
+        )
 
     def show_summary_hyperparameters(self):
         relevant_keys = ["Hyperparameters"]

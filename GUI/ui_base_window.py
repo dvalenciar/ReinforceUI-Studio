@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
 from GUI.ui_styles import Styles
 
+
 class BaseWindow(QMainWindow):
     """Base window class with common functionality for all windows."""
 

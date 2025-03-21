@@ -41,7 +41,9 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.figure = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.figure)
         self.figure.set_facecolor("#222222")  # Dark Gray Background
-        self.ax = self.figure.add_subplot(111, facecolor="#222222", frameon=False)
+        self.ax = self.figure.add_subplot(
+            111, facecolor="#222222", frameon=False
+        )
         self.clear_data()
 
     def plot_data(self, data_plot: dict, title: str, y_label: str) -> None:
@@ -55,7 +57,9 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.ax.clear()
 
         # Set Titles and Labels
-        self.ax.set_title(title, color="white", fontsize=14, fontweight="bold", pad=10)
+        self.ax.set_title(
+            title, color="white", fontsize=14, fontweight="bold", pad=10
+        )
         self.ax.set_xlabel("Steps", color="white", fontsize=12, labelpad=5)
         self.ax.set_ylabel(y_label, color="white", fontsize=12, labelpad=5)
 
@@ -64,18 +68,16 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.ax.tick_params(axis="y", colors="white", labelsize=10)
 
         # Grid Style
-        self.ax.grid(True, color="#666666", linestyle="--", linewidth=0.6, alpha=0.7)
+        self.ax.grid(
+            True, color="#666666", linestyle="--", linewidth=0.6, alpha=0.7
+        )
 
         # Plot Data
         self.ax.plot(
             data_plot["Total Timesteps"],
             data_plot[y_label],
             color="#1976D2",  # Medium blue matching button hover
-            linewidth=2.5,
-            marker="o",
-            markerfacecolor="#0D47A1",
-            markeredgewidth=0.2,
-            markeredgecolor="white",
+            linewidth=2.0,
         )
 
         self.draw()
@@ -106,7 +108,11 @@ class PlotCanvas(FigureCanvasQTAgg):
 
 
 def create_button(
-    parent, text=" ", width=270, height=50, icon=None,
+    parent,
+    text=" ",
+    width=270,
+    height=50,
+    icon=None,
 ) -> QPushButton:
     """Create a standardized button with consistent styling.
 
