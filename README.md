@@ -40,7 +40,7 @@ Please check out our **full documentation** available [here](https://docs.reinfo
 
 
 <p align="center">
-  <img src="media_resources/new_main_window.gif">
+  <img src="media_resources/new_main_window_example.gif">
 </p>
 
 # Supported Algorithms
