@@ -1,179 +1,233 @@
 class Styles:
     """Central location for all styling in the application."""
 
-    MAIN_BACKGROUND = "background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
+    # Color palette - centralized for easy theme changes
+    COLORS = {
+        "primary": "#1976D2",        # Medium blue (primary brand color)
+        "primary_dark": "#0D47A1",   # Dark blue for text and borders
+        "primary_light": "#BBDEFB",  # Light blue for hover states
+        "background": "#F0F8FF",     # Very light blue for backgrounds
+        "success": "#388E3C",        # Green for positive actions
+        "success_hover": "#2E7D32",  # Darker green for hover
+        "danger": "#D32F2F",         # Red for negative/warning actions
+        "danger_hover": "#B71C1C",   # Darker red for hover
+        "text_primary": "#333333",   # Dark gray for primary text
+        "text_secondary": "#555555", # Medium gray for secondary text
+        "white": "#FFFFFF"           # White for text on dark backgrounds
+    }
 
+    # Base gradients
+    BG_GRADIENT = f"background: linear-gradient(to bottom, {COLORS['background']}, #E3F2FD);"
+    WIDGET_GRADIENT = f"background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
 
-    BIG_TITLE_LABEL = """
-        color: #333333;
+    # Common properties
+    FONT_FAMILY = "font-family: Arial, sans-serif;"
+    BORDER_RADIUS_SM = "border-radius: 5px;"
+    BORDER_RADIUS_MD = "border-radius: 10px;"
+    BORDER_RADIUS_LG = "border-radius: 17px;"
+
+    # Main background
+    MAIN_BACKGROUND = BG_GRADIENT
+
+    # Text styles with consistent hierarchy
+    BIG_TITLE_LABEL = f"""
+        {FONT_FAMILY}
+        color: {COLORS['text_primary']};
         font-size: 24px;
         font-weight: bold;
         padding: 10px;
     """
 
-    WELCOME_LABEL = """
-        color: #333333;
+    WELCOME_LABEL = f"""
+        {FONT_FAMILY}
+        color: {COLORS['text_primary']};
         font-size: 20px;
         font-weight: bold;
-        padding: 10px;    
+        padding: 10px;
     """
 
-    SUBTITLE_LABEL = """
-        color: #333333;
+    SUBTITLE_LABEL = f"""
+        {FONT_FAMILY}
+        color: {COLORS['text_primary']};
         font-size: 18px;
         font-weight: bold;
         padding: 10px;
     """
 
-    TEXT_LABEL = """
-        color: #555555;
+    TEXT_LABEL = f"""
+        {FONT_FAMILY}
+        color: {COLORS['text_secondary']};
         font-size: 16px;
         padding: 1px;
     """
 
-    SEPARATOR_LINE = """
-        color: #1976D2;
-        border: 1px solid #1976D2;
+    SEPARATOR_LINE = f"""
+        color: {COLORS['primary']};
+        border: 1px solid {COLORS['primary']};
     """
 
-
-    BUTTON = """
-        QPushButton {
-            background-color: #E3F2FD; /* Light Blue */
-            color: #0D47A1; /* Dark Blue Text */
+    # Button styles with consistent properties
+    BUTTON = f"""
+        QPushButton {{
+            {FONT_FAMILY}
+            background-color: rgba(227, 242, 253, 0.6);
+            color: {COLORS['primary_dark']};
             font-size: 15px;
             padding: 10px 20px;
-            border-radius: 17px;
-            border: 1.1px solid #1976D2;
-        }
-        QPushButton:hover {
-            background-color: #1976D2; /* Medium Blue */
-            color: white;
-        }
+            {BORDER_RADIUS_LG}
+            border: 1.1px solid {COLORS['primary']};
+        }}
+        QPushButton:hover {{
+            background-color: {COLORS['primary']};
+            color: {COLORS['white']};
+        }}
+        QPushButton:disabled {{
+            background-color: #D6D6D6;
+            color: #888888;
+            border: 1.1px solid #AAAAAA;
+        }}
     """
 
-    START_BUTTON = """
-        QPushButton {
-            background-color: #388E3C; /* Green */
-            color: white;
-            font-size: 14px;
-            padding: 5px 15px;
-            border-radius: 6px;
-            border: 1px solid #388E3C;
-        }
-        QPushButton:hover {
-            background-color: #2E7D32; /* Darker Green */
-             border: 1px solid #1976D2;
-        }
+    SELECTED_BUTTON = f"""
+        QPushButton {{
+            {FONT_FAMILY}
+            background-color: {COLORS['primary']};
+            color: {COLORS['white']};
+            font-size: 15px;
+            padding: 10px 20px;
+            {BORDER_RADIUS_LG}
+            border: 2px solid {COLORS['primary_dark']};
+        }}
+        QPushButton:hover {{
+            background-color: #1565C0;
+        }}
     """
 
-    STOP_BUTTON = """
-        QPushButton {
-            background-color: #D32F2F; /* Red */
-            color: white;
+    START_BUTTON = f"""
+        QPushButton {{
+            {FONT_FAMILY}
+            background-color: {COLORS['success']};
+            color: {COLORS['white']};
             font-size: 14px;
             padding: 5px 15px;
-            border-radius: 6px;
-            border: 1px solid #D32F2F;
-        }
-        QPushButton:hover {
-            background-color: #B71C1C; /* Darker Red */
+            {BORDER_RADIUS_SM}
+            border: 1px solid {COLORS['success']};
+        }}
+        QPushButton:hover {{
+            background-color: {COLORS['success_hover']};
+            border: 1px solid {COLORS['primary']};
+        }}
+        QPushButton:disabled {{
+            background-color: #A0C0A0;
+            color: #EFEFEF;
+            border: 1px solid #A0C0A0;
+        }}
+    """
+
+    STOP_BUTTON = f"""
+        QPushButton {{
+            {FONT_FAMILY}
+            background-color: {COLORS['danger']};
+            color: {COLORS['white']};
+            font-size: 14px;
+            padding: 5px 15px;
+            {BORDER_RADIUS_SM}
+            border: 1px solid {COLORS['danger']};
+        }}
+        QPushButton:hover {{
+            background-color: {COLORS['danger_hover']};
             border: 1px solid #FF6F61;
-        }
+        }}
+        QPushButton:disabled {{
+            background-color: #D6A0A0;
+            color: #EFEFEF;
+            border: 1px solid #D6A0A0;
+        }}
     """
 
-    SELECTED_BUTTON = """
-        QPushButton {
-            background-color: #1976D2; /* Medium Blue - Matches Hover Effect */
-            color: white;
-            font-size: 15px;
-            padding: 10px 20px;
-            border-radius: 17px;
-            border: 2px solid #0D47A1; /* Darker Blue Border */
-        }
-
-        QPushButton:hover {
-            background-color: #1565C0; /* Slightly Darker Blue */
-        }
-    """
-
-    COMBO_BOX = """
-        QComboBox {
-            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);
-            color: #0D47A1; /* Dark Blue Text - Matches Button */
+    COMBO_BOX = f"""
+        QComboBox {{
+            {FONT_FAMILY}
+            {WIDGET_GRADIENT}
             font-size: 16px;
             padding: 5px;
-            border-radius: 10px;
-            border: 1px solid #1976D2; /* Matches Button Border */
-        }
+            {BORDER_RADIUS_MD}
+            border: 1px solid {COLORS['primary']};
+        }}
+        QComboBox:hover {{
+            background-color: {COLORS['primary_light']};
+            color: {COLORS['primary_dark']};
+        }}
 
-        QComboBox:hover {
-            background-color: #BBDEFB; /* Softer Blue on Hover */
-        }
-        
-        QComboBox QAbstractItemView {
-            background-color: white;
-            color: #0D47A1;
-            border: 1px solid #1976D2;
-            selection-background-color: #1976D2; /* Highlighted item */
-            selection-color: white;
-        }
+        QComboBox QAbstractItemView {{
+            {FONT_FAMILY}
+            {WIDGET_GRADIENT}
+            selection-color: {COLORS['white']};
+            selection-background-color: {COLORS['primary']};
+            border: 1px solid {COLORS['primary']};
+            {BORDER_RADIUS_SM}
+        }}
     """
 
-    MESSAGE_BOX = """
-        QMessageBox {
-            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);
-            color: #0D47A1; /* Dark Blue Text */
-            border: 1px solid #1976D2; /* Matches Button Border */
-        }
-
-        QMessageBox QLabel {
-            color: #0D47A1; /* Dark Blue Text */
+    LINE_EDIT = f"""
+        QLineEdit {{
+            {FONT_FAMILY}
+            {WIDGET_GRADIENT}
+            color: {COLORS['primary_dark']};
             font-size: 16px;
-        }
+            padding: 5px;
+            {BORDER_RADIUS_SM}
+            border: 1px solid {COLORS['primary']};
+        }}
+        QLineEdit:focus {{
+            border: 2px solid #1565C0;
+        }}
+        QLineEdit:disabled {{
+            background-color: #EEEEEE;
+            color: #888888;
+            border: 1px solid #CCCCCC;
+        }}
+    """
 
-        QMessageBox QPushButton {
-            background-color: #1976D2; /* Medium Blue - Matches Button */
-            color: white;
+    PROGRESS_BAR = f"""
+        QProgressBar {{
+            {FONT_FAMILY}
+            {WIDGET_GRADIENT}
+            color: {COLORS['text_primary']};
+            border: 2px solid {COLORS['primary']};
+            {BORDER_RADIUS_MD}
+            text-align: center;
+            min-height: 15px;
+        }}
+        QProgressBar::chunk {{
+            background-color: {COLORS['primary']};
+            width: 20px;
+        }}
+    """
+
+    MESSAGE_BOX = f"""
+        QMessageBox {{
+            {FONT_FAMILY}
+            {WIDGET_GRADIENT}
+            color: {COLORS['primary_dark']};
+            border: 1px solid {COLORS['primary']};
+        }}
+        QMessageBox QLabel {{
+            {FONT_FAMILY}
+            color: {COLORS['primary_dark']};
+            font-size: 16px;
+        }}
+        QMessageBox QPushButton {{
+            {FONT_FAMILY}
+            background-color: {COLORS['primary']};
+            color: {COLORS['white']};
             font-size: 14px;
             padding: 5px 15px;
-            border-radius: 5px;
-            border: 1px solid #0D47A1; /* Dark Blue Border */
-        }
-
-        QMessageBox QPushButton:hover {
-            background-color: #1565C0; /* Slightly Darker Blue */
-        }
+            {BORDER_RADIUS_SM}
+            border: 1px solid {COLORS['primary_dark']};
+            min-width: 80px;
+        }}
+        QMessageBox QPushButton:hover {{
+            background-color: #1565C0;
+        }}
     """
-
-    LINE_EDIT = """
-        QLineEdit {
-            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);
-            color: #0D47A1; /* Dark Blue Text */
-            font-size: 16px;
-            padding: 2px;
-            border-radius: 5px;
-            border: 1px solid #1976D2; /* Matches Button Border */
-        }
-
-        QLineEdit:focus {
-            border: 2px solid #1565C0; /* Slightly Darker Blue on Focus */
-        }
-    """
-
-    PROGRESS_BAR = """
-        QProgressBar {
-            background-color: linear-gradient(to bottom, #EAF2F8, #D6EAF8);
-            color: #0D47A1; /* Dark Blue Text */
-            border: 2px solid #1976D2; /* Medium Blue Border */
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        QProgressBar::chunk {
-            background-color: #1976D2; /* Medium Blue - Matches Buttons */
-            width: 20px;
-        }
-    """
-
-

@@ -40,10 +40,8 @@ class PlotCanvas(FigureCanvasQTAgg):
         """
         self.figure = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.figure)
-        self.figure.set_facecolor("black")
-        self.ax = self.figure.add_subplot(
-            111, facecolor="black", frameon=False
-        )
+        self.figure.set_facecolor("#222222")  # Dark Gray Background
+        self.ax = self.figure.add_subplot(111, facecolor="#222222", frameon=False)
         self.clear_data()
 
     def plot_data(self, data_plot: dict, title: str, y_label: str) -> None:
@@ -55,35 +53,55 @@ class PlotCanvas(FigureCanvasQTAgg):
             y_label: Y-axis label
         """
         self.ax.clear()
-        self.ax.set_title(title, color="white", fontsize=12)
-        self.ax.set_xlabel("Steps", color="white", fontsize=11, labelpad=1)
-        self.ax.set_ylabel(y_label, color="white", fontsize=11, labelpad=1)
+
+        # Set Titles and Labels
+        self.ax.set_title(title, color="white", fontsize=14, fontweight="bold", pad=10)
+        self.ax.set_xlabel("Steps", color="white", fontsize=12, labelpad=5)
+        self.ax.set_ylabel(y_label, color="white", fontsize=12, labelpad=5)
+
+        # Ticks Customization
         self.ax.tick_params(axis="x", colors="white", labelsize=10)
         self.ax.tick_params(axis="y", colors="white", labelsize=10)
-        self.ax.grid(True, color="gray", linestyle="--", linewidth=0.5)
+
+        # Grid Style
+        self.ax.grid(True, color="#666666", linestyle="--", linewidth=0.6, alpha=0.7)
+
+        # Plot Data
         self.ax.plot(
             data_plot["Total Timesteps"],
             data_plot[y_label],
-            color="#32CD32",
-            linewidth=2,
+            color="#1976D2",  # Medium blue matching button hover
+            linewidth=2.5,
+            marker="o",
+            markerfacecolor="#0D47A1",
+            markeredgewidth=0.2,
+            markeredgecolor="white",
         )
+
         self.draw()
 
     def clear_data(self) -> None:
         """Clear plot and display placeholder text."""
         self.ax.clear()
         self.ax.grid(False)
-        self.ax.tick_params(axis="x", colors="black", labelsize=10)
-        self.ax.tick_params(axis="y", colors="black", labelsize=10)
+
+        # Ticks Customization (Gray when no data)
+        self.ax.tick_params(axis="x", colors="#222222", labelsize=11)
+        self.ax.tick_params(axis="y", colors="#222222", labelsize=11)
+
+        # Placeholder Text
         self.ax.text(
             0.5,
             0.5,
             "Reward Curves will be displayed here soon",
             ha="center",
             va="center",
-            fontsize=12,
-            color="gray",
+            fontsize=14,
+            color="white",
+            alpha=0.6,  # Semi-transparent white
+            fontweight="medium",
         )
+
         self.draw()
 
 

@@ -35,7 +35,7 @@ class TrainingWindow(BaseWindow):
 
     def __init__(self, previous_window, previous_selections) -> None:  # noqa
         """Initialize the TrainingWindow class"""
-        super().__init__("Training Configuration Window", 1200, 800)
+        super().__init__("Training Configuration Window", 1200, 870)
 
         self.folder_name = None
         self.selected_button = None
@@ -118,7 +118,7 @@ class TrainingWindow(BaseWindow):
         layout = QVBoxLayout()
         label = QLabel("Training Parameters", self)
         label.setStyleSheet(Styles.SUBTITLE_LABEL)
-        label.setAlignment(Qt.AlignLeft)
+        label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label)
 
         self.input_layout = QGridLayout()
