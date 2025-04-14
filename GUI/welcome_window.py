@@ -11,6 +11,7 @@ from GUI.ui_base_window import BaseWindow
 from GUI.ui_utils import create_button
 from GUI.ui_styles import Styles
 from GUI.select_algorithm_window import SelectAlgorithmWindow
+from GUI.select_multiple_algorithm_window import SelectMultipleAlgorithmWindow
 from GUI.load_model_window import LoadConfigWindow
 
 
@@ -18,6 +19,7 @@ class WelcomeWindow(BaseWindow):
     def __init__(self) -> None:
         """Initialize the WelcomeWindow class."""
         super().__init__("RL Configuration Guide")
+
         self.load_config_window = None
         self.platform_config_window = None
         self.user_selections = {"setup_choice": ""}
@@ -59,7 +61,6 @@ class WelcomeWindow(BaseWindow):
             icon=QIcon("media_resources/load_icon.svg"),
         )
 
-
         button_layout.addWidget(manual_button)
         button_layout.addWidget(comparative_button)
         button_layout.addWidget(load_button)
@@ -97,7 +98,7 @@ class WelcomeWindow(BaseWindow):
         """Open comparative configuration window."""
         self.user_selections["setup_choice"] = "compare_model"
         self.close()
-        self.platform_config_window = SelectAlgorithmWindow(
+        self.platform_config_window = SelectMultipleAlgorithmWindow(
             self.show, self.user_selections
         )
         self.platform_config_window.show()
