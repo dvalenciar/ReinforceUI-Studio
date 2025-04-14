@@ -20,7 +20,7 @@ class TrainingThread(QThread):
             self.config_data,
             self.training_window,
             self.log_folder,
-            is_running=lambda: self._is_running,
+            is_running=self._is_running,
         )
 
     def stop(self):

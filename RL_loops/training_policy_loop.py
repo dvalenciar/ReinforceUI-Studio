@@ -72,7 +72,7 @@ def training_loop(  # noqa: C901
         config_data: The configuration data for the training.
         training_window: The training window for updating progress.
         log_folder_path: The path to the log folder.
-        is_running: A callable to check if the training is running.
+        is_running: check if the training is running.
     """
     set_seed(int(config_data.get("Seed")))
     algorithm, algorithm_name = import_algorithm_instance(config_data)
@@ -134,7 +134,7 @@ def training_loop(  # noqa: C901
 
     training_completed = True
     for total_step_counter in range(steps_training):
-        if not is_running():  # Check the running state using the callable
+        if not is_running:  # Check the running state using the callable
             print("Training loop interrupted. Exiting...")
             training_completed = False
             break
