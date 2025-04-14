@@ -52,6 +52,7 @@ class WelcomeWindow(BaseWindow):
             icon=QIcon("media_resources/comparative_icon.svg"),
         )
 
+
         load_button = create_button(
             self,
             "Load Pre-trained Model",
