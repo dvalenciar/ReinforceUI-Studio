@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QLabel,
@@ -81,7 +82,7 @@ class SelectAlgorithmWindow(BaseWindow):
         button_layout_hyperparams.addWidget(self.yes_button)
 
         self.custom_button = create_button(
-            self, "Custom", width=270, height=50
+            self, "Custom", width=270, height=50, icon=QIcon("media_resources/icons/config.svg")
         )
         self.custom_button.clicked.connect(self.open_custom_hyperparams_window)
         button_layout_hyperparams.addWidget(self.custom_button)

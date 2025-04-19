@@ -93,15 +93,15 @@ class Styles:
     SELECTED_BUTTON = f"""
         QPushButton {{
             {FONT_FAMILY}
-            background-color: {COLORS['primary']};
+            background-color: {COLORS['success']};
             color: {COLORS['white']};
             font-size: 15px;
             padding: 10px 20px;
             {BORDER_RADIUS_LG}
-            border: 2px solid {COLORS['primary_dark']};
+            border: 2px solid {COLORS['success']};
         }}
         QPushButton:hover {{
-            background-color: #1565C0;
+            background-color: {COLORS['success_hover']};
         }}
     """
 

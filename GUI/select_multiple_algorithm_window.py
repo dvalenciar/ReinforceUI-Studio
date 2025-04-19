@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QLabel,
@@ -56,11 +57,6 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
         self.scroll_widget = QWidget()
         self.algo_selection_layout = QVBoxLayout()
 
-        # hyperparam_label = QLabel("Use default hyperparameters?", self)
-        # hyperparam_label.setAlignment(Qt.AlignRight)
-        # hyperparam_label.setStyleSheet(Styles.TEXT_LABEL)
-        # self.algo_selection_layout.addWidget(hyperparam_label)
-
         self.scroll_widget.setLayout(self.algo_selection_layout)
         scroll_area.setWidget(self.scroll_widget)
         self.main_layout.addWidget(scroll_area)
@@ -107,7 +103,7 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
         button_row = QHBoxLayout()
 
         yes_button = create_button(self, "Yes", width=270, height=40)
-        custom_button = create_button(self, "Custom", width=270, height=40)
+        custom_button = create_button(self, "Custom", width=270, height=40, icon=QIcon("media_resources/icons/config.svg"))
 
         yes_button.setStyleSheet(Styles.SELECTED_BUTTON)
         custom_button.setStyleSheet(Styles.BUTTON)
@@ -142,7 +138,10 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
             "use_default": True,
         })
 
+        self.scroll_widget.adjustSize()
         self.adjustSize()
+        self.resize(self.sizeHint())
+
 
     def remove_algorithm_selection(self, row_widget):
         for row in self.selection_rows:
@@ -150,8 +149,11 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
                 self.algo_selection_layout.removeWidget(row_widget)
                 row_widget.deleteLater()
                 self.selection_rows.remove(row)
-                self.adjustSize()
                 break
+
+        self.scroll_widget.adjustSize()
+        self.adjustSize()
+        self.resize(self.sizeHint())
 
     def set_hyper_choice(self, row_widget, use_default, yes_button, custom_button):
         yes_button.setStyleSheet(Styles.SELECTED_BUTTON if use_default else Styles.BUTTON)

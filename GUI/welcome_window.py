@@ -45,20 +45,20 @@ class WelcomeWindow(BaseWindow):
         manual_button = create_button(
             self,
             "Single Model Training",
-            icon=QIcon("media_resources/single_icon"),
+            icon=QIcon("media_resources/icons/single_icon.svg"),
         )
 
         comparative_button = create_button(
             self,
             "Compare Training Models",
-            icon=QIcon("media_resources/comparative_icon.svg"),
+            icon=QIcon("media_resources/icons/comparative_icon.svg"),
         )
 
 
         load_button = create_button(
             self,
             "Load Pre-trained Model",
-            icon=QIcon("media_resources/load_icon.svg"),
+            icon=QIcon("media_resources/icons/load_icon.svg"),
         )
 
         button_layout.addWidget(manual_button)
