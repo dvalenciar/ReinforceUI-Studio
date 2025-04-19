@@ -22,7 +22,8 @@ class PlatformConfigWindow(BaseWindow):
 
         self.algorithm_window = algorithm_window
         self.user_selections = user_selections
-        self.algorithm_selected = user_selections["Algorithm"]
+        print(self.user_selections)
+        self.algorithm_selected = user_selections["Algorithms"]
         self.selected_button = None
         self.select_env_window = None
 

@@ -29,6 +29,7 @@ class SelectAlgorithmWindow(BaseWindow):
         self.custom_window = None
         self.platform_window = None
         self.use_default_hyperparameters = None
+        self.custom_hyperparameters = {}
 
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
@@ -118,7 +119,8 @@ class SelectAlgorithmWindow(BaseWindow):
         Args:
             hyperparameters (dict): User-selected hyperparameters
         """
-        self.user_selections["Hyperparameters"] = hyperparameters
+        # self.user_selections["Hyperparameters"] = hyperparameters
+        self.custom_hyperparameters = hyperparameters
 
     def open_welcome_window(self) -> None:
         """Return to initial welcome screen."""
@@ -132,8 +134,8 @@ class SelectAlgorithmWindow(BaseWindow):
             return
 
         # Set algorithm selection in user_selections
+        selection = []
         selected_algo = self.algo_combo.currentText()
-        self.user_selections["Algorithm"] = selected_algo
 
         # If using default hyperparameters, load them from config
         if self.use_default_hyperparameters:
@@ -143,14 +145,21 @@ class SelectAlgorithmWindow(BaseWindow):
                     algorithms = config.get("algorithms", [])
                     for algo in algorithms:
                         if algo["name"] == selected_algo:
-                            self.user_selections["Hyperparameters"] = algo.get(
-                                "hyperparameters", {}
-                            )
+                            hyperparams = algo.get("hyperparameters", {})
                             break
             except FileNotFoundError:
-                self.user_selections["Hyperparameters"] = {}
+                hyperparams = {}
+        else :
+            hyperparams = self.custom_hyperparameters
 
-        # Proceed to platform configuration
+        selection.append(
+            {
+                "Algorithm": selected_algo,
+                "Hyperparameters": hyperparams,
+            }
+        )
+
+        self.user_selections["Algorithms"] = selection
         self.close()
         self.platform_window = PlatformConfigWindow(
             self.show, self.user_selections
