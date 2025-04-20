@@ -39,7 +39,7 @@ class SelectAlgorithmWindow(BaseWindow):
         # Navigation buttons (Back/Next)
         button_layout = QHBoxLayout()
 
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(self, "Back", width=120, height=50, icon=QIcon("media_resources/icons/back.svg"))
         back_button.clicked.connect(self.open_welcome_window)
         button_layout.addWidget(back_button)
 
@@ -47,7 +47,7 @@ class SelectAlgorithmWindow(BaseWindow):
             QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         )
 
-        next_button = create_button(self, "Next", width=120, height=50)
+        next_button = create_button(self, "Next", width=120, height=50,)
         next_button.clicked.connect(self.confirm_selection)
         button_layout.addWidget(next_button)
 

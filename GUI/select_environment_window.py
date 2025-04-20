@@ -1,4 +1,5 @@
 import yaml
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QLabel,
@@ -22,7 +23,7 @@ class SelectEnvironmentWindow(BaseWindow):
 
         self.platform_window = platform_window
         self.user_selections = user_selections
-        self.algorithm_selected = user_selections["Algorithm"]
+        self.algorithm_selected = user_selections["Algorithms"]
         self.selected_platform = user_selections["selected_platform"]
         self.select_alg_window = None
 
@@ -32,7 +33,7 @@ class SelectEnvironmentWindow(BaseWindow):
 
         # Navigation buttons
         button_layout = QHBoxLayout()
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(self, "Back", width=120, height=50, icon=QIcon("media_resources/icons/back.svg"))
         back_button.clicked.connect(self.open_platform_selection)
         button_layout.addWidget(back_button)
 

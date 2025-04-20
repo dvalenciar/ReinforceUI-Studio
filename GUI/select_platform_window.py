@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QWidget,
 )
-from PyQt5.QtGui import QMovie, QPixmap
+from PyQt5.QtGui import QMovie, QPixmap, QIcon
 from PyQt5.QtCore import Qt
 
 from GUI.ui_base_window import BaseWindow
@@ -22,7 +22,6 @@ class PlatformConfigWindow(BaseWindow):
 
         self.algorithm_window = algorithm_window
         self.user_selections = user_selections
-        print(self.user_selections)
         self.algorithm_selected = user_selections["Algorithms"]
         self.selected_button = None
         self.select_env_window = None
@@ -34,7 +33,7 @@ class PlatformConfigWindow(BaseWindow):
         # Navigation buttons
         buttons_layout = QHBoxLayout()
 
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(self, "Back", width=120, height=50, icon=QIcon("media_resources/icons/back.svg"))
         back_button.clicked.connect(self.open_algorithm_window)
         buttons_layout.addWidget(back_button, alignment=Qt.AlignLeft)
 

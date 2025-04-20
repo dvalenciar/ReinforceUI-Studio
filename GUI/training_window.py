@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (
     QSpacerItem,
 )
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal
-from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtGui import QDesktopServices, QIcon
 from GUI.ui_utils import PlotCanvas, TrainingThread
 from GUI.ui_base_window import BaseWindow
 from GUI.ui_styles import Styles
@@ -35,17 +35,18 @@ class TrainingWindow(BaseWindow):
 
     def __init__(self, previous_window, previous_selections) -> None:  # noqa
         """Initialize the TrainingWindow class"""
-        super().__init__("Training Configuration Window", 1200, 870)
+        super().__init__("Training Configuration Window", 1300, 870)
 
         self.folder_name = None
         self.selected_button = None
         self.training_start = None
         self.previous_window = previous_window
         self.previous_selections = previous_selections
+
         self.default_values = {
             "Training Steps": "1000000",
             "Exploration Steps": "1000",
-            "Batch Size": "128",
+            "Batch Size": "64",
             "G Value": "1",
             "Evaluation Interval": "1000",
             "Evaluation Episodes": "10",
@@ -111,7 +112,7 @@ class TrainingWindow(BaseWindow):
 
     def create_back_button_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(self, "Back", width=120, height=50, icon=QIcon("media_resources/icons/back.svg"))
         back_button.clicked.connect(self.back_to_selection)
         button_layout.addWidget(back_button, alignment=Qt.AlignLeft)
         return button_layout
@@ -170,9 +171,12 @@ class TrainingWindow(BaseWindow):
 
     def create_start_stop_button_layout(self) -> QHBoxLayout:
         layout = QHBoxLayout()
-        start_button = create_activation_button(
-            self, "Start", width=160, height=35, start_button=True
-        )
+        # start_button = create_activation_button(
+        #     self, "Start", width=160, height=35, start_button=True
+        # )
+        start_button = create_button(self, "Start", width=160, height=35) # todo, check if user this or previous
+
+
         start_button.clicked.connect(self.start_training)
         layout.addWidget(start_button)
         stop_button = create_activation_button(
@@ -221,12 +225,18 @@ class TrainingWindow(BaseWindow):
     def create_summary_layout(self):
         layout = QHBoxLayout()
         display_names = {
-            "Algorithm": "Algorithm",
             "selected_environment": "Environment",
             "selected_platform": "Platform",
         }
+
         for key, value in self.previous_selections.items():
-            if key in display_names:
+            if key == "Algorithms":
+                # Join algorithm names with commas
+                algo_names = ", ".join([algo["Algorithm"] for algo in value])
+                label = QLabel(f"Algorithm(s): {algo_names}", self)
+                label.setStyleSheet(Styles.TEXT_LABEL)
+                layout.addWidget(label, alignment=Qt.AlignCenter)
+            elif key in display_names:
                 label = QLabel(f"{display_names[key]}: {value}", self)
                 label.setStyleSheet(Styles.TEXT_LABEL)
                 layout.addWidget(label, alignment=Qt.AlignCenter)
@@ -236,6 +246,7 @@ class TrainingWindow(BaseWindow):
         )
         view_hyper_button.clicked.connect(self.show_summary_hyperparameters)
         layout.addWidget(view_hyper_button, alignment=Qt.AlignRight)
+
         return layout
 
     def create_progress_bar(self) -> QProgressBar:
@@ -312,13 +323,17 @@ class TrainingWindow(BaseWindow):
         )
 
     def show_summary_hyperparameters(self):
-        relevant_keys = ["Hyperparameters"]
-        lines = [
-            f"{sub_key}: {sub_value}\n"
-            for key, values in self.previous_selections.items()
-            if key in relevant_keys
-            for sub_key, sub_value in values.items()
-        ]
+        lines = []
+
+        algorithms = self.previous_selections.get("Algorithms", [])
+        for algo in algorithms:
+            algo_name = algo.get("Algorithm", "Unknown Algorithm")
+            hyperparams = algo.get("Hyperparameters", {})
+            lines.append(f"{algo_name}:\n")
+            for param, value in hyperparams.items():
+                lines.append(f"  {param}: {value}")
+            lines.append("")  # Empty line between algorithms
+
         selections = "\n".join(lines)
         self.show_message_box(
             "Hyperparameters", selections, QMessageBox.Information
@@ -447,7 +462,9 @@ class TrainingWindow(BaseWindow):
         self.training_start = False
 
     def adjust_for_ppo(self):
-        if self.previous_selections.get("Algorithm") == "PPO":
+        algorithms = self.previous_selections.get("Algorithms", [])
+
+        if len(algorithms) == 1 and algorithms[0].get("Algorithm") == "PPO":
             for field in ["Exploration Steps", "Batch Size", "G Value"]:
                 self.training_inputs[field].setText("")
                 self.training_inputs[field].setReadOnly(True)
