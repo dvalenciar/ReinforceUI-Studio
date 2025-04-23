@@ -248,13 +248,12 @@ class TrainingWindow(BaseWindow):
 
     def create_start_stop_button_layout(self) -> QHBoxLayout:
         layout = QHBoxLayout()
-        # start_button = create_activation_button(
-        #     self, "Start", width=160, height=35, start_button=True
-        # )
-        start_button = create_button(self, "Start", width=160, height=35) # todo, check if user this or previous
-
+        start_button = create_activation_button(
+            self, "Start", width=160, height=35, start_button=True
+        )
         start_button.clicked.connect(self.start_training)
         layout.addWidget(start_button)
+
         stop_button = create_activation_button(
             self, "Stop", width=160, height=35, start_button=False
         )
