@@ -179,11 +179,12 @@ class TrainingWindow(BaseWindow):
     #         label.setStyleSheet(Styles.TEXT_LABEL)
     #     return labels
 
-    def create_bottom_tab_layout(self) -> QHBoxLayout:
-        layout = QHBoxLayout()
+    def create_bottom_tab_layout(self) -> QWidget:
+        container = QWidget()
+        layout = QHBoxLayout(container)  # Set layout on container directly
 
         self.tab_widget = QTabWidget(self)
-        self.algo_info = {}  # Dictionary to track each algo's labels/progress
+        self.algo_info = {}
 
         for algo_dict in self.previous_selections.get("Algorithms", []):
             algo_name = algo_dict["Algorithm"]
@@ -191,11 +192,14 @@ class TrainingWindow(BaseWindow):
             self.tab_widget.addTab(tab, algo_name)
 
         layout.addWidget(self.tab_widget)
-        return layout
+        container.setLayout(layout)
+        return container
 
     def create_algorithm_tab(self, algo_name) -> QWidget:
         widget = QWidget()
-        layout = QVBoxLayout()
+
+        labels_layout = QHBoxLayout()
+        vertical_layout = QVBoxLayout()
 
         # Create info labels
         labels = {
@@ -207,14 +211,17 @@ class TrainingWindow(BaseWindow):
         }
         for label in labels.values():
             label.setStyleSheet(Styles.TEXT_LABEL)
-            layout.addWidget(label)
+            labels_layout.addWidget(label)
+
+        vertical_layout.addLayout(labels_layout)  # Add the label row
 
         # Create progress bar
         progress_bar = QProgressBar(self)
         progress_bar.setStyleSheet(Styles.PROGRESS_BAR)
         progress_bar.setFixedHeight(30)
         progress_bar.setValue(0)
-        layout.addWidget(progress_bar)
+
+        vertical_layout.addWidget(progress_bar)
 
         # Store references
         self.algo_info[algo_name] = {
@@ -222,7 +229,7 @@ class TrainingWindow(BaseWindow):
             "progress_bar": progress_bar,
         }
 
-        widget.setLayout(layout)
+        widget.setLayout(vertical_layout)
         return widget
 
     def create_selection_plot_layout(self) -> QHBoxLayout:
