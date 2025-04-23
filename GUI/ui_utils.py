@@ -10,17 +10,19 @@ class TrainingThread(QThread):
     def __init__(self, training_window, config_data, log_folder):
         super().__init__()
         self.config_data = config_data
+        self.algorithm_name = config_data["Algorithm"]
         self.training_window = training_window
         self.log_folder = log_folder
         self._is_running = True
 
     def run(self):
-        print("Training thread started")
+        print(f"[{self.algorithm_name}] Training thread started")
         training_loop(
             self.config_data,
             self.training_window,
             self.log_folder,
             is_running=self._is_running,
+            algorithm_name=self.algorithm_name
         )
 
     def stop(self):

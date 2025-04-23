@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QFrame,
     QSpacerItem,
+    QTabWidget
 )
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QDesktopServices, QIcon
@@ -56,6 +57,9 @@ class TrainingWindow(BaseWindow):
         self.init_ui()
         self.connect_signals()
 
+        self.completed_algorithms = set()
+        self.total_algorithms = len(self.previous_selections.get("Algorithms", []))
+
     def connect_signals(self) -> None:
         """Connect signals to their respective slots"""
         signals = [
@@ -97,8 +101,9 @@ class TrainingWindow(BaseWindow):
         middle_layout.addLayout(self.create_right_layout())
         main_layout.addLayout(middle_layout)
 
-        main_layout.addLayout(self.create_bottom_layout())
-        main_layout.addWidget(self.create_progress_bar())
+        # main_layout.addLayout(self.create_bottom_layout())
+        # main_layout.addWidget(self.create_progress_bar())
+        main_layout.addWidget(self.create_bottom_tab_layout())
 
         open_log_file_button = create_button(
             self, "Open Log Folder", width=200, height=40
@@ -148,12 +153,77 @@ class TrainingWindow(BaseWindow):
         layout.addWidget(self.create_separator())
         return layout
 
-    def create_bottom_layout(self) -> QHBoxLayout:
+    # def create_bottom_layout(self) -> QHBoxLayout:
+    #     layout = QHBoxLayout()
+    #     self.info_labels = self.create_info_labels()
+    #     for label in self.info_labels.values():
+    #         layout.addWidget(label)
+    #     return layout
+
+    # def create_progress_bar(self) -> QProgressBar:
+    #     self.progress_bar = QProgressBar(self)
+    #     self.progress_bar.setStyleSheet(Styles.PROGRESS_BAR)
+    #     self.progress_bar.setFixedHeight(30)
+    #     self.progress_bar.setValue(0)
+    #     return self.progress_bar
+
+    # def create_info_labels(self) -> dict:
+    #     labels = {
+    #         "Time Remaining": QLabel("Time Remaining: N/A", self),
+    #         "Total Steps": QLabel("Total Steps: 0", self),
+    #         "Episode Number": QLabel("Episode Number: 0", self),
+    #         "Episode Reward": QLabel("Episode Reward: 0", self),
+    #         "Episode Steps": QLabel("Episode Steps: 0", self),
+    #     }
+    #     for label in labels.values():
+    #         label.setStyleSheet(Styles.TEXT_LABEL)
+    #     return labels
+
+    def create_bottom_tab_layout(self) -> QHBoxLayout:
         layout = QHBoxLayout()
-        self.info_labels = self.create_info_labels()
-        for label in self.info_labels.values():
-            layout.addWidget(label)
+
+        self.tab_widget = QTabWidget(self)
+        self.algo_info = {}  # Dictionary to track each algo's labels/progress
+
+        for algo_dict in self.previous_selections.get("Algorithms", []):
+            algo_name = algo_dict["Algorithm"]
+            tab = self.create_algorithm_tab(algo_name)
+            self.tab_widget.addTab(tab, algo_name)
+
+        layout.addWidget(self.tab_widget)
         return layout
+
+    def create_algorithm_tab(self, algo_name) -> QWidget:
+        widget = QWidget()
+        layout = QVBoxLayout()
+
+        # Create info labels
+        labels = {
+            "Time Remaining": QLabel("Time Remaining: N/A", self),
+            "Total Steps": QLabel("Total Steps: 0", self),
+            "Episode Number": QLabel("Episode Number: 0", self),
+            "Episode Reward": QLabel("Episode Reward: 0", self),
+            "Episode Steps": QLabel("Episode Steps: 0", self),
+        }
+        for label in labels.values():
+            label.setStyleSheet(Styles.TEXT_LABEL)
+            layout.addWidget(label)
+
+        # Create progress bar
+        progress_bar = QProgressBar(self)
+        progress_bar.setStyleSheet(Styles.PROGRESS_BAR)
+        progress_bar.setFixedHeight(30)
+        progress_bar.setValue(0)
+        layout.addWidget(progress_bar)
+
+        # Store references
+        self.algo_info[algo_name] = {
+            "labels": labels,
+            "progress_bar": progress_bar,
+        }
+
+        widget.setLayout(layout)
+        return widget
 
     def create_selection_plot_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
@@ -175,7 +245,6 @@ class TrainingWindow(BaseWindow):
         #     self, "Start", width=160, height=35, start_button=True
         # )
         start_button = create_button(self, "Start", width=160, height=35) # todo, check if user this or previous
-
 
         start_button.clicked.connect(self.start_training)
         layout.addWidget(start_button)
@@ -210,18 +279,6 @@ class TrainingWindow(BaseWindow):
                 row += 2
         return inputs
 
-    def create_info_labels(self) -> dict:
-        labels = {
-            "Time Remaining": QLabel("Time Remaining: N/A", self),
-            "Total Steps": QLabel("Total Steps: 0", self),
-            "Episode Number": QLabel("Episode Number: 0", self),
-            "Episode Reward": QLabel("Episode Reward: 0", self),
-            "Episode Steps": QLabel("Episode Steps: 0", self),
-        }
-        for label in labels.values():
-            label.setStyleSheet(Styles.TEXT_LABEL)
-        return labels
-
     def create_summary_layout(self):
         layout = QHBoxLayout()
         display_names = {
@@ -249,12 +306,6 @@ class TrainingWindow(BaseWindow):
 
         return layout
 
-    def create_progress_bar(self) -> QProgressBar:
-        self.progress_bar = QProgressBar(self)
-        self.progress_bar.setStyleSheet(Styles.PROGRESS_BAR)
-        self.progress_bar.setFixedHeight(30)
-        self.progress_bar.setValue(0)
-        return self.progress_bar
 
     def show_training_completed_message(self, completion_flag) -> None:
         msg_box = QMessageBox(self)
@@ -306,9 +357,37 @@ class TrainingWindow(BaseWindow):
 
     def update_step_label(self, step):
         self.info_labels["Total Steps"].setText(f"Total Steps: {step}")
+        # todo: this needs to be updated to
+        #self.algo_info[algo_name]["labels"]["Total Steps"].setText(f"Total Steps: {steps}")
+
 
     def update_progress_bar(self, value):
         self.progress_bar.setValue(value)
+        # todo: this needs to be updated to
+        #self.algo_info[algo_name]["progress_bar"].setValue(progress)
+
+    def update_algorithm_ui(self, algo_name: str, key: str, value): # todo change this name to update_algorithm_values
+        if algo_name not in self.algo_info:
+            return  # Ignore updates for unknown algorithms
+
+        if key == "Time Remaining":
+            self.algo_info[algo_name]["labels"]["Time Remaining"].setText(f"Time Remaining: {value}")
+        elif key == "Total Steps":
+            self.algo_info[algo_name]["labels"]["Total Steps"].setText(f"Total Steps: {value}")
+        elif key == "Episode Number":
+            self.algo_info[algo_name]["labels"]["Episode Number"].setText(f"Episode Number: {value}")
+        elif key == "Episode Reward":
+            self.algo_info[algo_name]["labels"]["Episode Reward"].setText(f"Episode Reward: {value}")
+        elif key == "Episode Steps":
+            self.algo_info[algo_name]["labels"]["Episode Steps"].setText(f"Episode Steps: {value}")
+        elif key == "Progress":
+            self.algo_info[algo_name]["progress_bar"].setValue(value)
+
+        elif key == "training_completed":
+            self.completed_algorithms.add(algo_name)
+            if len(self.completed_algorithms) == self.total_algorithms:
+                self.show_training_completed_message(value) # todo have a look ion this and the value passed to it
+
 
     def show_training_curve(self):
         self.plot_stack.setCurrentWidget(self.training_figure)
@@ -346,6 +425,7 @@ class TrainingWindow(BaseWindow):
     def start_training(self):
         if self.training_start:
             return
+
         if not self.all_inputs_filled():
             self.show_message_box(
                 "Input Error",
@@ -353,26 +433,48 @@ class TrainingWindow(BaseWindow):
                 QMessageBox.Warning,
             )
             return
+
         if self.show_confirmation(
             "Confirm Training", "The training will start. Are you sure?"
         ):
             self.training_start = True
             self.lock_inputs()
             self.create_log_folder()
-            training_params = {
+
+            shared_training_params = {
                 label: widget.text()
                 for label, widget in self.training_inputs.items()
             }
-            config_data = {**self.previous_selections, **training_params}
-            self.training_thread = TrainingThread(
-                self, config_data, self.folder_name
-            )
-            self.training_thread.start()
+
+            algorithms = self.previous_selections.get("Algorithms", [])
+            per_algorithm_configs = []
+
+            for algo_entry in algorithms:
+                algo_name = algo_entry.get("Algorithm")
+                hyperparams = algo_entry.get("Hyperparameters", {})
+
+                config = {
+                    "Algorithm": algo_name,
+                    "Hyperparameters": hyperparams,
+                    **shared_training_params,
+                    "selected_platform": self.previous_selections.get("selected_platform"),
+                    "selected_environment": self.previous_selections.get("selected_environment"),
+                    "setup_choice": self.previous_selections.get("setup_choice"),
+                }
+                per_algorithm_configs.append(config)
+
+            # todo: also consider the case of same algorithm with different hyperparameters
+            self.training_threads = []
+            for config_data in per_algorithm_configs:
+                thread = TrainingThread(self, config_data, self.folder_name)
+                self.training_threads.append(thread)
+                thread.start()
+
 
     def create_log_folder(self):
         home_dir = os.path.expanduser("~")
         timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
-        self.folder_name = os.path.join(home_dir, f"training_log_{timestamp}")
+        self.folder_name = os.path.join(home_dir, f"training_log_{timestamp}") # TODO: Maybe include the algorithm(s) name
         os.makedirs(self.folder_name, exist_ok=True)
         training_params = {
             label: widget.text()
@@ -388,6 +490,7 @@ class TrainingWindow(BaseWindow):
         if self.training_start and self.show_confirmation(
             "Stop Training", "Are you sure you want to stop the training?"
         ):
+            # todo check and fix this
             self.training_start = False
             self.training_thread.stop()
             self.training_thread.wait()
@@ -406,14 +509,10 @@ class TrainingWindow(BaseWindow):
         self.previous_window()
 
     def all_inputs_filled(self):
+        algorithms = self.previous_selections.get("Algorithms", [])
+        is_single_ppo = len(algorithms) == 1 and algorithms[0].get("Algorithm") == "PPO"
         for label, widget in self.training_inputs.items():
-            if self.previous_selections.get(
-                "Algorithm"
-            ) == "PPO" and label in [
-                "Exploration Steps",
-                "Batch Size",
-                "G Value",
-            ]:
+            if is_single_ppo and label in ["Exploration Steps", "Batch Size", "G Value"]:
                 continue
             if widget.text().strip() == "":
                 return False
