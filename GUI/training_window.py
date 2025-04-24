@@ -57,6 +57,9 @@ class TrainingWindow(BaseWindow):
         self.init_ui()
         self.connect_signals()
 
+        self.training_plot_data_by_algo = {} # todo define a better name for this
+        self.evaluation_plot_data_by_algo = {}  # For evaluation curves
+
         self.completed_algorithms = set()
         self.total_algorithms = len(self.previous_selections.get("Algorithms", []))
 
@@ -152,32 +155,6 @@ class TrainingWindow(BaseWindow):
         layout.addLayout(self.create_selection_plot_layout())
         layout.addWidget(self.create_separator())
         return layout
-
-    # def create_bottom_layout(self) -> QHBoxLayout:
-    #     layout = QHBoxLayout()
-    #     self.info_labels = self.create_info_labels()
-    #     for label in self.info_labels.values():
-    #         layout.addWidget(label)
-    #     return layout
-
-    # def create_progress_bar(self) -> QProgressBar:
-    #     self.progress_bar = QProgressBar(self)
-    #     self.progress_bar.setStyleSheet(Styles.PROGRESS_BAR)
-    #     self.progress_bar.setFixedHeight(30)
-    #     self.progress_bar.setValue(0)
-    #     return self.progress_bar
-
-    # def create_info_labels(self) -> dict:
-    #     labels = {
-    #         "Time Remaining": QLabel("Time Remaining: N/A", self),
-    #         "Total Steps": QLabel("Total Steps: 0", self),
-    #         "Episode Number": QLabel("Episode Number: 0", self),
-    #         "Episode Reward": QLabel("Episode Reward: 0", self),
-    #         "Episode Steps": QLabel("Episode Steps: 0", self),
-    #     }
-    #     for label in labels.values():
-    #         label.setStyleSheet(Styles.TEXT_LABEL)
-    #     return labels
 
     def create_bottom_tab_layout(self) -> QWidget:
         container = QWidget()
@@ -335,15 +312,15 @@ class TrainingWindow(BaseWindow):
             self.open_log_file()
         self.reset_training_window()
 
-    def update_plot_eval(self, data_plot):
-        self.evaluation_figure.plot_data(
-            data_plot, "Evaluation Curve", "Average Reward"
-        )
+    # def update_plot_eval(self, data_plot):
+    #     self.evaluation_figure.plot_data(
+    #         data_plot, "Evaluation Curve", "Average Reward"
+    #     )
 
-    def update_plot(self, data_plot):
-        self.training_figure.plot_data(
-            data_plot, "Training Curve", "Episode Reward"
-        )
+    # def update_plot(self, data_plot):
+    #     self.training_figure.plot_data(
+    #         data_plot, "Training Curve", "Episode Reward"
+    #     )
 
     def update_episode_steps(self, steps):
         self.info_labels["Episode Steps"].setText(f"Episode Steps: {steps}")
@@ -366,16 +343,23 @@ class TrainingWindow(BaseWindow):
         # todo: this needs to be updated to
         #self.algo_info[algo_name]["labels"]["Total Steps"].setText(f"Total Steps: {steps}")
 
-
     def update_progress_bar(self, value):
         self.progress_bar.setValue(value)
         # todo: this needs to be updated to
         #self.algo_info[algo_name]["progress_bar"].setValue(progress)
 
+    def update_plot_training(self, algo_name, data_plot):
+        self.training_plot_data_by_algo[algo_name] = data_plot
+        self.training_figure.plot_data(data_plot=self.training_plot_data_by_algo, title="Training Curve", y_label="Episode Reward")
+
+    def update_plot_evaluation(self, algo_name, data_plot):
+        self.evaluation_plot_data_by_algo[algo_name] = data_plot
+        self.evaluation_figure.plot_data(data_plot=self.evaluation_plot_data_by_algo, title="Evaluation Curve", y_label="Average Reward")
+
+
     def update_algorithm_ui(self, algo_name: str, key: str, value): # todo change this name to update_algorithm_values
         if algo_name not in self.algo_info:
             return  # Ignore updates for unknown algorithms
-
         if key == "Time Remaining":
             self.algo_info[algo_name]["labels"]["Time Remaining"].setText(f"Time Remaining: {value}")
         elif key == "Total Steps":

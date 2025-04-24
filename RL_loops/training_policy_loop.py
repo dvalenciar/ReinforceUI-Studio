@@ -226,7 +226,7 @@ def training_loop(  # noqa: C901
                 total_step_counter + 1,
                 episode_time,
             )
-            training_window.update_plot(df_log_train)
+            training_window.update_plot_training(algorithm_name, df_log_train)
 
             # Save checkpoint based on log interval
             if (total_step_counter + 1) % log_interval == 0:
@@ -252,7 +252,7 @@ def training_loop(  # noqa: C901
             df_grouped = df_log_evaluation.groupby(
                 "Total Timesteps", as_index=False
             ).last()
-            training_window.update_plot_eval(df_grouped)
+            training_window.update_plot_evaluation(df_grouped)
 
         # Update the training window
         # training_window.update_progress_signal.emit(int(progress))

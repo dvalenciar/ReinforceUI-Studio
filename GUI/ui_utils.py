@@ -58,10 +58,16 @@ class PlotCanvas(FigureCanvasQTAgg):
         """
         self.ax.clear()
 
+        for algo_name, df in data_plot.items():
+            self.ax.plot(
+                df["Total Timesteps"],
+                df[y_label],
+                label=algo_name,
+                linewidth=2.0,
+            )
+
         # Set Titles and Labels
-        self.ax.set_title(
-            title, color="white", fontsize=14, fontweight="bold", pad=10
-        )
+        self.ax.set_title(title, color="white", fontsize=14, fontweight="bold", pad=10)
         self.ax.set_xlabel("Steps", color="white", fontsize=12, labelpad=5)
         self.ax.set_ylabel(y_label, color="white", fontsize=12, labelpad=5)
 
@@ -70,17 +76,17 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.ax.tick_params(axis="y", colors="white", labelsize=10)
 
         # Grid Style
-        self.ax.grid(
-            True, color="#666666", linestyle="--", linewidth=0.6, alpha=0.7
-        )
+        self.ax.grid(True, color="#666666", linestyle="--", linewidth=0.6, alpha=0.7)
+
+        self.ax.legend(loc="upper left", fontsize=10)
 
         # Plot Data
-        self.ax.plot(
-            data_plot["Total Timesteps"],
-            data_plot[y_label],
-            color="#1976D2",  # Medium blue matching button hover
-            linewidth=2.0,
-        )
+        # self.ax.plot(
+        #     data_plot["Total Timesteps"],
+        #     data_plot[y_label],
+        #     color="#1976D2",  # Medium blue matching button hover
+        #     linewidth=2.0,
+        # )
 
         self.draw()
 
