@@ -24,19 +24,13 @@ from GUI.ui_utils import create_button, create_activation_button
 
 
 class TrainingWindow(BaseWindow):
-    update_plot_signal = pyqtSignal(object)
-    update_plot_eval_signal = pyqtSignal(object)
-    update_progress_signal = pyqtSignal(int)
-    update_step_signal = pyqtSignal(int)
-    update_reward_signal = pyqtSignal(float)
-    update_episode_signal = pyqtSignal(int)
-    update_time_remaining_signal = pyqtSignal(str)
-    update_episode_steps_signal = pyqtSignal(int)
-    training_completed_signal = pyqtSignal(bool)
+    update_algo_signal = pyqtSignal(str, str, object)  # algo_name, key, value
+    update_plot_signal = pyqtSignal(str, object, str)  # algo_name, data_plot, plot_type
+    training_completed_signal = pyqtSignal(str, bool)  # algo_name, status_flag
 
     def __init__(self, previous_window, previous_selections) -> None:  # noqa
         """Initialize the TrainingWindow class"""
-        super().__init__("Training Configuration Window", 1300, 870)
+        super().__init__("Training Configuration Window", 1300, 890)
 
         self.folder_name = None
         self.selected_button = None
@@ -66,18 +60,9 @@ class TrainingWindow(BaseWindow):
     def connect_signals(self) -> None:
         """Connect signals to their respective slots"""
         signals = [
-            (self.update_progress_signal, self.update_progress_bar),
-            (self.update_step_signal, self.update_step_label),
-            (self.update_reward_signal, self.update_reward_label),
-            (self.update_episode_signal, self.update_episode_label),
-            (self.update_time_remaining_signal, self.update_time_remaining),
-            (self.update_episode_steps_signal, self.update_episode_steps),
+            (self.update_algo_signal, self.update_algorithm_ui),
             (self.update_plot_signal, self.update_plot),
-            (self.update_plot_eval_signal, self.update_plot_eval),
-            (
-                self.training_completed_signal,
-                self.show_training_completed_message,
-            ),
+            (self.training_completed_signal, self.update_confirmation),
         ]
         for signal, slot in signals:
             signal.connect(slot)
@@ -104,8 +89,6 @@ class TrainingWindow(BaseWindow):
         middle_layout.addLayout(self.create_right_layout())
         main_layout.addLayout(middle_layout)
 
-        # main_layout.addLayout(self.create_bottom_layout())
-        # main_layout.addWidget(self.create_progress_bar())
         main_layout.addWidget(self.create_bottom_tab_layout())
 
         open_log_file_button = create_button(
@@ -289,73 +272,44 @@ class TrainingWindow(BaseWindow):
 
         return layout
 
-
     def show_training_completed_message(self, completion_flag) -> None:
         msg_box = QMessageBox(self)
-        msg_box.setIcon(
-            QMessageBox.Information if completion_flag else QMessageBox.Warning
-        )
-        msg_box.setWindowTitle(
-            "Training Completed" if completion_flag else "Training Interrupted"
-        )
+        msg_box.setIcon(QMessageBox.Information if completion_flag else QMessageBox.Warning)
+        msg_box.setWindowTitle("Training Completed" if completion_flag else "Training Interrupted")
         msg_box.setText(
             "The training process has been successfully completed."
             if completion_flag
             else "The training process has been interrupted."
         )
         msg_box.setStyleSheet(Styles.MESSAGE_BOX)
-        see_log_button = msg_box.addButton(
-            "See log folder", QMessageBox.AcceptRole
-        )
+        see_log_button = msg_box.addButton("See log folder", QMessageBox.AcceptRole)
         msg_box.exec_()
-        if msg_box.clickedButton() == see_log_button:
-            self.open_log_file()
+
+        # todo uncomment this and check compatibility
+        # if msg_box.clickedButton() == see_log_button:
+        #     self.open_log_file()
         self.reset_training_window()
 
-    # def update_plot_eval(self, data_plot):
-    #     self.evaluation_figure.plot_data(
-    #         data_plot, "Evaluation Curve", "Average Reward"
-    #     )
+    def update_confirmation(self, algo_name, status_flag):
+        self.completed_algorithms.add(algo_name)
+        if len(self.completed_algorithms) == self.total_algorithms:
+            self.show_training_completed_message(status_flag)
 
-    # def update_plot(self, data_plot):
-    #     self.training_figure.plot_data(
-    #         data_plot, "Training Curve", "Episode Reward"
-    #     )
-
-    def update_episode_steps(self, steps):
-        self.info_labels["Episode Steps"].setText(f"Episode Steps: {steps}")
-
-    def update_time_remaining(self, time_remaining):
-        self.info_labels["Time Remaining"].setText(
-            f"Time Remaining: {time_remaining}"
-        )
-
-    def update_episode_label(self, episode):
-        self.info_labels["Episode Number"].setText(
-            f"Episode Number: {episode}"
-        )
-
-    def update_reward_label(self, reward):
-        self.info_labels["Episode Reward"].setText(f"Episode Reward: {reward}")
-
-    def update_step_label(self, step):
-        self.info_labels["Total Steps"].setText(f"Total Steps: {step}")
-        # todo: this needs to be updated to
-        #self.algo_info[algo_name]["labels"]["Total Steps"].setText(f"Total Steps: {steps}")
-
-    def update_progress_bar(self, value):
-        self.progress_bar.setValue(value)
-        # todo: this needs to be updated to
-        #self.algo_info[algo_name]["progress_bar"].setValue(progress)
-
-    def update_plot_training(self, algo_name, data_plot):
-        self.training_plot_data_by_algo[algo_name] = data_plot
-        self.training_figure.plot_data(data_plot=self.training_plot_data_by_algo, title="Training Curve", y_label="Episode Reward")
-
-    def update_plot_evaluation(self, algo_name, data_plot):
-        self.evaluation_plot_data_by_algo[algo_name] = data_plot
-        self.evaluation_figure.plot_data(data_plot=self.evaluation_plot_data_by_algo, title="Evaluation Curve", y_label="Average Reward")
-
+    def update_plot(self, algo_name, data_plot, plot_type: str):
+        if plot_type == "training":
+            self.training_plot_data_by_algo[algo_name] = data_plot
+            self.training_figure.plot_data(
+                data_plot=self.training_plot_data_by_algo,
+                title="Training Curve",
+                y_label="Episode Reward",
+            )
+        elif plot_type == "evaluation":
+            self.evaluation_plot_data_by_algo[algo_name] = data_plot
+            self.evaluation_figure.plot_data(
+                data_plot=self.evaluation_plot_data_by_algo,
+                title="Evaluation Curve",
+                y_label="Average Reward",
+            )
 
     def update_algorithm_ui(self, algo_name: str, key: str, value): # todo change this name to update_algorithm_values
         if algo_name not in self.algo_info:
@@ -373,10 +327,6 @@ class TrainingWindow(BaseWindow):
         elif key == "Progress":
             self.algo_info[algo_name]["progress_bar"].setValue(value)
 
-        elif key == "training_completed":
-            self.completed_algorithms.add(algo_name)
-            if len(self.completed_algorithms) == self.total_algorithms:
-                self.show_training_completed_message(value) # todo have a look ion this and the value passed to it
 
 
     def show_training_curve(self):
@@ -478,12 +428,16 @@ class TrainingWindow(BaseWindow):
 
     def stop_training(self):
         if self.training_start and self.show_confirmation(
-            "Stop Training", "Are you sure you want to stop the training?"
+                "Stop Training", "Are you sure you want to stop the training?"
         ):
-            # todo check and fix this
             self.training_start = False
-            self.training_thread.stop()
-            self.training_thread.wait()
+
+            # Stop and wait for all threads
+            for thread in self.training_threads:
+                thread.stop()
+                thread.wait()
+
+            # Re-enable UI input fields
             for widget in self.training_inputs.values():
                 widget.setReadOnly(False)
 
@@ -537,18 +491,27 @@ class TrainingWindow(BaseWindow):
         return confirm_msg.exec_() == QMessageBox.Yes
 
     def reset_training_window(self):
+        print("inside reset_training_window")
         self.folder_name = None
+
         for field, widget in self.training_inputs.items():
             widget.setText(self.default_values.get(field, ""))
-        self.progress_bar.setValue(0)
+            widget.setReadOnly(False)
+
+        # Reset all algorithm-specific UI (labels and progress bars)
+        for algo_data in self.algo_info.values():
+            for label in algo_data["labels"].values():
+                label.setText(label.text().split(":")[0] + ": 0")
+            algo_data["progress_bar"].setValue(0)
+
         self.training_figure.clear_data()
         self.evaluation_figure.clear_data()
-        for label in self.info_labels.values():
-            label.setText(label.text().split(":")[0] + ": 0")
-        for widget in self.training_inputs.values():
-            widget.setReadOnly(False)
+
         self.adjust_for_ppo()
         self.training_start = False
+        self.completed_algorithms = set()
+        self.training_plot_data_by_algo.clear()
+        self.evaluation_plot_data_by_algo.clear()
 
     def adjust_for_ppo(self):
         algorithms = self.previous_selections.get("Algorithms", [])

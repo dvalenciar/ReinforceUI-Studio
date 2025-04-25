@@ -5,6 +5,7 @@ from matplotlib.figure import Figure
 from RL_loops.training_policy_loop import training_loop
 from PyQt5.QtCore import QThread
 
+# todo change the name of the file and maybe move each class to its own file
 
 class TrainingThread(QThread):
     def __init__(self, training_window, config_data, log_folder):
@@ -18,14 +19,15 @@ class TrainingThread(QThread):
     def run(self):
         print(f"[{self.algorithm_name}] Training thread started")
         training_loop(
-            self.config_data,
-            self.training_window,
-            self.log_folder,
-            is_running=self._is_running,
-            algorithm_name=self.algorithm_name
+            config_data = self.config_data,
+            training_window=self.training_window,
+            log_folder_path=self.log_folder,
+            algorithm_name=self.algorithm_name,
+            is_running=lambda: self._is_running,
         )
 
     def stop(self):
+        print(f"[{self.algorithm_name}] Training thread stopped")
         self._is_running = False
 
 
@@ -77,16 +79,7 @@ class PlotCanvas(FigureCanvasQTAgg):
 
         # Grid Style
         self.ax.grid(True, color="#666666", linestyle="--", linewidth=0.6, alpha=0.7)
-
         self.ax.legend(loc="upper left", fontsize=10)
-
-        # Plot Data
-        # self.ax.plot(
-        #     data_plot["Total Timesteps"],
-        #     data_plot[y_label],
-        #     color="#1976D2",  # Medium blue matching button hover
-        #     linewidth=2.0,
-        # )
 
         self.draw()
 

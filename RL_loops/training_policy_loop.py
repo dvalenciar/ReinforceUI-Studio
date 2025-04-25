@@ -1,7 +1,7 @@
 import time
 import importlib
 import random
-from typing import Any
+from typing import Any, Callable
 from RL_memory.memory_buffer import MemoryBuffer
 from RL_environment.gym_env import GymEnvironment
 from RL_environment.dmcs_env import DMControlEnvironment
@@ -63,8 +63,9 @@ def training_loop(  # noqa: C901
     config_data: dict,
     training_window: Any,
     log_folder_path: str,
-    is_running: bool,
-    algorithm_name: str = None,
+    algorithm_name: str,
+    is_running: Callable,
+
 ) -> None:
     """Run the training loop for the reinforcement learning agent.
 
@@ -72,8 +73,8 @@ def training_loop(  # noqa: C901
         config_data: The configuration data for the training.
         training_window: The training window for updating progress.
         log_folder_path: The path to the log folder.
-        is_running: check if the training is running.
-        algorithm_name: The name of the algorithm being used. Defaults to None.
+        algorithm_name: The name of the algorithm being used.
+        is_running: A callable that returns True if training should continue.
     """
     set_seed(int(config_data.get("Seed")))
     algorithm = import_algorithm_instance(algorithm_name)
@@ -135,7 +136,7 @@ def training_loop(  # noqa: C901
 
     training_completed = True
     for total_step_counter in range(steps_training):
-        if not is_running:  # Check the running state using the callable
+        if not is_running():  # Check the running state using the callable
             print("Training loop interrupted. Exiting...")
             training_completed = False
             break
@@ -207,17 +208,17 @@ def training_loop(  # noqa: C901
                 "%H:%M:%S", time.gmtime(max(0, estimated_time_remaining))
             )
 
-            #training_window.update_time_remaining_signal.emit(episode_time_str)
-            training_window.update_algorithm_ui(algorithm_name, "Time Remaining", episode_time_str)
+            training_window.update_algo_signal.emit(algorithm_name, "Time Remaining", episode_time_str)
+            #training_window.update_algorithm_ui(algorithm_name, "Time Remaining", episode_time_str)
 
-            #training_window.update_episode_signal.emit(episode_num + 1)
-            training_window.update_algorithm_ui(algorithm_name, "Episode Number", episode_num + 1)
+            training_window.update_algo_signal.emit(algorithm_name, "Episode Number", episode_num + 1)
+            #training_window.update_algorithm_ui(algorithm_name, "Episode Number", episode_num + 1)
 
-            #training_window.update_reward_signal.emit(round(episode_reward, 3))
-            training_window.update_algorithm_ui(algorithm_name, "Episode Reward", round(episode_reward, 3))
+            training_window.update_algo_signal.emit(algorithm_name, "Episode Reward", round(episode_reward, 3))
+            # training_window.update_algorithm_ui(algorithm_name, "Episode Reward", round(episode_reward, 3))
 
-            # training_window.update_episode_steps_signal.emit(episode_timesteps)
-            training_window.update_algorithm_ui(algorithm_name, "Episode Steps", episode_timesteps)
+            training_window.update_algo_signal.emit(algorithm_name, "Episode Steps", episode_timesteps)
+            # training_window.update_algorithm_ui(algorithm_name, "Episode Steps", episode_timesteps)
 
             df_log_train = logger.log_training(
                 episode_num + 1,
@@ -226,7 +227,9 @@ def training_loop(  # noqa: C901
                 total_step_counter + 1,
                 episode_time,
             )
-            training_window.update_plot_training(algorithm_name, df_log_train)
+
+            #training_window.update_plot_training(algorithm_name, df_log_train)
+            training_window.update_plot_signal.emit(algorithm_name, df_log_train, "training")
 
             # Save checkpoint based on log interval
             if (total_step_counter + 1) % log_interval == 0:
@@ -252,20 +255,24 @@ def training_loop(  # noqa: C901
             df_grouped = df_log_evaluation.groupby(
                 "Total Timesteps", as_index=False
             ).last()
-            training_window.update_plot_evaluation(df_grouped)
+
+            # training_window.update_plot_evaluation(algorithm_name, df_grouped)
+            training_window.update_plot_signal.emit(algorithm_name, df_grouped, "evaluation")
 
         # Update the training window
-        # training_window.update_progress_signal.emit(int(progress))
-        training_window.update_algorithm_ui(algorithm_name, "Progress", int(progress))
+        training_window.update_algo_signal.emit(algorithm_name, "Progress", int(progress))
+        # training_window.update_algorithm_ui(algorithm_name, "Progress", int(progress))
 
-        # training_window.update_step_signal.emit(total_step_counter + 1)
-        training_window.update_algorithm_ui(algorithm_name, "Total Steps", total_step_counter + 1)
+        training_window.update_algo_signal.emit(algorithm_name, "Total Steps", total_step_counter + 1)
+        # training_window.update_algorithm_ui(algorithm_name, "Total Steps", total_step_counter + 1)
 
 
     # Finalize training
-    logger.save_logs()
-    policy_loop_test(env, rl_agent, logger, algo_name=algorithm_name)
+    # fixme uncomment when needed and check correct compatibility
+    #logger.save_logs()
+    #policy_loop_test(env, rl_agent, logger, algo_name=algorithm_name)
 
 
-    # training_window.training_completed_signal.emit(training_completed)
-    training_window.update_algorithm_ui(algorithm_name, "training_completed", training_completed )
+    # training_window.update_confirmation(algorithm_name, training_completed )
+    training_window.training_completed_signal.emit(algorithm_name, training_completed)
+
