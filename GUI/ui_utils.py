@@ -4,6 +4,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from RL_loops.training_policy_loop import training_loop
 from PyQt5.QtCore import QThread
+from collections import defaultdict
+
 
 # todo change the name of the file and maybe move each class to its own file
 
@@ -12,6 +14,7 @@ class TrainingThread(QThread):
         super().__init__()
         self.config_data = config_data
         self.algorithm_name = config_data["Algorithm"]
+        self.display_name = config_data["UniqueName"]
         self.training_window = training_window
         self.log_folder = log_folder
         self._is_running = True
@@ -23,6 +26,7 @@ class TrainingThread(QThread):
             training_window=self.training_window,
             log_folder_path=self.log_folder,
             algorithm_name=self.algorithm_name,
+            display_name=self.display_name,
             is_running=lambda: self._is_running,
         )
 
@@ -104,8 +108,18 @@ class PlotCanvas(FigureCanvasQTAgg):
             alpha=0.6,  # Semi-transparent white
             fontweight="medium",
         )
-
         self.draw()
+
+def make_unique_names(algorithms: list[dict]) -> None:
+    algo_counts = defaultdict(int)
+    for config in algorithms:
+        base_name = config["Algorithm"]
+        algo_counts[base_name] += 1
+        if algo_counts[base_name] > 1:
+            config["UniqueName"] = f"{base_name} ({algo_counts[base_name]})"
+        else:
+            config["UniqueName"] = base_name
+
 
 
 def create_button(

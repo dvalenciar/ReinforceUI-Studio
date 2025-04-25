@@ -64,6 +64,7 @@ def training_loop(  # noqa: C901
     training_window: Any,
     log_folder_path: str,
     algorithm_name: str,
+    display_name: str,
     is_running: Callable,
 
 ) -> None:
@@ -74,6 +75,7 @@ def training_loop(  # noqa: C901
         training_window: The training window for updating progress.
         log_folder_path: The path to the log folder.
         algorithm_name: The name of the algorithm being used.
+        display_name: The display name for the algorithm.
         is_running: A callable that returns True if training should continue.
     """
     set_seed(int(config_data.get("Seed")))
@@ -208,16 +210,16 @@ def training_loop(  # noqa: C901
                 "%H:%M:%S", time.gmtime(max(0, estimated_time_remaining))
             )
 
-            training_window.update_algo_signal.emit(algorithm_name, "Time Remaining", episode_time_str)
+            training_window.update_algo_signal.emit(display_name, "Time Remaining", episode_time_str)
             #training_window.update_algorithm_ui(algorithm_name, "Time Remaining", episode_time_str)
 
-            training_window.update_algo_signal.emit(algorithm_name, "Episode Number", episode_num + 1)
+            training_window.update_algo_signal.emit(display_name, "Episode Number", episode_num + 1)
             #training_window.update_algorithm_ui(algorithm_name, "Episode Number", episode_num + 1)
 
-            training_window.update_algo_signal.emit(algorithm_name, "Episode Reward", round(episode_reward, 3))
+            training_window.update_algo_signal.emit(display_name, "Episode Reward", round(episode_reward, 3))
             # training_window.update_algorithm_ui(algorithm_name, "Episode Reward", round(episode_reward, 3))
 
-            training_window.update_algo_signal.emit(algorithm_name, "Episode Steps", episode_timesteps)
+            training_window.update_algo_signal.emit(display_name, "Episode Steps", episode_timesteps)
             # training_window.update_algorithm_ui(algorithm_name, "Episode Steps", episode_timesteps)
 
             df_log_train = logger.log_training(
@@ -229,7 +231,7 @@ def training_loop(  # noqa: C901
             )
 
             #training_window.update_plot_training(algorithm_name, df_log_train)
-            training_window.update_plot_signal.emit(algorithm_name, df_log_train, "training")
+            training_window.update_plot_signal.emit(display_name, df_log_train, "training")
 
             # Save checkpoint based on log interval
             if (total_step_counter + 1) % log_interval == 0:
@@ -257,13 +259,13 @@ def training_loop(  # noqa: C901
             ).last()
 
             # training_window.update_plot_evaluation(algorithm_name, df_grouped)
-            training_window.update_plot_signal.emit(algorithm_name, df_grouped, "evaluation")
+            training_window.update_plot_signal.emit(display_name, df_grouped, "evaluation")
 
         # Update the training window
-        training_window.update_algo_signal.emit(algorithm_name, "Progress", int(progress))
+        training_window.update_algo_signal.emit(display_name, "Progress", int(progress))
         # training_window.update_algorithm_ui(algorithm_name, "Progress", int(progress))
 
-        training_window.update_algo_signal.emit(algorithm_name, "Total Steps", total_step_counter + 1)
+        training_window.update_algo_signal.emit(display_name, "Total Steps", total_step_counter + 1)
         # training_window.update_algorithm_ui(algorithm_name, "Total Steps", total_step_counter + 1)
 
 
@@ -274,5 +276,5 @@ def training_loop(  # noqa: C901
 
 
     # training_window.update_confirmation(algorithm_name, training_completed )
-    training_window.training_completed_signal.emit(algorithm_name, training_completed)
+    training_window.training_completed_signal.emit(display_name, training_completed)
 

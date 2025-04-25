@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QDesktopServices, QIcon
-from GUI.ui_utils import PlotCanvas, TrainingThread
+from GUI.ui_utils import PlotCanvas, TrainingThread, make_unique_names
 from GUI.ui_base_window import BaseWindow
 from GUI.ui_styles import Styles
 from GUI.ui_utils import create_button, create_activation_button
@@ -35,6 +35,10 @@ class TrainingWindow(BaseWindow):
         self.folder_name = None
         self.selected_button = None
         self.training_start = None
+
+        # handle the possibility of having the same algorithms with different hyperparameters
+        make_unique_names(previous_selections["Algorithms"])
+
         self.previous_window = previous_window
         self.previous_selections = previous_selections
 
@@ -147,7 +151,7 @@ class TrainingWindow(BaseWindow):
         self.algo_info = {}
 
         for algo_dict in self.previous_selections.get("Algorithms", []):
-            algo_name = algo_dict["Algorithm"]
+            algo_name = algo_dict.get("UniqueName")  # Use unique display name
             tab = self.create_algorithm_tab(algo_name)
             self.tab_widget.addTab(tab, algo_name)
 
@@ -323,8 +327,6 @@ class TrainingWindow(BaseWindow):
         elif key == "Progress":
             self.algo_info[algo_name]["progress_bar"].setValue(value)
 
-
-
     def show_training_curve(self):
         self.plot_stack.setCurrentWidget(self.training_figure)
         self.update_button_styles(
@@ -388,12 +390,10 @@ class TrainingWindow(BaseWindow):
 
             per_algorithm_configs = []
             for algo_entry in algorithms:
-                algo_name = algo_entry.get("Algorithm")
-                hyperparams = algo_entry.get("Hyperparameters", {})
-
                 config = {
-                    "Algorithm": algo_name,
-                    "Hyperparameters": hyperparams,
+                    "Algorithm": algo_entry.get("Algorithm"),
+                    "UniqueName": algo_entry.get("UniqueName"),
+                    "Hyperparameters": algo_entry.get("Hyperparameters", {}),
                     **shared_training_params,
                     "selected_platform": self.previous_selections.get("selected_platform"),
                     "selected_environment": self.previous_selections.get("selected_environment"),
@@ -401,7 +401,6 @@ class TrainingWindow(BaseWindow):
                 }
                 per_algorithm_configs.append(config)
 
-            # todo: also consider the case of same algorithm with different hyperparameters
             self.training_threads = []
             for config_data in per_algorithm_configs:
                 thread = TrainingThread(self, config_data, self.folder_name)
@@ -428,17 +427,17 @@ class TrainingWindow(BaseWindow):
 
         # Save per-algorithm configs
         algorithms = self.previous_selections.get("Algorithms", [])
-        for algo_entry in algorithms:
-            algo_name = algo_entry.get("Algorithm")
-            hyperparams = algo_entry.get("Hyperparameters", {})
 
-            algo_folder = os.path.join(self.folder_name, algo_name)
+        for algo_entry in algorithms:
+            algo_name_display = algo_entry.get("UniqueName")
+
+            algo_folder = os.path.join(self.folder_name, algo_name_display)
             os.makedirs(algo_folder, exist_ok=True)
 
             algo_config = {
                 "Shared Parameters": training_params,
-                "Algorithm": algo_name,
-                "Hyperparameters": hyperparams,
+                "Algorithm": algo_entry.get("Algorithm"),
+                "Hyperparameters": algo_entry.get("Hyperparameters", {}),
             }
 
             with open(os.path.join(algo_folder, "config.json"), "w") as algo_file:
