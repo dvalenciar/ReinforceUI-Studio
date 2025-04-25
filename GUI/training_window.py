@@ -277,17 +277,13 @@ class TrainingWindow(BaseWindow):
         msg_box.setIcon(QMessageBox.Information if completion_flag else QMessageBox.Warning)
         msg_box.setWindowTitle("Training Completed" if completion_flag else "Training Interrupted")
         msg_box.setText(
-            "The training process has been successfully completed."
-            if completion_flag
-            else "The training process has been interrupted."
-        )
+            "The training process has been successfully completed." if completion_flag else "The training process has been interrupted.")
         msg_box.setStyleSheet(Styles.MESSAGE_BOX)
         see_log_button = msg_box.addButton("See log folder", QMessageBox.AcceptRole)
         msg_box.exec_()
 
-        # todo uncomment this and check compatibility
-        # if msg_box.clickedButton() == see_log_button:
-        #     self.open_log_file()
+        if msg_box.clickedButton() == see_log_button:
+            self.open_log_file()
         self.reset_training_window()
 
     def update_confirmation(self, algo_name, status_flag):
@@ -375,20 +371,22 @@ class TrainingWindow(BaseWindow):
             return
 
         if self.show_confirmation(
-            "Confirm Training", "The training will start. Are you sure?"
+                "Confirm Training", "The training will start. Are you sure?"
         ):
             self.training_start = True
             self.lock_inputs()
-            self.create_log_folder()
+
+            algorithms = self.previous_selections.get("Algorithms", [])
+            algo_names = [entry.get("Algorithm") for entry in algorithms]
+
+            self.create_log_folder(algo_names=algo_names)
 
             shared_training_params = {
                 label: widget.text()
                 for label, widget in self.training_inputs.items()
             }
 
-            algorithms = self.previous_selections.get("Algorithms", [])
             per_algorithm_configs = []
-
             for algo_entry in algorithms:
                 algo_name = algo_entry.get("Algorithm")
                 hyperparams = algo_entry.get("Hyperparameters", {})
@@ -410,21 +408,42 @@ class TrainingWindow(BaseWindow):
                 self.training_threads.append(thread)
                 thread.start()
 
-
-    def create_log_folder(self):
+    def create_log_folder(self, algo_names: list[str]) -> None:
         home_dir = os.path.expanduser("~")
         timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
-        self.folder_name = os.path.join(home_dir, f"training_log_{timestamp}") # TODO: Maybe include the algorithm(s) name
+        algo_str = "_".join(algo_names)
+        self.folder_name = os.path.join(home_dir, f"training_log_{algo_str}_{timestamp}")
         os.makedirs(self.folder_name, exist_ok=True)
+
+        # Shared/global training parameters
         training_params = {
             label: widget.text()
             for label, widget in self.training_inputs.items()
         }
-        config_data = {**self.previous_selections, **training_params}
-        with open(
-            os.path.join(self.folder_name, "config.json"), "w"
-        ) as config_file:
-            json.dump(config_data, config_file, indent=4)
+
+        # Save the global config file
+        main_config = {**self.previous_selections, **training_params}
+        with open(os.path.join(self.folder_name, "session_config.json"), "w") as config_file:
+            json.dump(main_config, config_file, indent=4)
+
+        # Save per-algorithm configs
+        algorithms = self.previous_selections.get("Algorithms", [])
+        for algo_entry in algorithms:
+            algo_name = algo_entry.get("Algorithm")
+            hyperparams = algo_entry.get("Hyperparameters", {})
+
+            algo_folder = os.path.join(self.folder_name, algo_name)
+            os.makedirs(algo_folder, exist_ok=True)
+
+            algo_config = {
+                "Shared Parameters": training_params,
+                "Algorithm": algo_name,
+                "Hyperparameters": hyperparams,
+            }
+
+            with open(os.path.join(algo_folder, "config.json"), "w") as algo_file:
+                json.dump(algo_config, algo_file, indent=4)
+
 
     def stop_training(self):
         if self.training_start and self.show_confirmation(
@@ -442,7 +461,7 @@ class TrainingWindow(BaseWindow):
                 widget.setReadOnly(False)
 
     def back_to_selection(self):
-        if self.training_start:
+        if self.training_start: # todo this may not be changed to "in progess", name it accordingly
             self.show_message_box(
                 "Training in Progress",
                 "Please stop the training before going back.",
@@ -491,7 +510,6 @@ class TrainingWindow(BaseWindow):
         return confirm_msg.exec_() == QMessageBox.Yes
 
     def reset_training_window(self):
-        print("inside reset_training_window")
         self.folder_name = None
 
         for field, widget in self.training_inputs.items():
