@@ -24,23 +24,30 @@ from GUI.ui_utils import create_button, create_activation_button
 
 
 class TrainingWindow(BaseWindow):
-    update_algo_signal = pyqtSignal(str, str, object)  # algo_name, key, value
-    update_plot_signal = pyqtSignal(str, object, str)  # algo_name, data_plot, plot_type
-    training_completed_signal = pyqtSignal(str, bool)  # algo_name, status_flag
+    update_algo_signal = pyqtSignal(str, str, object)
+    update_plot_signal = pyqtSignal(str, object, str)
+    training_completed_signal = pyqtSignal(str, bool)
 
     def __init__(self, previous_window, previous_selections) -> None:  # noqa
         """Initialize the TrainingWindow class"""
         super().__init__("Training Configuration Window", 1300, 890)
 
-        self.folder_name = None
-        self.selected_button = None
-        self.training_start = None
-
         # handle the possibility of having the same algorithms with different hyperparameters
         make_unique_names(previous_selections["Algorithms"])
 
+        self.main_folder_name = None
+        self.selected_button = None
+        self.training_start = None
+
         self.previous_window = previous_window
         self.previous_selections = previous_selections
+
+        self.algo_info = {}
+        self.training_threads = []
+        self.training_plot_data_by_algo = {}
+        self.evaluation_plot_data_by_algo = {}  # For evaluation curves
+        self.completed_algorithms = set()
+        self.total_algorithms = len(self.previous_selections.get("Algorithms", []))
 
         self.default_values = {
             "Training Steps": "1000000",
@@ -52,19 +59,14 @@ class TrainingWindow(BaseWindow):
             "Log Interval": "1000",
             "Seed": "0",
         }
-        self.init_ui()
+
         self.connect_signals()
-
-        self.training_plot_data_by_algo = {} # todo define a better name for this
-        self.evaluation_plot_data_by_algo = {}  # For evaluation curves
-
-        self.completed_algorithms = set()
-        self.total_algorithms = len(self.previous_selections.get("Algorithms", []))
+        self.init_ui()
 
     def connect_signals(self) -> None:
         """Connect signals to their respective slots"""
         signals = [
-            (self.update_algo_signal, self.update_algorithm_ui),
+            (self.update_algo_signal, self.update_algorithm_labels),
             (self.update_plot_signal, self.update_plot),
             (self.training_completed_signal, self.update_confirmation),
         ]
@@ -138,6 +140,7 @@ class TrainingWindow(BaseWindow):
         self.evaluation_figure = PlotCanvas()
         self.plot_stack.addWidget(self.training_figure)
         self.plot_stack.addWidget(self.evaluation_figure)
+
         layout.addWidget(self.plot_stack)
         layout.addLayout(self.create_selection_plot_layout())
         layout.addWidget(self.create_separator())
@@ -147,25 +150,21 @@ class TrainingWindow(BaseWindow):
         container = QWidget()
         layout = QHBoxLayout(container)  # Set layout on container directly
 
-        self.tab_widget = QTabWidget(self)
-        self.algo_info = {}
-
+        tab_widget = QTabWidget(self)
         for algo_dict in self.previous_selections.get("Algorithms", []):
             algo_name = algo_dict.get("UniqueName")  # Use unique display name
             tab = self.create_algorithm_tab(algo_name)
-            self.tab_widget.addTab(tab, algo_name)
+            tab_widget.addTab(tab, algo_name)
 
-        layout.addWidget(self.tab_widget)
+        layout.addWidget(tab_widget)
         container.setLayout(layout)
         return container
 
-    def create_algorithm_tab(self, algo_name) -> QWidget:
+    def create_algorithm_tab(self, algo_name:str ) -> QWidget:
         widget = QWidget()
-
         labels_layout = QHBoxLayout()
         vertical_layout = QVBoxLayout()
 
-        # Create info labels
         labels = {
             "Time Remaining": QLabel("Time Remaining: N/A", self),
             "Total Steps": QLabel("Total Steps: 0", self),
@@ -192,7 +191,6 @@ class TrainingWindow(BaseWindow):
             "labels": labels,
             "progress_bar": progress_bar,
         }
-
         widget.setLayout(vertical_layout)
         return widget
 
@@ -203,6 +201,7 @@ class TrainingWindow(BaseWindow):
         )
         self.view_training_button.clicked.connect(self.show_training_curve)
         button_layout.addWidget(self.view_training_button)
+
         self.view_evaluation_button = create_button(
             self, "View Evaluation Curve", width=350, height=40
         )
@@ -224,12 +223,6 @@ class TrainingWindow(BaseWindow):
         stop_button.clicked.connect(self.stop_training)
         layout.addWidget(stop_button)
         return layout
-
-    def create_separator(self, vertical=False) -> QFrame:
-        separator = QFrame()
-        separator.setFrameShape(QFrame.VLine if vertical else QFrame.HLine)
-        separator.setStyleSheet(Styles.SEPARATOR_LINE)
-        return separator
 
     def create_input_fields(self) -> dict:
         inputs = {label: QLineEdit(self) for label in self.default_values}
@@ -255,7 +248,6 @@ class TrainingWindow(BaseWindow):
             "selected_environment": "Environment",
             "selected_platform": "Platform",
         }
-
         for key, value in self.previous_selections.items():
             if key == "Algorithms":
                 # Join algorithm names with commas
@@ -273,7 +265,6 @@ class TrainingWindow(BaseWindow):
         )
         view_hyper_button.clicked.connect(self.show_summary_hyperparameters)
         layout.addWidget(view_hyper_button, alignment=Qt.AlignRight)
-
         return layout
 
     def show_training_completed_message(self, completion_flag) -> None:
@@ -311,7 +302,7 @@ class TrainingWindow(BaseWindow):
                 y_label="Average Reward",
             )
 
-    def update_algorithm_ui(self, algo_name: str, key: str, value): # todo change this name to update_algorithm_values
+    def update_algorithm_labels(self, algo_name: str, key: str, value):
         if algo_name not in self.algo_info:
             return  # Ignore updates for unknown algorithms
         if key == "Time Remaining":
@@ -401,9 +392,8 @@ class TrainingWindow(BaseWindow):
                 }
                 per_algorithm_configs.append(config)
 
-            self.training_threads = []
             for config_data in per_algorithm_configs:
-                thread = TrainingThread(self, config_data, self.folder_name)
+                thread = TrainingThread(self, config_data, self.main_folder_name)
                 self.training_threads.append(thread)
                 thread.start()
 
@@ -411,8 +401,8 @@ class TrainingWindow(BaseWindow):
         home_dir = os.path.expanduser("~")
         timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
         algo_str = "_".join(algo_names)
-        self.folder_name = os.path.join(home_dir, f"training_log_{algo_str}_{timestamp}")
-        os.makedirs(self.folder_name, exist_ok=True)
+        self.main_folder_name = os.path.join(home_dir, f"training_log_{algo_str}_{timestamp}")
+        os.makedirs(self.main_folder_name, exist_ok=True)
 
         # Shared/global training parameters
         training_params = {
@@ -422,7 +412,7 @@ class TrainingWindow(BaseWindow):
 
         # Save the global config file
         main_config = {**self.previous_selections, **training_params}
-        with open(os.path.join(self.folder_name, "session_config.json"), "w") as config_file:
+        with open(os.path.join(self.main_folder_name, "session_config.json"), "w") as config_file:
             json.dump(main_config, config_file, indent=4)
 
         # Save per-algorithm configs
@@ -431,7 +421,7 @@ class TrainingWindow(BaseWindow):
         for algo_entry in algorithms:
             algo_name_display = algo_entry.get("UniqueName")
 
-            algo_folder = os.path.join(self.folder_name, algo_name_display)
+            algo_folder = os.path.join(self.main_folder_name, algo_name_display)
             os.makedirs(algo_folder, exist_ok=True)
 
             algo_config = {
@@ -460,7 +450,7 @@ class TrainingWindow(BaseWindow):
                 widget.setReadOnly(False)
 
     def back_to_selection(self):
-        if self.training_start: # todo this may not be changed to "in progess", name it accordingly
+        if self.training_start:
             self.show_message_box(
                 "Training in Progress",
                 "Please stop the training before going back.",
@@ -481,14 +471,14 @@ class TrainingWindow(BaseWindow):
         return True
 
     def open_log_file(self):
-        if not self.folder_name:
+        if not self.main_folder_name:
             self.show_message_box(
                 "Log Folder",
                 "Log folder does not exist. Please Start training first.",
                 QMessageBox.Warning,
             )
         else:
-            QDesktopServices.openUrl(QUrl.fromLocalFile(self.folder_name))
+            QDesktopServices.openUrl(QUrl.fromLocalFile(self.main_folder_name))
 
     def show_message_box(self, title, text, icon):
         msg_box = QMessageBox(self)
@@ -509,7 +499,8 @@ class TrainingWindow(BaseWindow):
         return confirm_msg.exec_() == QMessageBox.Yes
 
     def reset_training_window(self):
-        self.folder_name = None
+        self.main_folder_name = None
+        self.training_threads = []
 
         for field, widget in self.training_inputs.items():
             widget.setText(self.default_values.get(field, ""))
@@ -532,7 +523,6 @@ class TrainingWindow(BaseWindow):
 
     def adjust_for_ppo(self):
         algorithms = self.previous_selections.get("Algorithms", [])
-
         if len(algorithms) == 1 and algorithms[0].get("Algorithm") == "PPO":
             for field in ["Exploration Steps", "Batch Size", "G Value"]:
                 self.training_inputs[field].setText("")
@@ -542,3 +532,12 @@ class TrainingWindow(BaseWindow):
     def update_button_styles(active_button, inactive_button):
         active_button.setStyleSheet(Styles.SELECTED_BUTTON)
         inactive_button.setStyleSheet(Styles.BUTTON)
+
+    @staticmethod
+    def create_separator(vertical=False) -> QFrame:
+        separator = QFrame()
+        separator.setFrameShape(QFrame.VLine if vertical else QFrame.HLine)
+        separator.setStyleSheet(Styles.SEPARATOR_LINE)
+        return separator
+
+

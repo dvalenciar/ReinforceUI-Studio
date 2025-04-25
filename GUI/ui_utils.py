@@ -1,3 +1,4 @@
+import os
 from PyQt5.QtWidgets import QPushButton
 from GUI.ui_styles import Styles
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -16,7 +17,8 @@ class TrainingThread(QThread):
         self.algorithm_name = config_data["Algorithm"]
         self.display_name = config_data["UniqueName"]
         self.training_window = training_window
-        self.log_folder = log_folder
+        self.log_folder = os.path.join(log_folder, self.display_name)
+
         self._is_running = True
 
     def run(self):

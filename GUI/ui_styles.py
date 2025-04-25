@@ -35,7 +35,7 @@ class Styles:
     BIG_TITLE_LABEL = f"""
         {FONT_FAMILY}
         color: {COLORS['text_primary']};
-        font-size: 24px;
+        font-size: 28px;
         font-weight: bold;
         padding: 10px;
     """

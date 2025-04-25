@@ -179,6 +179,7 @@ class SelectAlgorithmWindow(BaseWindow):
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec_()
 
+    # todo this is redundant with the one in update_button_styles in training_window.py, remove it or make it a common function
     def set_active_button(
         self, active_button, inactive_button  # noqa
     ) -> None:

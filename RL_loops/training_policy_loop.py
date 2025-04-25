@@ -99,6 +99,8 @@ def training_loop(  # noqa: C901
         config_data.get("Hyperparameters"),
         algorithm_name,
     )
+
+
     logger = RecordLogger(log_folder_path, rl_agent)
 
     steps_training = int(config_data.get("Training Steps", 1000000))
@@ -211,16 +213,9 @@ def training_loop(  # noqa: C901
             )
 
             training_window.update_algo_signal.emit(display_name, "Time Remaining", episode_time_str)
-            #training_window.update_algorithm_ui(algorithm_name, "Time Remaining", episode_time_str)
-
             training_window.update_algo_signal.emit(display_name, "Episode Number", episode_num + 1)
-            #training_window.update_algorithm_ui(algorithm_name, "Episode Number", episode_num + 1)
-
             training_window.update_algo_signal.emit(display_name, "Episode Reward", round(episode_reward, 3))
-            # training_window.update_algorithm_ui(algorithm_name, "Episode Reward", round(episode_reward, 3))
-
             training_window.update_algo_signal.emit(display_name, "Episode Steps", episode_timesteps)
-            # training_window.update_algorithm_ui(algorithm_name, "Episode Steps", episode_timesteps)
 
             df_log_train = logger.log_training(
                 episode_num + 1,
@@ -230,7 +225,6 @@ def training_loop(  # noqa: C901
                 episode_time,
             )
 
-            #training_window.update_plot_training(algorithm_name, df_log_train)
             training_window.update_plot_signal.emit(display_name, df_log_train, "training")
 
             # Save checkpoint based on log interval
@@ -258,15 +252,11 @@ def training_loop(  # noqa: C901
                 "Total Timesteps", as_index=False
             ).last()
 
-            # training_window.update_plot_evaluation(algorithm_name, df_grouped)
             training_window.update_plot_signal.emit(display_name, df_grouped, "evaluation")
 
         # Update the training window
         training_window.update_algo_signal.emit(display_name, "Progress", int(progress))
-        # training_window.update_algorithm_ui(algorithm_name, "Progress", int(progress))
-
         training_window.update_algo_signal.emit(display_name, "Total Steps", total_step_counter + 1)
-        # training_window.update_algorithm_ui(algorithm_name, "Total Steps", total_step_counter + 1)
 
 
     # Finalize training
