@@ -78,7 +78,12 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
         try:
             with open("config/config_algorithm.yaml", "r") as file:
                 config = yaml.safe_load(file)
-                return [algo["name"] for algo in config.get("algorithms", [])]
+                # Filter out "DQN" from the loaded algorithm names
+                return [
+                    algo["name"]
+                    for algo in config.get("algorithms", [])
+                    if algo["name"] != "DQN"
+                ]
         except FileNotFoundError:
             return []
 

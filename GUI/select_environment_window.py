@@ -77,10 +77,11 @@ class SelectEnvironmentWindow(BaseWindow):
             with open("config/config_platform.yaml", "r") as file:
                 config = yaml.safe_load(file)
                 platforms = config.get("platforms", {})
-                if self.algorithm_selected == "DQN":
-                    return platforms.get(platform, {}).get(
-                        "discrete_environments", []
-                    )
+                if len(self.algorithm_selected) == 1:
+                    if self.algorithm_selected[0]["Algorithm"] == "DQN":
+                        return platforms.get(platform, {}).get(
+                            "discrete_environments", []
+                        )
                 return platforms.get(platform, {}).get("environments", [])
         except FileNotFoundError:
             return []

@@ -69,23 +69,25 @@ class PlatformConfigWindow(BaseWindow):
             },
         ]
 
-        if self.algorithm_selected != "DQN":
-            platforms.insert(
-                1,
-                {
-                    "name": "DMCS",
-                    "gif": "media_resources/cheetah_run.gif",
-                    "is_gif": True,
-                },
-            )
-            platforms.insert(
-                2,
-                {
-                    "name": "MuJoCo",
-                    "gif": "media_resources/half_cheetah.gif",
-                    "is_gif": True,
-                },
-            )
+        if len(self.algorithm_selected) == 1:
+            selected_algo_name = self.algorithm_selected[0]["Algorithm"]
+            if selected_algo_name != "DQN":
+                platforms.insert(
+                    1,
+                    {
+                        "name": "DMCS",
+                        "gif": "media_resources/cheetah_run.gif",
+                        "is_gif": True,
+                    },
+                )
+                platforms.insert(
+                    2,
+                    {
+                        "name": "MuJoCo",
+                        "gif": "media_resources/half_cheetah.gif",
+                        "is_gif": True,
+                    },
+                )
 
         # Create platform buttons
         for platform in platforms:
