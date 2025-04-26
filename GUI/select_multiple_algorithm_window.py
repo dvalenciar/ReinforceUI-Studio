@@ -47,7 +47,13 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
 
         # Navigation buttons
         nav_layout = QHBoxLayout()
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(
+            self,
+            "Back",
+            width=120,
+            height=50,
+            icon=QIcon("media_resources/icons/back.svg"),
+        )
         back_button.clicked.connect(self.open_welcome_window)
         nav_layout.addWidget(back_button)
         nav_layout.addItem(
