@@ -123,7 +123,6 @@ def make_unique_names(algorithms: list[dict]) -> None:
             config["UniqueName"] = base_name
 
 
-
 def create_button(
     parent,
     text=" ",

@@ -21,6 +21,7 @@ from GUI.ui_utils import PlotCanvas, TrainingThread, make_unique_names
 from GUI.ui_base_window import BaseWindow
 from GUI.ui_styles import Styles
 from GUI.ui_utils import create_button, create_activation_button
+from RL_helpers.plotters import plot_comparison
 
 
 class TrainingWindow(BaseWindow):
@@ -284,6 +285,7 @@ class TrainingWindow(BaseWindow):
     def update_confirmation(self, algo_name, status_flag):
         self.completed_algorithms.add(algo_name)
         if len(self.completed_algorithms) == self.total_algorithms:
+            self.generate_comparison_plot()
             self.show_training_completed_message(status_flag)
 
     def update_plot(self, algo_name, data_plot, plot_type: str):
@@ -497,6 +499,22 @@ class TrainingWindow(BaseWindow):
         confirm_msg.setStyleSheet(Styles.MESSAGE_BOX)
         confirm_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         return confirm_msg.exec_() == QMessageBox.Yes
+
+    def generate_comparison_plot(self):
+        algo_log_dirs = {}
+        for algo_dict in self.previous_selections.get("Algorithms", []):
+            unique_name = algo_dict.get("UniqueName", algo_dict["Algorithm"])
+            algo_folder = os.path.join(self.main_folder_name, unique_name)
+            algo_log_dirs[unique_name] = algo_folder
+
+        output_file = os.path.join(self.main_folder_name, "final_plot.png")
+
+        if len(algo_log_dirs) == 1:
+            plot_title = "Final Evaluation Curve"
+        else:
+            plot_title = "Evaluation Comparison"
+
+        plot_comparison(algo_log_dirs, output_file, title=plot_title)
 
     def reset_training_window(self):
         self.main_folder_name = None

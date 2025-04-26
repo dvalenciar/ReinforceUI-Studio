@@ -62,7 +62,7 @@ def create_environment_instance(
 def training_loop(  # noqa: C901
     config_data: dict,
     training_window: Any,
-    log_folder_path: str,
+    log_folder_path: Any,
     algorithm_name: str,
     display_name: str,
     is_running: Callable,
@@ -218,18 +218,14 @@ def training_loop(  # noqa: C901
             training_window.update_algo_signal.emit(display_name, "Episode Steps", episode_timesteps)
 
             df_log_train = logger.log_training(
-                episode_num + 1,
-                episode_reward,
-                episode_timesteps,
-                total_step_counter + 1,
-                episode_time,
+                episode = episode_num + 1,
+                episode_reward = episode_reward,
+                episode_steps = episode_timesteps,
+                total_timesteps = total_step_counter + 1,
+                duration = episode_time,
             )
 
             training_window.update_plot_signal.emit(display_name, df_log_train, "training")
-
-            # Save checkpoint based on log interval
-            if (total_step_counter + 1) % log_interval == 0:
-                logger.save_checkpoint()
 
             # Reset the environment
             state = env.reset()
@@ -258,13 +254,13 @@ def training_loop(  # noqa: C901
         training_window.update_algo_signal.emit(display_name, "Progress", int(progress))
         training_window.update_algo_signal.emit(display_name, "Total Steps", total_step_counter + 1)
 
+        # Save checkpoint based on log interval
+        if (total_step_counter + 1) % log_interval == 0:
+            logger.save_logs(plot_flag=False)
+
 
     # Finalize training
-    # fixme uncomment when needed and check correct compatibility
-    #logger.save_logs()
-    #policy_loop_test(env, rl_agent, logger, algo_name=algorithm_name)
+    logger.save_logs(plot_flag=True)
+    policy_loop_test(env, rl_agent, logger, algo_name=algorithm_name)
 
-
-    # training_window.update_confirmation(algorithm_name, training_completed )
     training_window.training_completed_signal.emit(display_name, training_completed)
-
