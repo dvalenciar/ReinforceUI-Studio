@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QWidget,
 )
-from PyQt5.QtGui import QMovie, QPixmap
+from PyQt5.QtGui import QMovie, QPixmap, QIcon
 from PyQt5.QtCore import Qt
 
 from GUI.ui_base_window import BaseWindow
@@ -22,7 +22,7 @@ class PlatformConfigWindow(BaseWindow):
 
         self.algorithm_window = algorithm_window
         self.user_selections = user_selections
-        self.algorithm_selected = user_selections["Algorithm"]
+        self.algorithm_selected = user_selections["Algorithms"]
         self.selected_button = None
         self.select_env_window = None
 
@@ -33,7 +33,7 @@ class PlatformConfigWindow(BaseWindow):
         # Navigation buttons
         buttons_layout = QHBoxLayout()
 
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(self, "Back", width=120, height=50, icon=QIcon("media_resources/icons/back.svg"))
         back_button.clicked.connect(self.open_algorithm_window)
         buttons_layout.addWidget(back_button, alignment=Qt.AlignLeft)
 
@@ -69,23 +69,25 @@ class PlatformConfigWindow(BaseWindow):
             },
         ]
 
-        if self.algorithm_selected != "DQN":
-            platforms.insert(
-                1,
-                {
-                    "name": "DMCS",
-                    "gif": "media_resources/cheetah_run.gif",
-                    "is_gif": True,
-                },
-            )
-            platforms.insert(
-                2,
-                {
-                    "name": "MuJoCo",
-                    "gif": "media_resources/half_cheetah.gif",
-                    "is_gif": True,
-                },
-            )
+        if len(self.algorithm_selected) == 1:
+            selected_algo_name = self.algorithm_selected[0]["Algorithm"]
+            if selected_algo_name != "DQN":
+                platforms.insert(
+                    1,
+                    {
+                        "name": "DMCS",
+                        "gif": "media_resources/cheetah_run.gif",
+                        "is_gif": True,
+                    },
+                )
+                platforms.insert(
+                    2,
+                    {
+                        "name": "MuJoCo",
+                        "gif": "media_resources/half_cheetah.gif",
+                        "is_gif": True,
+                    },
+                )
 
         # Create platform buttons
         for platform in platforms:

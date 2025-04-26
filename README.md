@@ -65,7 +65,7 @@ ReinforceUI Studio supports the following algorithms:
 5. Comprehensive Data Logging: Automatically capture training data, evaluation results, plots, models, and videos for easy post-training analysis.
 6. User-Friendly Training and Testing: Train, evaluate, and refine RL policies through a streamlined and intuitive workflow.
 
-Check out our [video tutorial](https://www.youtube.com/watch?v=olaspgr3vlM), where we show you how ReinforceUI Studio works
+Check out our [video tutorial](https://www.youtube.com/watch?v=itXyyttwZ1M), where we show you how ReinforceUI Studio works
 
 
 ## Results Examples

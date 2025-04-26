@@ -11,6 +11,7 @@ from GUI.ui_base_window import BaseWindow
 from GUI.ui_utils import create_button
 from GUI.ui_styles import Styles
 from GUI.select_algorithm_window import SelectAlgorithmWindow
+from GUI.select_multiple_algorithm_window import SelectMultipleAlgorithmWindow
 from GUI.load_model_window import LoadConfigWindow
 
 
@@ -18,6 +19,7 @@ class WelcomeWindow(BaseWindow):
     def __init__(self) -> None:
         """Initialize the WelcomeWindow class."""
         super().__init__("RL Configuration Guide")
+
         self.load_config_window = None
         self.platform_config_window = None
         self.user_selections = {"setup_choice": ""}
@@ -38,44 +40,65 @@ class WelcomeWindow(BaseWindow):
 
         # Button layout
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(25)
+        button_layout.setSpacing(10)
 
         manual_button = create_button(
             self,
-            "Start Training Configuration",
-            icon=QIcon("media_resources/icon_custom_config.png"),
+            "Single Model Training",
+            icon=QIcon("media_resources/icons/single_icon.svg"),
         )
+
+        comparative_button = create_button(
+            self,
+            "Compare Training Models",
+            icon=QIcon("media_resources/icons/comparative_icon.svg"),
+        )
+
 
         load_button = create_button(
             self,
             "Load Pre-trained Model",
-            icon=QIcon("media_resources/icon_config.png"),
+            icon=QIcon("media_resources/icons/load_icon.svg"),
         )
 
         button_layout.addWidget(manual_button)
+        button_layout.addWidget(comparative_button)
         button_layout.addWidget(load_button)
-        button_layout.setContentsMargins(100, 20, 100, 20)
+        button_layout.setContentsMargins(20, 20, 20, 20)
         button_layout.setAlignment(Qt.AlignCenter)
         main_layout.addLayout(button_layout)
 
         main_widget.setLayout(main_layout)
 
-        manual_button.clicked.connect(self.open_manual_configuration)
-        load_button.clicked.connect(self.open_manual_configuration)
+        manual_button.clicked.connect(self.open_single_manual_configuration)
+        comparative_button.clicked.connect(self.open_comparative_configuration)
+        load_button.clicked.connect(self.load_manual_configuration)
 
-    def open_manual_configuration(self) -> None:
-        """Open the manual configuration window."""
-        if self.sender().text() == "Load Pre-trained Model":
-            self.user_selections["setup_choice"] = "load_model"
-            self.close()
-            self.load_config_window = LoadConfigWindow(
-                self.show, self.user_selections
-            )
-            self.load_config_window.show()
-        else:
-            self.user_selections["setup_choice"] = "train_model"
-            self.close()
-            self.platform_config_window = SelectAlgorithmWindow(
-                self.show, self.user_selections
-            )
-            self.platform_config_window.show()
+    def load_manual_configuration(self):
+        """Open the load configuration window."""
+        self.user_selections["setup_choice"] = "load_model"
+        self.close()
+        self.load_config_window = LoadConfigWindow(
+            self.show, self.user_selections
+        )
+        self.load_config_window.show()
+
+
+    def open_single_manual_configuration(self) -> None:
+        """Open single manual configuration window."""
+        self.user_selections["setup_choice"] = "single_train_model"
+        self.close()
+        self.platform_config_window = SelectAlgorithmWindow(
+            self.show, self.user_selections
+        )
+        self.platform_config_window.show()
+
+
+    def open_comparative_configuration(self) -> None:
+        """Open comparative configuration window."""
+        self.user_selections["setup_choice"] = "compare_model"
+        self.close()
+        self.platform_config_window = SelectMultipleAlgorithmWindow(
+            self.show, self.user_selections
+        )
+        self.platform_config_window.show()
