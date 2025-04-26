@@ -8,8 +8,6 @@ from PyQt5.QtCore import QThread
 from collections import defaultdict
 
 
-# todo change the name of the file and maybe move each class to its own file
-
 class TrainingThread(QThread):
     def __init__(self, training_window, config_data, log_folder):
         super().__init__()
