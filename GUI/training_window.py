@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QFrame,
     QSpacerItem,
-    QTabWidget
+    QTabWidget,
 )
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QDesktopServices, QIcon
@@ -110,7 +110,13 @@ class TrainingWindow(BaseWindow):
 
     def create_back_button_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
-        back_button = create_button(self, "Back", width=120, height=50, icon=QIcon("media_resources/icons/back.svg"))
+        back_button = create_button(
+            self,
+            "Back",
+            width=120,
+            height=50,
+            icon=QIcon("media_resources/icons/back.svg"),
+        )
         back_button.clicked.connect(self.back_to_selection)
         button_layout.addWidget(back_button, alignment=Qt.AlignLeft)
         return button_layout
@@ -161,7 +167,7 @@ class TrainingWindow(BaseWindow):
         container.setLayout(layout)
         return container
 
-    def create_algorithm_tab(self, algo_name:str ) -> QWidget:
+    def create_algorithm_tab(self, algo_name: str) -> QWidget:
         widget = QWidget()
         labels_layout = QHBoxLayout()
         vertical_layout = QVBoxLayout()
@@ -270,10 +276,17 @@ class TrainingWindow(BaseWindow):
 
     def show_training_completed_message(self, completion_flag) -> None:
         msg_box = QMessageBox(self)
-        msg_box.setIcon(QMessageBox.Information if completion_flag else QMessageBox.Warning)
-        msg_box.setWindowTitle("Training Completed" if completion_flag else "Training Interrupted")
+        msg_box.setIcon(
+            QMessageBox.Information if completion_flag else QMessageBox.Warning
+        )
+        msg_box.setWindowTitle(
+            "Training Completed" if completion_flag else "Training Interrupted"
+        )
         msg_box.setText(
-            "The training process has been successfully completed." if completion_flag else "The training process has been interrupted.")
+            "The training process has been successfully completed."
+            if completion_flag
+            else "The training process has been interrupted."
+        )
         msg_box.setStyleSheet(Styles.MESSAGE_BOX)
         see_log_button = msg_box.addButton("See log folder", QMessageBox.AcceptRole)
         msg_box.exec_()
@@ -308,15 +321,25 @@ class TrainingWindow(BaseWindow):
         if algo_name not in self.algo_info:
             return  # Ignore updates for unknown algorithms
         if key == "Time Remaining":
-            self.algo_info[algo_name]["labels"]["Time Remaining"].setText(f"Time Remaining: {value}")
+            self.algo_info[algo_name]["labels"]["Time Remaining"].setText(
+                f"Time Remaining: {value}"
+            )
         elif key == "Total Steps":
-            self.algo_info[algo_name]["labels"]["Total Steps"].setText(f"Total Steps: {value}")
+            self.algo_info[algo_name]["labels"]["Total Steps"].setText(
+                f"Total Steps: {value}"
+            )
         elif key == "Episode Number":
-            self.algo_info[algo_name]["labels"]["Episode Number"].setText(f"Episode Number: {value}")
+            self.algo_info[algo_name]["labels"]["Episode Number"].setText(
+                f"Episode Number: {value}"
+            )
         elif key == "Episode Reward":
-            self.algo_info[algo_name]["labels"]["Episode Reward"].setText(f"Episode Reward: {value}")
+            self.algo_info[algo_name]["labels"]["Episode Reward"].setText(
+                f"Episode Reward: {value}"
+            )
         elif key == "Episode Steps":
-            self.algo_info[algo_name]["labels"]["Episode Steps"].setText(f"Episode Steps: {value}")
+            self.algo_info[algo_name]["labels"]["Episode Steps"].setText(
+                f"Episode Steps: {value}"
+            )
         elif key == "Progress":
             self.algo_info[algo_name]["progress_bar"].setValue(value)
 
@@ -345,9 +368,7 @@ class TrainingWindow(BaseWindow):
             lines.append("")  # Empty line between algorithms
 
         selections = "\n".join(lines)
-        self.show_message_box(
-            "Hyperparameters", selections, QMessageBox.Information
-        )
+        self.show_message_box("Hyperparameters", selections, QMessageBox.Information)
 
     def lock_inputs(self):
         for widget in self.training_inputs.values():
@@ -366,7 +387,7 @@ class TrainingWindow(BaseWindow):
             return
 
         if self.show_confirmation(
-                "Confirm Training", "The training will start. Are you sure?"
+            "Confirm Training", "The training will start. Are you sure?"
         ):
             self.training_start = True
             self.lock_inputs()
@@ -377,8 +398,7 @@ class TrainingWindow(BaseWindow):
             self.create_log_folder(algo_names=algo_names)
 
             shared_training_params = {
-                label: widget.text()
-                for label, widget in self.training_inputs.items()
+                label: widget.text() for label, widget in self.training_inputs.items()
             }
 
             per_algorithm_configs = []
@@ -388,8 +408,12 @@ class TrainingWindow(BaseWindow):
                     "UniqueName": algo_entry.get("UniqueName"),
                     "Hyperparameters": algo_entry.get("Hyperparameters", {}),
                     **shared_training_params,
-                    "selected_platform": self.previous_selections.get("selected_platform"),
-                    "selected_environment": self.previous_selections.get("selected_environment"),
+                    "selected_platform": self.previous_selections.get(
+                        "selected_platform"
+                    ),
+                    "selected_environment": self.previous_selections.get(
+                        "selected_environment"
+                    ),
                     "setup_choice": self.previous_selections.get("setup_choice"),
                 }
                 per_algorithm_configs.append(config)
@@ -403,18 +427,21 @@ class TrainingWindow(BaseWindow):
         home_dir = os.path.expanduser("~")
         timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
         algo_str = "_".join(algo_names)
-        self.main_folder_name = os.path.join(home_dir, f"training_log_{algo_str}_{timestamp}")
+        self.main_folder_name = os.path.join(
+            home_dir, f"training_log_{algo_str}_{timestamp}"
+        )
         os.makedirs(self.main_folder_name, exist_ok=True)
 
         # Shared/global training parameters
         training_params = {
-            label: widget.text()
-            for label, widget in self.training_inputs.items()
+            label: widget.text() for label, widget in self.training_inputs.items()
         }
 
         # Save the global config file
         main_config = {**self.previous_selections, **training_params}
-        with open(os.path.join(self.main_folder_name, "session_config.json"), "w") as config_file:
+        with open(
+            os.path.join(self.main_folder_name, "session_config.json"), "w"
+        ) as config_file:
             json.dump(main_config, config_file, indent=4)
 
         # Save per-algorithm configs
@@ -435,10 +462,9 @@ class TrainingWindow(BaseWindow):
             with open(os.path.join(algo_folder, "config.json"), "w") as algo_file:
                 json.dump(algo_config, algo_file, indent=4)
 
-
     def stop_training(self):
         if self.training_start and self.show_confirmation(
-                "Stop Training", "Are you sure you want to stop the training?"
+            "Stop Training", "Are you sure you want to stop the training?"
         ):
             self.training_start = False
 
@@ -466,7 +492,11 @@ class TrainingWindow(BaseWindow):
         algorithms = self.previous_selections.get("Algorithms", [])
         is_single_ppo = len(algorithms) == 1 and algorithms[0].get("Algorithm") == "PPO"
         for label, widget in self.training_inputs.items():
-            if is_single_ppo and label in ["Exploration Steps", "Batch Size", "G Value"]:
+            if is_single_ppo and label in [
+                "Exploration Steps",
+                "Batch Size",
+                "G Value",
+            ]:
                 continue
             if widget.text().strip() == "":
                 return False
@@ -557,5 +587,3 @@ class TrainingWindow(BaseWindow):
         separator.setFrameShape(QFrame.VLine if vertical else QFrame.HLine)
         separator.setStyleSheet(Styles.SEPARATOR_LINE)
         return separator
-
-

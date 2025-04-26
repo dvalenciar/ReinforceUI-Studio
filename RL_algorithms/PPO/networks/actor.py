@@ -29,9 +29,7 @@ class Actor(nn.Module):
             nn.Tanh(),
         )
 
-        self.log_std = nn.Parameter(
-            torch.zeros(num_actions)
-        )  # Learnable log std
+        self.log_std = nn.Parameter(torch.zeros(num_actions))  # Learnable log std
 
     def forward(  # noqa: D102
         self, state: torch.Tensor

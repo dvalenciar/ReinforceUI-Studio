@@ -30,9 +30,7 @@ class CTD4:
                 ensemble_size: Number of critic networks in the ensemble
                 policy_noise_decay: Decay rate for target policy noise
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.gamma = float(hyperparameters.get("gamma"))
         self.tau = float(hyperparameters.get("tau"))
         self.actor_lr = float(hyperparameters.get("actor_lr"))
@@ -54,9 +52,7 @@ class CTD4:
 
         self.noise_clip = 0.5
         self.target_policy_noise_scale = 0.2
-        self.policy_noise_decay = float(
-            hyperparameters.get("policy_noise_decay")
-        )
+        self.policy_noise_decay = float(hyperparameters.get("policy_noise_decay"))
         self.min_policy_noise = 0.0
 
         self.learn_counter = 0
@@ -96,9 +92,7 @@ class CTD4:
             action = self.actor_net(state_tensor)
             action = action.cpu().data.numpy().flatten()
             if not evaluation:
-                noise = np.random.normal(
-                    0, scale=noise_scale, size=self.action_num
-                )
+                noise = np.random.normal(0, scale=noise_scale, size=self.action_num)
                 action = action + noise
                 action = np.clip(action, -1, 1)
         self.actor_net.train()
@@ -114,9 +108,7 @@ class CTD4:
 
         kalman_gain = (std_1**2) / (std_1**2 + std_2**2)
         fusion_mean = mean_1 + kalman_gain * (mean_2 - mean_1)
-        fusion_variance = (
-            (1 - kalman_gain) * std_1**2 + kalman_gain * std_2**2 + 1e-6
-        )
+        fusion_variance = (1 - kalman_gain) * std_1**2 + kalman_gain * std_2**2 + 1e-6
         fusion_std = torch.sqrt(fusion_variance)
         return fusion_mean, fusion_std
 
@@ -151,9 +143,7 @@ class CTD4:
             target_noise = self.target_policy_noise_scale * torch.randn_like(
                 next_actions
             )
-            target_noise = torch.clamp(
-                target_noise, -self.noise_clip, self.noise_clip
-            )
+            target_noise = torch.clamp(target_noise, -self.noise_clip, self.noise_clip)
             next_actions = next_actions + target_noise
             next_actions = torch.clamp(next_actions, min=-1, max=1)
 
@@ -256,8 +246,7 @@ class CTD4:
                     critic_net.parameters(), target_critic_net.parameters()
                 ):
                     target_param.data.copy_(
-                        self.tau * param.data
-                        + (1 - self.tau) * target_param.data
+                        self.tau * param.data + (1 - self.tau) * target_param.data
                     )
 
             for param, target_param in zip(
@@ -278,9 +267,7 @@ class CTD4:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(
-            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
-        )
+        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
         torch.save(
             self.ensemble_critics.state_dict(),
             f"{filepath}/{filename}_ensemble_critic.pht",

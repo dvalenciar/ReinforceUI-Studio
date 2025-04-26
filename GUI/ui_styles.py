@@ -17,10 +17,10 @@ class Styles:
     }
 
     # Base gradients
-    BG_GRADIENT = f"background: linear-gradient(to bottom, {COLORS['background']}, #E3F2FD);"
-    WIDGET_GRADIENT = (
-        f"background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
+    BG_GRADIENT = (
+        f"background: linear-gradient(to bottom, {COLORS['background']}, #E3F2FD);"
     )
+    WIDGET_GRADIENT = f"background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
 
     # Common properties
     FONT_FAMILY = "font-family: Arial, sans-serif;"

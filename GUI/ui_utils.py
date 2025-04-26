@@ -22,7 +22,7 @@ class TrainingThread(QThread):
     def run(self):
         print(f"[{self.algorithm_name}] Training thread started")
         training_loop(
-            config_data = self.config_data,
+            config_data=self.config_data,
             training_window=self.training_window,
             log_folder_path=self.log_folder,
             algorithm_name=self.algorithm_name,
@@ -49,9 +49,7 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.figure = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.figure)
         self.figure.set_facecolor("#222222")  # Dark Gray Background
-        self.ax = self.figure.add_subplot(
-            111, facecolor="#222222", frameon=False
-        )
+        self.ax = self.figure.add_subplot(111, facecolor="#222222", frameon=False)
         self.clear_data()
 
     def plot_data(self, data_plot: dict, title: str, y_label: str) -> None:
@@ -109,6 +107,7 @@ class PlotCanvas(FigureCanvasQTAgg):
             fontweight="medium",
         )
         self.draw()
+
 
 def make_unique_names(algorithms: list[dict]) -> None:
     algo_counts = defaultdict(int)

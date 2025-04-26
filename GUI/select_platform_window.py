@@ -33,7 +33,13 @@ class PlatformConfigWindow(BaseWindow):
         # Navigation buttons
         buttons_layout = QHBoxLayout()
 
-        back_button = create_button(self, "Back", width=120, height=50, icon=QIcon("media_resources/icons/back.svg"))
+        back_button = create_button(
+            self,
+            "Back",
+            width=120,
+            height=50,
+            icon=QIcon("media_resources/icons/back.svg"),
+        )
         back_button.clicked.connect(self.open_algorithm_window)
         buttons_layout.addWidget(back_button, alignment=Qt.AlignLeft)
 
@@ -55,9 +61,7 @@ class PlatformConfigWindow(BaseWindow):
 
         # Platforms layout
         platforms_layout = QHBoxLayout()
-        spacer = QSpacerItem(
-            40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum
-        )
+        spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         platforms_layout.addItem(spacer)
 
         # Define available platforms

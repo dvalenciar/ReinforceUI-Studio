@@ -39,7 +39,13 @@ class SelectAlgorithmWindow(BaseWindow):
         # Navigation buttons (Back/Next)
         button_layout = QHBoxLayout()
 
-        back_button = create_button(self, "Back", width=120, height=50, icon=QIcon("media_resources/icons/back.svg"))
+        back_button = create_button(
+            self,
+            "Back",
+            width=120,
+            height=50,
+            icon=QIcon("media_resources/icons/back.svg"),
+        )
         back_button.clicked.connect(self.open_welcome_window)
         button_layout.addWidget(back_button)
 
@@ -47,7 +53,12 @@ class SelectAlgorithmWindow(BaseWindow):
             QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         )
 
-        next_button = create_button(self, "Next", width=120, height=50,)
+        next_button = create_button(
+            self,
+            "Next",
+            width=120,
+            height=50,
+        )
         next_button.clicked.connect(self.confirm_selection)
         button_layout.addWidget(next_button)
 
@@ -82,7 +93,11 @@ class SelectAlgorithmWindow(BaseWindow):
         button_layout_hyperparams.addWidget(self.yes_button)
 
         self.custom_button = create_button(
-            self, "Custom", width=270, height=50, icon=QIcon("media_resources/icons/config.svg")
+            self,
+            "Custom",
+            width=270,
+            height=50,
+            icon=QIcon("media_resources/icons/config.svg"),
         )
         self.custom_button.clicked.connect(self.open_custom_hyperparams_window)
         button_layout_hyperparams.addWidget(self.custom_button)
@@ -150,7 +165,7 @@ class SelectAlgorithmWindow(BaseWindow):
                             break
             except FileNotFoundError:
                 hyperparams = {}
-        else :
+        else:
             hyperparams = self.custom_hyperparameters
 
         selection.append(
@@ -162,9 +177,7 @@ class SelectAlgorithmWindow(BaseWindow):
 
         self.user_selections["Algorithms"] = selection
         self.close()
-        self.platform_window = PlatformConfigWindow(
-            self.show, self.user_selections
-        )
+        self.platform_window = PlatformConfigWindow(self.show, self.user_selections)
         self.platform_window.show()
 
     def _show_selection_required_warning(self) -> None:
@@ -180,9 +193,7 @@ class SelectAlgorithmWindow(BaseWindow):
         msg_box.exec_()
 
     # todo this is redundant with the one in update_button_styles in training_window.py, remove it or make it a common function
-    def set_active_button(
-        self, active_button, inactive_button  # noqa
-    ) -> None:
+    def set_active_button(self, active_button, inactive_button) -> None:  # noqa
         """Visually highlight the selected option button."""
         active_button.setStyleSheet(Styles.SELECTED_BUTTON)
         inactive_button.setStyleSheet(Styles.BUTTON)

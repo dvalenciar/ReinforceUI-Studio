@@ -3,9 +3,11 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
-def plot_comparison(algo_folders: dict[str, str], output_file: str, title="Evaluation Comparison"):
-    """
-    Plot evaluation logs from multiple algorithms for comparison.
+
+def plot_comparison(
+    algo_folders: dict[str, str], output_file: str, title: str = "Evaluation Comparison"
+) -> None:
+    """Plot evaluation logs from multiple algorithms for comparison.
 
     Args:
         algo_folders: Dict mapping algorithm display names (e.g. 'TD3 (1)') to their log folder paths.

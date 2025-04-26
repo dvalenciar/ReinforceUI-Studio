@@ -1,9 +1,8 @@
 import os
 import numpy as np
 import cv2
-import seaborn as sns
 import pandas as pd
-import matplotlib.pyplot as plt
+
 
 from RL_helpers.plotters import plot_logs
 
@@ -101,8 +100,7 @@ class RecordLogger:
         df = pd.DataFrame(logs)
         df.to_csv(filename, index=False)
 
-
-    def save_logs(self, plot_flag = False) -> None:
+    def save_logs(self, plot_flag: bool = False) -> None:
         """Save training and evaluation logs to CSV files and plot them."""
         self._save_csv(
             self.logs_training,
@@ -114,9 +112,7 @@ class RecordLogger:
             os.path.join(self.data_log_dir, "evaluation_log.csv"),
         )
 
-        self.rl_agent.save_models(
-            filename="model", filepath=self.model_log_dir
-        )
+        self.rl_agent.save_models(filename="model", filepath=self.model_log_dir)
 
         if plot_flag:
             plot_logs(
@@ -146,9 +142,7 @@ class RecordLogger:
             frame: The first frame of the video to determine the video dimensions.
         """
         frame_height, frame_width, _ = frame.shape
-        video_filename = os.path.join(
-            self.log_dir, "video_tested_final_policy.mp4"
-        )
+        video_filename = os.path.join(self.log_dir, "video_tested_final_policy.mp4")
         self.video_writer = cv2.VideoWriter(
             video_filename,
             cv2.VideoWriter_fourcc(*"mp4v"),

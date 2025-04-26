@@ -12,7 +12,5 @@ def test_import_algorithm_instance() -> None:
     """
     algorithms = ["CTD4", "DDPG", "DQN", "PPO", "SAC", "TD3", "TQC"]
     for algorithm_name in algorithms:
-        algorithm_class = import_algorithm_instance(
-            algorithm_name
-        )
+        algorithm_class = import_algorithm_instance(algorithm_name)
         assert algorithm_class.__name__ == algorithm_name

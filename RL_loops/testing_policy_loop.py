@@ -21,9 +21,7 @@ def policy_loop_test(
         number_test_episodes: The number of test episodes. Defaults to 1.
         algo_name: The name of the algorithm used by the agent. Defaults to None.
     """
-    rl_agent.load_models(
-        filename="model", filepath=f"{logger.log_dir}/models_log"
-    )
+    rl_agent.load_models(filename="model", filepath=f"{logger.log_dir}/models_log")
     logger.start_video_record(env.render_frame())
     for episode in range(number_test_episodes):
         state = env.reset()
@@ -36,18 +34,14 @@ def policy_loop_test(
             elif algo_name == "DQN":
                 action = rl_agent.select_action_from_policy(state)
             else:
-                action = rl_agent.select_action_from_policy(
-                    state, evaluation=True
-                )
+                action = rl_agent.select_action_from_policy(state, evaluation=True)
             state, reward, done, truncated = env.step(action)
             episode_reward += reward
             logger.record_video_frame(env.render_frame())
     logger.end_video_record()
 
 
-def policy_from_model_load_test(
-    config_data: dict, models_log_path: str
-) -> None:
+def policy_from_model_load_test(config_data: dict, models_log_path: str) -> None:
     """Test the policy of a loaded model.
 
     This function tests the policy of a reinforcement learning agent
@@ -82,9 +76,7 @@ def policy_from_model_load_test(
             elif algorithm_name == "DQN":
                 action = rl_agent.select_action_from_policy(state)
             else:
-                action = rl_agent.select_action_from_policy(
-                    state, evaluation=True
-                )
+                action = rl_agent.select_action_from_policy(state, evaluation=True)
             state, reward, done, truncated = env.step(action)
             episode_reward += reward
             env.render_frame()

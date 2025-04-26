@@ -43,9 +43,7 @@ def evaluate_policy_loop(
             elif alg_name == "DQN":
                 action = rl_agent.select_action_from_policy(state)
             else:
-                action = rl_agent.select_action_from_policy(
-                    state, evaluation=True
-                )
+                action = rl_agent.select_action_from_policy(state, evaluation=True)
 
             state, reward, done, truncated = env.step(action)
             episode_reward_env += reward

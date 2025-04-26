@@ -54,7 +54,6 @@ class WelcomeWindow(BaseWindow):
             icon=QIcon("media_resources/icons/comparative_icon.svg"),
         )
 
-
         load_button = create_button(
             self,
             "Load Pre-trained Model",
@@ -74,15 +73,12 @@ class WelcomeWindow(BaseWindow):
         comparative_button.clicked.connect(self.open_comparative_configuration)
         load_button.clicked.connect(self.load_manual_configuration)
 
-    def load_manual_configuration(self):
+    def load_manual_configuration(self) -> None:
         """Open the load configuration window."""
         self.user_selections["setup_choice"] = "load_model"
         self.close()
-        self.load_config_window = LoadConfigWindow(
-            self.show, self.user_selections
-        )
+        self.load_config_window = LoadConfigWindow(self.show, self.user_selections)
         self.load_config_window.show()
-
 
     def open_single_manual_configuration(self) -> None:
         """Open single manual configuration window."""
@@ -92,7 +88,6 @@ class WelcomeWindow(BaseWindow):
             self.show, self.user_selections
         )
         self.platform_config_window.show()
-
 
     def open_comparative_configuration(self) -> None:
         """Open comparative configuration window."""

@@ -33,7 +33,13 @@ class SelectEnvironmentWindow(BaseWindow):
 
         # Navigation buttons
         button_layout = QHBoxLayout()
-        back_button = create_button(self, "Back", width=120, height=50, icon=QIcon("media_resources/icons/back.svg"))
+        back_button = create_button(
+            self,
+            "Back",
+            width=120,
+            height=50,
+            icon=QIcon("media_resources/icons/back.svg"),
+        )
         back_button.clicked.connect(self.open_platform_selection)
         button_layout.addWidget(back_button)
 
@@ -97,7 +103,5 @@ class SelectEnvironmentWindow(BaseWindow):
         self.user_selections["selected_environment"] = selected_env
         self.close()
 
-        self.select_alg_window = TrainingWindow(
-            self.show, self.user_selections
-        )
+        self.select_alg_window = TrainingWindow(self.show, self.user_selections)
         self.select_alg_window.show()
