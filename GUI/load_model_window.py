@@ -1,5 +1,7 @@
 import json
 import os
+
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QLabel,
     QVBoxLayout,
@@ -36,7 +38,13 @@ class LoadConfigWindow(BaseWindow):
 
         # Top layout with Back button
         top_layout = QHBoxLayout()
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(
+            self,
+            "Back",
+            width=120,
+            height=50,
+            icon=QIcon("media_resources/icons/back.svg"),
+        )
         back_button.clicked.connect(self.back_main_window)
         top_layout.addWidget(back_button, alignment=Qt.AlignLeft)
         top_layout.addItem(

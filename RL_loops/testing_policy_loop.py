@@ -56,9 +56,17 @@ def policy_from_model_load_test(config_data: dict, models_log_path: str) -> None
         create_environment_instance,
     )
 
-    set_seed(int(config_data.get("Seed")))
-    algorithm, algorithm_name = import_algorithm_instance(config_data)
-    env = create_environment_instance(config_data, render_mode="human")
+    algorithm_name = config_data.get("Algorithm")
+    set_seed(int(config_data.get("Shared Parameters").get("Seed")))
+
+    env_data = {
+        "Seed": int(config_data.get("Shared Parameters").get("Seed")),
+        "selected_platform": config_data.get("selected_platform"),
+        "selected_environment": config_data.get("selected_environment"),
+    }
+
+    algorithm = import_algorithm_instance(algorithm_name)
+    env = create_environment_instance(env_data, render_mode="human")
     rl_agent = algorithm(
         env.observation_space(),
         env.action_num(),

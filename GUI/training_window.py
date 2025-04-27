@@ -457,6 +457,10 @@ class TrainingWindow(BaseWindow):
                 "Shared Parameters": training_params,
                 "Algorithm": algo_entry.get("Algorithm"),
                 "Hyperparameters": algo_entry.get("Hyperparameters", {}),
+                "selected_platform": self.previous_selections.get("selected_platform"),
+                "selected_environment": self.previous_selections.get(
+                    "selected_environment"
+                ),
             }
 
             with open(os.path.join(algo_folder, "config.json"), "w") as algo_file:
