@@ -92,6 +92,23 @@ class PlatformConfigWindow(BaseWindow):
                         "is_gif": True,
                     },
                 )
+        else:
+            platforms.insert(
+                1,
+                {
+                    "name": "DMCS",
+                    "gif": "media_resources/cheetah_run.gif",
+                    "is_gif": True,
+                },
+            )
+            platforms.insert(
+                2,
+                {
+                    "name": "MuJoCo",
+                    "gif": "media_resources/half_cheetah.gif",
+                    "is_gif": True,
+                },
+            )
 
         # Create platform buttons
         for platform in platforms:
