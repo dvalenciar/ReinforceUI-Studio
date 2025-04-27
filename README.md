@@ -1,71 +1,100 @@
+<p align="center"> <a href="https://docs.reinforceui-studio.com/welcome"> <img src="media_resources/cover_RL.png" alt="ReinforceUI" width="100%"> </a> </p> 
+<h1 align="center">🚀 ReinforceUI Studio: Reinforcement Learning Made Simple</h1> 
+<p align="center"> Intuitive, Powerful, and Hassle-Free RL Training & Monitoring – All in One Place. </p> 
+<p align="center"> <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?label=CI&branch=main" alt="Build Status"> </a> 
+<a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status"> </a> 
+<a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Formatting&branch=main" alt="Formatting Status"> </a> 
+<a href="https://docs.reinforceui-studio.com/"> <img src="https://img.shields.io/badge/Docs-Up-blue" alt="Documentation"> </a> <a href="https://opensource.org/licenses/MIT"> <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"> </a> 
+<a href="https://www.python.org/downloads/release/python-310/"> <img src="https://img.shields.io/badge/python-3.10-blue.svg" alt="Python Version"> </a> </p>
 
-<h1 align="center">
-  <br>
-ReinforceUI Studio
-  <br>
-</h1>
+---
+⭐️ If you find this project useful, please consider giving it a star! It really helps!
 
-<p align="center">
-  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?label=CI&branch=main" alt="Build Status">
-  </a>
+📚 Full Documentation: <a href="https://docs.reinforceui-studio.com" target="_blank">https://docs.reinforceui-studio.com</a>
 
-  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status">
-  </a>
+🎬 Video Demo: [YouTube Tutorial](https://www.youtube.com/watch?v=itXyyttwZ1M)
 
-  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Formatting&branch=main" alt="Formatting Status">
-  </a>
-  
-  <a href="https://docs.reinforceui-studio.com/">
-    <img  src="https://img.shields.io/badge/Docs-Up-blue" alt="Static Badge">
-  </a>
-  
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
-  </a>
-  <a href="https://www.python.org/downloads/release/python-310/">
-    <img src="https://img.shields.io/badge/python-3.10-blue.svg" alt="Python Version">
-  </a>
+---
 
-</p>
+## What is ReinforceUI Studio?
 
-ReinforceUI Studio is a Python-based application designed to simplify the configuration and monitoring of Reinforcement Learning (RL) training processes. Featuring an intuitive graphical user interface (GUI), it eliminates the hassle of managing extra repositories or memorizing complex command lines.
+ReinforceUI Studio is a Python-based application designed to simplify Reinforcement Learning (RL) workflows through a beautiful, intuitive GUI.
+No more memorizing commands, no more juggling extra repos – just train, monitor, and evaluate in a few clicks!
 
-Everything you need to train your RL model is provided in one repository. With just a few clicks, you can train your model, visualize the training process, and save the model for later use—ready to be deployed and analyzed.
+<p align="center"> <img src="media_resources/new_main_window_example.gif" width="80%"> </p>
 
 
-Please check out our **full documentation** available [here](https://docs.reinforceui-studio.com) for installation instructions, tutorials, RL concepts, and more.
+## Quickstart
+Getting started with ReinforceUI Studio is fast and easy!
 
+### 🖥️ Install and Run Locally
+The recommended way to use ReinforceUI Studio is by running it locally.
+This gives you full control over the application, with no extra tools needed.
 
-<p align="center">
-  <img src="media_resources/new_main_window_example.gif">
-</p>
+Follow these simple steps:
 
-# Supported Algorithms
+1. Clone the repository and install dependencies
+
+```bash
+git clone https://github.com/dvalenciar/ReinforceUI-Studio.git
+cd ReinforceUI-Studio
+pip install -r requirements.txt
+```
+
+2. Run the application
+
+```bash
+python main.py 
+```
+
+That's it! You’re ready to start training and monitoring your Reinforcement Learning agents through an intuitive GUI.
+
+✅ Tip:
+If you encounter any issues, check out the [Installation Guide](https://docs.reinforceui-studio.com/user_guides/installation) in the full documentation.
+
+## Why you should use ReinforceUI Studio
+* 🚀 Instant RL Training: Configure environments, select algorithms, set hyperparameters – all in seconds.
+* 🖥️ Real-Time Dashboard: Watch your agents learn with live performance curves and metrics.
+* 🧠 Multi-Algorithm Support: Train and compare multiple algorithms simultaneously.
+* 📦 Full Logging: Automatically save models, plots, evaluations, videos, and training stats.
+* 🔧 Easy Customization: Adjust hyperparameters or load optimized defaults.
+* 🧩 Environment Support: Works with MuJoCo, OpenAI Gymnasium, and DeepMind Control Suite.
+* 📊 Final Comparison Plots: Auto-generate publishable comparison graphs for your reports or papers.
+
+## Quick Overview: Single and Multi-Algorithm Training
+
+* **Single Training**: Choose an algorithm, tweak parameters, train & visualize.
+
+* **Multi-Training**: Select several algorithms, run them simultaneously, and compare performances side-by-side.
+
+<table align="center">
+  <tr>
+    <th>Selection Window</th>
+    <th>Main Window Display</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="media_resources/single_selection.png" width="400"></td>
+    <td align="center"><img src="media_resources/single_selection_main_window.png" width="400"></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="media_resources/multiple_selection.png" width="400"></td>
+    <td align="center"><img src="media_resources/multiple_selection_main_window.png" width="400"></td>
+  </tr>
+</table>
+
+## Supported Algorithms
 ReinforceUI Studio supports the following algorithms:
 
 | Algorithm | Description |
 | --- | --- |
-| CTD4 | Continuous Distributional Actor-Critic Agent with a Kalman Fusion of Multiple Critics |
-| DDPG | Deep Deterministic Policy Gradient |
-| DQN | Deep Q-Network |
-| PPO | Proximal Policy Optimization |
-| SAC | Soft Actor-Critic |
-| TD3 | Twin Delayed Deep Deterministic Policy Gradient |
-| TQC | Controlling Overestimation Bias with Truncated Mixture of Continuous Distributional Quantile Critics |
+| **CTD4** | Continuous Distributional Actor-Critic Agent with a Kalman Fusion of Multiple Critics |
+| **DDPG** | Deep Deterministic Policy Gradient |
+| **DQN** | Deep Q-Network |
+| **PPO** | Proximal Policy Optimization |
+| **SAC** | Soft Actor-Critic |
+| **TD3** | Twin Delayed Deep Deterministic Policy Gradient |
+| **TQC** | Controlling Overestimation Bias with Truncated Mixture of Continuous Distributional Quantile Critics |
 
-
-# Why you should use ReinforceUI Studio
-1. Simplified RL Workflows: The intuitive GUI eliminates the need for complex command-line operations
-2. Environment Support: Seamlessly integrates with MuJoCo, OpenAI Gymnasium, and DeepMind Control Suite.
-3. Algorithm Customization: Adjust hyperparameters and algorithms or use optimized defaults for quick experiments.
-4. Real-Time Monitoring Dashboard: View training progress, metrics, and performance curves as they happen.
-5. Comprehensive Data Logging: Automatically capture training data, evaluation results, plots, models, and videos for easy post-training analysis.
-6. User-Friendly Training and Testing: Train, evaluate, and refine RL policies through a streamlined and intuitive workflow.
-
-Check out our [video tutorial](https://www.youtube.com/watch?v=itXyyttwZ1M), where we show you how ReinforceUI Studio works
 
 
 ## Results Examples
@@ -91,6 +120,12 @@ If you find ReinforceUI Studio useful for your research or project, please kindl
   url = {https://github.com/dvalenciar/ReinforceUI-Studio.}
 }
 ```
+
+
+## Why Star ⭐ this Repository?
+Your support helps the project grow!
+If you like ReinforceUI Studio, please star ⭐ this repository and share it with friends, colleagues, and the RL community!
+Together, we can make Reinforcement Learning accessible to everyone!
 
 ## License
 ReinforceUI Studio is licensed under the MIT License. You are free to use, modify, and distribute this software, 
