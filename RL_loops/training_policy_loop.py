@@ -1,7 +1,7 @@
 import time
 import importlib
 import random
-from typing import Any
+from typing import Any, Callable
 from RL_memory.memory_buffer import MemoryBuffer
 from RL_environment.gym_env import GymEnvironment
 from RL_environment.dmcs_env import DMControlEnvironment
@@ -11,21 +11,18 @@ from RL_loops.evaluate_policy_loop import evaluate_policy_loop
 from RL_loops.testing_policy_loop import policy_loop_test
 
 
-def import_algorithm_instance(config_data: dict) -> tuple:
+def import_algorithm_instance(algorithm_name: str) -> Any:
     """Import the algorithm instance.
 
     Args:
-        config_data: The configuration data for the algorithm.
+        algorithm_name: The name of the algorithm to import.
 
     Returns:
-        tuple: A tuple containing the algorithm class and its name.
+        Any: The imported algorithm class.
     """
-    algorithm_name = config_data.get("Algorithm")
-    algorithm_module = importlib.import_module(
-        f"RL_algorithms.{algorithm_name}"
-    )
+    algorithm_module = importlib.import_module(f"RL_algorithms.{algorithm_name}")
     algorithm_class = getattr(algorithm_module, algorithm_name)
-    return algorithm_class, algorithm_name
+    return algorithm_class
 
 
 def create_environment_instance(
@@ -63,8 +60,10 @@ def create_environment_instance(
 def training_loop(  # noqa: C901
     config_data: dict,
     training_window: Any,
-    log_folder_path: str,
-    is_running: bool,
+    log_folder_path: Any,
+    algorithm_name: str,
+    display_name: str,
+    is_running: Callable,
 ) -> None:
     """Run the training loop for the reinforcement learning agent.
 
@@ -72,10 +71,12 @@ def training_loop(  # noqa: C901
         config_data: The configuration data for the training.
         training_window: The training window for updating progress.
         log_folder_path: The path to the log folder.
-        is_running: A callable to check if the training is running.
+        algorithm_name: The name of the algorithm being used.
+        display_name: The display name for the algorithm.
+        is_running: A callable that returns True if training should continue.
     """
     set_seed(int(config_data.get("Seed")))
-    algorithm, algorithm_name = import_algorithm_instance(config_data)
+    algorithm = import_algorithm_instance(algorithm_name)
 
     env = create_environment_instance(
         config_data, render_mode="rgb_array", evaluation_env=False
@@ -95,6 +96,7 @@ def training_loop(  # noqa: C901
         config_data.get("Hyperparameters"),
         algorithm_name,
     )
+
     logger = RecordLogger(log_folder_path, rl_agent)
 
     steps_training = int(config_data.get("Training Steps", 1000000))
@@ -118,12 +120,8 @@ def training_loop(  # noqa: C901
         )
     elif is_dqn:
         exploration_rate = 1
-        epsilon_min = float(
-            config_data.get("Hyperparameters").get("epsilon_min")
-        )
-        epsilon_decay = float(
-            config_data.get("Hyperparameters").get("epsilon_decay")
-        )
+        epsilon_min = float(config_data.get("Hyperparameters").get("epsilon_min"))
+        epsilon_decay = float(config_data.get("Hyperparameters").get("epsilon_decay"))
         G = int(config_data.get("G Value", 1))  # noqa: N806
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
@@ -166,9 +164,7 @@ def training_loop(  # noqa: C901
 
         # Store experience in memory
         if is_ppo:
-            memory.add_experience(
-                state, action, reward, next_state, done, log_prob
-            )
+            memory.add_experience(state, action, reward, next_state, done, log_prob)
         else:
             memory.add_experience(state, action, reward, next_state, done)
 
@@ -183,11 +179,7 @@ def training_loop(  # noqa: C901
             for _ in range(G):
                 rl_agent.train_policy(memory, batch_size)
 
-        elif (
-            not is_ppo
-            and not is_dqn
-            and total_step_counter >= steps_exploration
-        ):
+        elif not is_ppo and not is_dqn and total_step_counter >= steps_exploration:
             for _ in range(G):
                 rl_agent.train_policy(memory, batch_size)
 
@@ -199,29 +191,35 @@ def training_loop(  # noqa: C901
             remaining_episodes = (
                 steps_training - total_step_counter - 1
             ) // episode_timesteps
-            estimated_time_remaining = (
-                average_episode_time * remaining_episodes
-            )
+            estimated_time_remaining = average_episode_time * remaining_episodes
             episode_time_str = time.strftime(
                 "%H:%M:%S", time.gmtime(max(0, estimated_time_remaining))
             )
-            training_window.update_time_remaining_signal.emit(episode_time_str)
-            training_window.update_episode_signal.emit(episode_num + 1)
-            training_window.update_reward_signal.emit(round(episode_reward, 3))
-            training_window.update_episode_steps_signal.emit(episode_timesteps)
+
+            training_window.update_algo_signal.emit(
+                display_name, "Time Remaining", episode_time_str
+            )
+            training_window.update_algo_signal.emit(
+                display_name, "Episode Number", episode_num + 1
+            )
+            training_window.update_algo_signal.emit(
+                display_name, "Episode Reward", round(episode_reward, 3)
+            )
+            training_window.update_algo_signal.emit(
+                display_name, "Episode Steps", episode_timesteps
+            )
 
             df_log_train = logger.log_training(
-                episode_num + 1,
-                episode_reward,
-                episode_timesteps,
-                total_step_counter + 1,
-                episode_time,
+                episode=episode_num + 1,
+                episode_reward=episode_reward,
+                episode_steps=episode_timesteps,
+                total_timesteps=total_step_counter + 1,
+                duration=episode_time,
             )
-            training_window.update_plot(df_log_train)
 
-            # Save checkpoint based on log interval
-            if (total_step_counter + 1) % log_interval == 0:
-                logger.save_checkpoint()
+            training_window.update_plot_signal.emit(
+                display_name, df_log_train, "training"
+            )
 
             # Reset the environment
             state = env.reset()
@@ -243,13 +241,23 @@ def training_loop(  # noqa: C901
             df_grouped = df_log_evaluation.groupby(
                 "Total Timesteps", as_index=False
             ).last()
-            training_window.update_plot_eval(df_grouped)
+
+            training_window.update_plot_signal.emit(
+                display_name, df_grouped, "evaluation"
+            )
 
         # Update the training window
-        training_window.update_progress_signal.emit(int(progress))
-        training_window.update_step_signal.emit(total_step_counter + 1)
+        training_window.update_algo_signal.emit(display_name, "Progress", int(progress))
+        training_window.update_algo_signal.emit(
+            display_name, "Total Steps", total_step_counter + 1
+        )
+
+        # Save checkpoint based on log interval
+        if (total_step_counter + 1) % log_interval == 0:
+            logger.save_logs(plot_flag=False)
 
     # Finalize training
-    logger.save_logs()
+    logger.save_logs(plot_flag=True)
     policy_loop_test(env, rl_agent, logger, algo_name=algorithm_name)
-    training_window.training_completed_signal.emit(training_completed)
+
+    training_window.training_completed_signal.emit(display_name, training_completed)

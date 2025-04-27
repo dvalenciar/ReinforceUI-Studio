@@ -11,10 +11,6 @@ def test_import_algorithm_instance() -> None:
         AssertionError: If the imported algorithm class or name does not match the expected values.
     """
     algorithms = ["CTD4", "DDPG", "DQN", "PPO", "SAC", "TD3", "TQC"]
-    for algorithm in algorithms:
-        config_data = {"Algorithm": algorithm}
-        algorithm_class, algorithm_name = import_algorithm_instance(
-            config_data
-        )
-        assert algorithm_class.__name__ == algorithm
-        assert algorithm_name == algorithm
+    for algorithm_name in algorithms:
+        algorithm_class = import_algorithm_instance(algorithm_name)
+        assert algorithm_class.__name__ == algorithm_name

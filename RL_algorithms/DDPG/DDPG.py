@@ -29,9 +29,7 @@ class DDPG:
                 actor_lr: Learning rate for actor network
                 critic_lr: Learning rate for critic networks
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_actor_net = copy.deepcopy(self.actor_net).to(self.device)
@@ -161,12 +159,8 @@ class DDPG:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(
-            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
-        )
-        torch.save(
-            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
-        )
+        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
+        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
 
     def load_models(self, filename: str, filepath: str) -> None:
         """Load models previously saved for this algorithm.

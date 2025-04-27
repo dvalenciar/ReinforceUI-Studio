@@ -30,9 +30,7 @@ class TD3:
                 - actor_lr: Learning rate for actor network
                 - critic_lr: Learning rate for critic networks
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_actor_net = copy.deepcopy(self.actor_net).to(self.device)
@@ -80,9 +78,7 @@ class TD3:
             action = self.actor_net(state_tensor)
             action = action.cpu().data.numpy().flatten()
             if not evaluation:
-                noise = np.random.normal(
-                    0, scale=noise_scale, size=self.action_num
-                )
+                noise = np.random.normal(0, scale=noise_scale, size=self.action_num)
                 action = action + noise
                 action = np.clip(action, -1, 1)
         self.actor_net.train()
@@ -100,18 +96,14 @@ class TD3:
         with torch.no_grad():
             next_actions = self.target_actor_net(next_states)
             target_noise = self.policy_noise * torch.randn_like(next_actions)
-            target_noise = torch.clamp(
-                target_noise, -self.noise_clip, self.noise_clip
-            )
+            target_noise = torch.clamp(target_noise, -self.noise_clip, self.noise_clip)
             next_actions = next_actions + target_noise
             next_actions = torch.clamp(next_actions, min=-1, max=1)
 
             target_q_values_one, target_q_values_two = self.target_critic_net(
                 next_states, next_actions
             )
-            target_q_values = torch.minimum(
-                target_q_values_one, target_q_values_two
-            )
+            target_q_values = torch.minimum(target_q_values_one, target_q_values_two)
             q_target = rewards + self.gamma * (1 - dones) * target_q_values
 
         q_values_one, q_values_two = self.critic_net(states, actions)
@@ -194,12 +186,8 @@ class TD3:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(
-            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
-        )
-        torch.save(
-            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
-        )
+        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
+        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
 
     def load_models(self, filename: str, filepath: str) -> None:
         """Load models previously saved for this algorithm.

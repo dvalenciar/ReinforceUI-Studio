@@ -17,10 +17,10 @@ class Styles:
     }
 
     # Base gradients
-    BG_GRADIENT = f"background: linear-gradient(to bottom, {COLORS['background']}, #E3F2FD);"
-    WIDGET_GRADIENT = (
-        f"background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
+    BG_GRADIENT = (
+        f"background: linear-gradient(to bottom, {COLORS['background']}, #E3F2FD);"
     )
+    WIDGET_GRADIENT = f"background: linear-gradient(to bottom, #EAF2F8, #D6EAF8);"
 
     # Common properties
     FONT_FAMILY = "font-family: Arial, sans-serif;"
@@ -35,7 +35,7 @@ class Styles:
     BIG_TITLE_LABEL = f"""
         {FONT_FAMILY}
         color: {COLORS['text_primary']};
-        font-size: 24px;
+        font-size: 28px;
         font-weight: bold;
         padding: 10px;
     """
@@ -93,15 +93,15 @@ class Styles:
     SELECTED_BUTTON = f"""
         QPushButton {{
             {FONT_FAMILY}
-            background-color: {COLORS['primary']};
+            background-color: {COLORS['success']};
             color: {COLORS['white']};
             font-size: 15px;
             padding: 10px 20px;
             {BORDER_RADIUS_LG}
-            border: 2px solid {COLORS['primary_dark']};
+            border: 2px solid {COLORS['success']};
         }}
         QPushButton:hover {{
-            background-color: #1565C0;
+            background-color: {COLORS['success_hover']};
         }}
     """
 

@@ -5,9 +5,7 @@ from GUI.ui_styles import Styles
 class BaseWindow(QMainWindow):
     """Base window class with common functionality for all windows."""
 
-    def __init__(
-        self, title: str, width: int = 900, height: int = 230
-    ) -> None:
+    def __init__(self, title: str, width: int = 900, height: int = 230) -> None:
         """Initialize the BaseWindow class.
 
         Args:

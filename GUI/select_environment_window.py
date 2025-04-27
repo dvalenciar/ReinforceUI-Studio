@@ -1,4 +1,5 @@
 import yaml
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QLabel,
@@ -22,7 +23,7 @@ class SelectEnvironmentWindow(BaseWindow):
 
         self.platform_window = platform_window
         self.user_selections = user_selections
-        self.algorithm_selected = user_selections["Algorithm"]
+        self.algorithm_selected = user_selections["Algorithms"]
         self.selected_platform = user_selections["selected_platform"]
         self.select_alg_window = None
 
@@ -32,7 +33,13 @@ class SelectEnvironmentWindow(BaseWindow):
 
         # Navigation buttons
         button_layout = QHBoxLayout()
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(
+            self,
+            "Back",
+            width=120,
+            height=50,
+            icon=QIcon("media_resources/icons/back.svg"),
+        )
         back_button.clicked.connect(self.open_platform_selection)
         button_layout.addWidget(back_button)
 
@@ -76,10 +83,11 @@ class SelectEnvironmentWindow(BaseWindow):
             with open("config/config_platform.yaml", "r") as file:
                 config = yaml.safe_load(file)
                 platforms = config.get("platforms", {})
-                if self.algorithm_selected == "DQN":
-                    return platforms.get(platform, {}).get(
-                        "discrete_environments", []
-                    )
+                if len(self.algorithm_selected) == 1:
+                    if self.algorithm_selected[0]["Algorithm"] == "DQN":
+                        return platforms.get(platform, {}).get(
+                            "discrete_environments", []
+                        )
                 return platforms.get(platform, {}).get("environments", [])
         except FileNotFoundError:
             return []
@@ -95,7 +103,5 @@ class SelectEnvironmentWindow(BaseWindow):
         self.user_selections["selected_environment"] = selected_env
         self.close()
 
-        self.select_alg_window = TrainingWindow(
-            self.show, self.user_selections
-        )
+        self.select_alg_window = TrainingWindow(self.show, self.user_selections)
         self.select_alg_window.show()

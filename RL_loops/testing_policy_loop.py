@@ -21,9 +21,7 @@ def policy_loop_test(
         number_test_episodes: The number of test episodes. Defaults to 1.
         algo_name: The name of the algorithm used by the agent. Defaults to None.
     """
-    rl_agent.load_models(
-        filename="model", filepath=f"{logger.log_dir}/models_log"
-    )
+    rl_agent.load_models(filename="model", filepath=f"{logger.log_dir}/models_log")
     logger.start_video_record(env.render_frame())
     for episode in range(number_test_episodes):
         state = env.reset()
@@ -36,18 +34,14 @@ def policy_loop_test(
             elif algo_name == "DQN":
                 action = rl_agent.select_action_from_policy(state)
             else:
-                action = rl_agent.select_action_from_policy(
-                    state, evaluation=True
-                )
+                action = rl_agent.select_action_from_policy(state, evaluation=True)
             state, reward, done, truncated = env.step(action)
             episode_reward += reward
             logger.record_video_frame(env.render_frame())
     logger.end_video_record()
 
 
-def policy_from_model_load_test(
-    config_data: dict, models_log_path: str
-) -> None:
+def policy_from_model_load_test(config_data: dict, models_log_path: str) -> None:
     """Test the policy of a loaded model.
 
     This function tests the policy of a reinforcement learning agent
@@ -62,9 +56,17 @@ def policy_from_model_load_test(
         create_environment_instance,
     )
 
-    set_seed(int(config_data.get("Seed")))
-    algorithm, algorithm_name = import_algorithm_instance(config_data)
-    env = create_environment_instance(config_data, render_mode="human")
+    algorithm_name = config_data.get("Algorithm")
+    set_seed(int(config_data.get("Shared Parameters").get("Seed")))
+
+    env_data = {
+        "Seed": int(config_data.get("Shared Parameters").get("Seed")),
+        "selected_platform": config_data.get("selected_platform"),
+        "selected_environment": config_data.get("selected_environment"),
+    }
+
+    algorithm = import_algorithm_instance(algorithm_name)
+    env = create_environment_instance(env_data, render_mode="human")
     rl_agent = algorithm(
         env.observation_space(),
         env.action_num(),
@@ -82,9 +84,7 @@ def policy_from_model_load_test(
             elif algorithm_name == "DQN":
                 action = rl_agent.select_action_from_policy(state)
             else:
-                action = rl_agent.select_action_from_policy(
-                    state, evaluation=True
-                )
+                action = rl_agent.select_action_from_policy(state, evaluation=True)
             state, reward, done, truncated = env.step(action)
             episode_reward += reward
             env.render_frame()

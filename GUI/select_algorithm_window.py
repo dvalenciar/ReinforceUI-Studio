@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QLabel,
@@ -29,6 +30,7 @@ class SelectAlgorithmWindow(BaseWindow):
         self.custom_window = None
         self.platform_window = None
         self.use_default_hyperparameters = None
+        self.custom_hyperparameters = {}
 
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
@@ -37,7 +39,13 @@ class SelectAlgorithmWindow(BaseWindow):
         # Navigation buttons (Back/Next)
         button_layout = QHBoxLayout()
 
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(
+            self,
+            "Back",
+            width=120,
+            height=50,
+            icon=QIcon("media_resources/icons/back.svg"),
+        )
         back_button.clicked.connect(self.open_welcome_window)
         button_layout.addWidget(back_button)
 
@@ -45,7 +53,12 @@ class SelectAlgorithmWindow(BaseWindow):
             QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         )
 
-        next_button = create_button(self, "Next", width=120, height=50)
+        next_button = create_button(
+            self,
+            "Next",
+            width=120,
+            height=50,
+        )
         next_button.clicked.connect(self.confirm_selection)
         button_layout.addWidget(next_button)
 
@@ -80,7 +93,11 @@ class SelectAlgorithmWindow(BaseWindow):
         button_layout_hyperparams.addWidget(self.yes_button)
 
         self.custom_button = create_button(
-            self, "Custom", width=270, height=50
+            self,
+            "Custom",
+            width=270,
+            height=50,
+            icon=QIcon("media_resources/icons/config.svg"),
         )
         self.custom_button.clicked.connect(self.open_custom_hyperparams_window)
         button_layout_hyperparams.addWidget(self.custom_button)
@@ -118,7 +135,8 @@ class SelectAlgorithmWindow(BaseWindow):
         Args:
             hyperparameters (dict): User-selected hyperparameters
         """
-        self.user_selections["Hyperparameters"] = hyperparameters
+        # self.user_selections["Hyperparameters"] = hyperparameters
+        self.custom_hyperparameters = hyperparameters
 
     def open_welcome_window(self) -> None:
         """Return to initial welcome screen."""
@@ -132,8 +150,8 @@ class SelectAlgorithmWindow(BaseWindow):
             return
 
         # Set algorithm selection in user_selections
+        selection = []
         selected_algo = self.algo_combo.currentText()
-        self.user_selections["Algorithm"] = selected_algo
 
         # If using default hyperparameters, load them from config
         if self.use_default_hyperparameters:
@@ -143,18 +161,23 @@ class SelectAlgorithmWindow(BaseWindow):
                     algorithms = config.get("algorithms", [])
                     for algo in algorithms:
                         if algo["name"] == selected_algo:
-                            self.user_selections["Hyperparameters"] = algo.get(
-                                "hyperparameters", {}
-                            )
+                            hyperparams = algo.get("hyperparameters", {})
                             break
             except FileNotFoundError:
-                self.user_selections["Hyperparameters"] = {}
+                hyperparams = {}
+        else:
+            hyperparams = self.custom_hyperparameters
 
-        # Proceed to platform configuration
-        self.close()
-        self.platform_window = PlatformConfigWindow(
-            self.show, self.user_selections
+        selection.append(
+            {
+                "Algorithm": selected_algo,
+                "Hyperparameters": hyperparams,
+            }
         )
+
+        self.user_selections["Algorithms"] = selection
+        self.close()
+        self.platform_window = PlatformConfigWindow(self.show, self.user_selections)
         self.platform_window.show()
 
     def _show_selection_required_warning(self) -> None:
@@ -169,9 +192,8 @@ class SelectAlgorithmWindow(BaseWindow):
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec_()
 
-    def set_active_button(
-        self, active_button, inactive_button  # noqa
-    ) -> None:
+    # todo this is redundant with the one in update_button_styles in training_window.py, remove it or make it a common function
+    def set_active_button(self, active_button, inactive_button) -> None:  # noqa
         """Visually highlight the selected option button."""
         active_button.setStyleSheet(Styles.SELECTED_BUTTON)
         inactive_button.setStyleSheet(Styles.BUTTON)

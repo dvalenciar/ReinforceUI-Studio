@@ -32,9 +32,7 @@ class SAC:
                 alpha_lr: Learning rate for the temperature parameter
 
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_critic_net = copy.deepcopy(self.critic_net).to(self.device)
@@ -54,9 +52,7 @@ class SAC:
         init_temperature = 1.0
         self.log_alpha = torch.tensor(np.log(init_temperature)).to(self.device)
         self.log_alpha.requires_grad = True
-        self.log_alpha_optimizer = torch.optim.Adam(
-            [self.log_alpha], lr=self.alpha_lr
-        )
+        self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=self.alpha_lr)
 
         self.actor_net_optimiser = torch.optim.Adam(
             self.actor_net.parameters(), lr=self.actor_lr
@@ -117,8 +113,7 @@ class SAC:
             )
 
             q_target = (
-                rewards * self.reward_scale
-                + self.gamma * (1 - dones) * target_q_values
+                rewards * self.reward_scale + self.gamma * (1 - dones) * target_q_values
             )
 
         q_values_one, q_values_two = self.critic_net(states, actions)
@@ -149,9 +144,7 @@ class SAC:
         self.actor_net_optimiser.step()
 
         # update the temperature (alpha)
-        alpha_loss = -(
-            self.log_alpha * (log_pi + self.target_entropy).detach()
-        ).mean()
+        alpha_loss = -(self.log_alpha * (log_pi + self.target_entropy).detach()).mean()
 
         self.log_alpha_optimizer.zero_grad()
         alpha_loss.backward()
@@ -207,12 +200,8 @@ class SAC:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(
-            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
-        )
-        torch.save(
-            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
-        )
+        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
+        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
 
     def load_models(self, filename: str, filepath: str) -> None:
         """Load models previously saved for this algorithm.

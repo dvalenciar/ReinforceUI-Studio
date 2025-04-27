@@ -1,5 +1,7 @@
 import json
 import os
+
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QLabel,
     QVBoxLayout,
@@ -36,7 +38,13 @@ class LoadConfigWindow(BaseWindow):
 
         # Top layout with Back button
         top_layout = QHBoxLayout()
-        back_button = create_button(self, "Back", width=120, height=50)
+        back_button = create_button(
+            self,
+            "Back",
+            width=120,
+            height=50,
+            icon=QIcon("media_resources/icons/back.svg"),
+        )
         back_button.clicked.connect(self.back_main_window)
         top_layout.addWidget(back_button, alignment=Qt.AlignLeft)
         top_layout.addItem(
@@ -78,9 +86,7 @@ class LoadConfigWindow(BaseWindow):
         # Button layout
         self.button_layout = QHBoxLayout()
         self.button_layout.setSpacing(20)
-        load_button = create_button(
-            self, "Load Directory", width=250, height=50
-        )
+        load_button = create_button(self, "Load Directory", width=250, height=50)
         load_button.clicked.connect(self.load_directory)
 
         self.button_layout.addWidget(load_button)
@@ -92,9 +98,7 @@ class LoadConfigWindow(BaseWindow):
 
     def load_directory(self) -> None:
         """Open file dialog to select model directory and verify its contents."""
-        directory = QFileDialog.getExistingDirectory(
-            self, "Select Directory", ""
-        )
+        directory = QFileDialog.getExistingDirectory(self, "Select Directory", "")
         if directory:
             config_path = os.path.join(directory, "config.json")
             models_log_path = os.path.join(directory, "models_log")
@@ -121,9 +125,7 @@ class LoadConfigWindow(BaseWindow):
             config_exists: Boolean whether config file exists
             models_log_exists: Boolean whether models_log directory exists
         """
-        self.config_status.setText(
-            f"Config.json: {'✔️' if config_exists else '❌'}"
-        )
+        self.config_status.setText(f"Config.json: {'✔️' if config_exists else '❌'}")
         self.models_log_status.setText(
             f"models_log: {'✔️' if models_log_exists else '❌'}"
         )
@@ -138,9 +140,7 @@ class LoadConfigWindow(BaseWindow):
             else "color: #D32F2F; font-size: 16px;"
         )
 
-    def _load_config_and_display(
-        self, config_path: str, models_log_path: str
-    ) -> None:
+    def _load_config_and_display(self, config_path: str, models_log_path: str) -> None:
         """Load config file and display model info.
 
         Args:
@@ -150,9 +150,7 @@ class LoadConfigWindow(BaseWindow):
         with open(config_path, "r") as file:
             config_data = json.load(file)
             selected_platform = config_data.get("selected_platform", "N/A")
-            selected_environment = config_data.get(
-                "selected_environment", "N/A"
-            )
+            selected_environment = config_data.get("selected_environment", "N/A")
             algorithm = config_data.get("Algorithm", "N/A")
 
             self.info_display.setText(
@@ -169,9 +167,7 @@ class LoadConfigWindow(BaseWindow):
                     self, "Test Policy", width=250, height=50
                 )
                 self.test_policy_button.clicked.connect(
-                    lambda: policy_from_model_load_test(
-                        config_data, models_log_path
-                    )
+                    lambda: policy_from_model_load_test(config_data, models_log_path)
                 )
                 self.button_layout.addWidget(self.test_policy_button)
 
