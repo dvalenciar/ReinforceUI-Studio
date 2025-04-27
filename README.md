@@ -1,7 +1,7 @@
 <p align="center"> <a href="https://docs.reinforceui-studio.com/welcome"> <img src="media_resources/cover_RL.png" alt="ReinforceUI" width="100%"> </a> </p> 
 <h1 align="center">🚀 ReinforceUI Studio: Reinforcement Learning Made Simple</h1> 
 <p align="center"> Intuitive, Powerful, and Hassle-Free RL Training & Monitoring – All in One Place. </p> 
-<p align="center"> <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/main.yml?label=CI&branch=main" alt="Build Status"> </a> 
+<p align="center"> <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/pytest.yml?label=CI&branch=main" alt="Build Status"> </a> 
 <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status"> </a> 
 <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Formatting&branch=main" alt="Formatting Status"> </a> 
 <a href="https://docs.reinforceui-studio.com/"> <img src="https://img.shields.io/badge/Docs-Up-blue" alt="Documentation"> </a> <a href="https://opensource.org/licenses/MIT"> <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"> </a> 
