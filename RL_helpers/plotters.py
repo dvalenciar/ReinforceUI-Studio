@@ -1,7 +1,10 @@
+import os
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-import os
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
 
 
 def plot_comparison(
