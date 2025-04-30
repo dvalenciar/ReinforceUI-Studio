@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
-from reinforceui_studio.GUI.ui_utils import create_button
+from reinforceui_studio.GUI.ui_utils import create_button, get_config_path
 from reinforceui_studio.GUI.ui_styles import Styles
 
 
@@ -76,7 +76,8 @@ class SelectHyperWindow(BaseWindow):
 
         """
         try:
-            with open("config/config_algorithm.yaml", "r") as file:
+            config_path = get_config_path("config_algorithm.yaml")
+            with open(config_path, "r") as file:
                 config = yaml.safe_load(file)
                 algorithms = config.get("algorithms", [])
                 for algo in algorithms:

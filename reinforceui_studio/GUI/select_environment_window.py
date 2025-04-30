@@ -12,7 +12,11 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
-from reinforceui_studio.GUI.ui_utils import create_button
+from reinforceui_studio.GUI.ui_utils import (
+    create_button,
+    get_icon_path,
+    get_config_path,
+)
 from reinforceui_studio.GUI.ui_styles import Styles
 from reinforceui_studio.GUI.training_window import TrainingWindow
 
@@ -38,7 +42,7 @@ class SelectEnvironmentWindow(BaseWindow):
             "Back",
             width=120,
             height=50,
-            icon=QIcon("reinforceui_studio/GUI/icons/back.svg"),
+            icon=QIcon(get_icon_path("back.svg")),
         )
         back_button.clicked.connect(self.open_platform_selection)
         button_layout.addWidget(back_button)
@@ -80,7 +84,8 @@ class SelectEnvironmentWindow(BaseWindow):
             List of environment names
         """
         try:
-            with open("config/config_platform.yaml", "r") as file:
+            config_path = get_config_path("config_platform.yaml")
+            with open(config_path, "r") as file:
                 config = yaml.safe_load(file)
                 platforms = config.get("platforms", {})
                 if len(self.algorithm_selected) == 1:

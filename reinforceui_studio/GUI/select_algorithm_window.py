@@ -13,7 +13,11 @@ from PyQt5.QtCore import Qt
 import yaml
 
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
-from reinforceui_studio.GUI.ui_utils import create_button, get_icon_path
+from reinforceui_studio.GUI.ui_utils import (
+    create_button,
+    get_icon_path,
+    get_config_path,
+)
 from reinforceui_studio.GUI.ui_styles import Styles
 from reinforceui_studio.GUI.select_hyperparameters_window import SelectHyperWindow
 from reinforceui_studio.GUI.select_platform_window import PlatformConfigWindow
@@ -107,8 +111,9 @@ class SelectAlgorithmWindow(BaseWindow):
 
     def load_algorithms(self) -> list:
         """Load algorithm choices from configuration file."""
+        config_path = get_config_path("config_algorithm.yaml")
         try:
-            with open("config/config_algorithm.yaml", "r") as file:
+            with open(config_path, "r") as file:
                 config = yaml.safe_load(file)
                 return [algo["name"] for algo in config.get("algorithms", [])]
         except FileNotFoundError:
@@ -139,7 +144,7 @@ class SelectAlgorithmWindow(BaseWindow):
         self.custom_hyperparameters = hyperparameters
 
     def open_welcome_window(self) -> None:
-        """Return to initial welcome screen."""
+        """Return to the initial welcome screen."""
         self.close()
         self.welcome_window()
 
@@ -156,7 +161,8 @@ class SelectAlgorithmWindow(BaseWindow):
         # If using default hyperparameters, load them from config
         if self.use_default_hyperparameters:
             try:
-                with open("config/config_algorithm.yaml", "r") as file:
+                config_path = get_config_path("config_algorithm.yaml")
+                with open(config_path, "r") as file:
                     config = yaml.safe_load(file)
                     algorithms = config.get("algorithms", [])
                     for algo in algorithms:

@@ -15,7 +15,11 @@ from PyQt5.QtCore import Qt
 import yaml
 
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
-from reinforceui_studio.GUI.ui_utils import create_button
+from reinforceui_studio.GUI.ui_utils import (
+    create_button,
+    get_icon_path,
+    get_config_path,
+)
 from reinforceui_studio.GUI.ui_styles import Styles
 from reinforceui_studio.GUI.select_hyperparameters_window import SelectHyperWindow
 from reinforceui_studio.GUI.select_platform_window import PlatformConfigWindow
@@ -52,7 +56,7 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
             "Back",
             width=120,
             height=50,
-            icon=QIcon("reinforceui_studio/icons/back.svg"),
+            icon=QIcon(get_icon_path("back.svg")),
         )
         back_button.clicked.connect(self.open_welcome_window)
         nav_layout.addWidget(back_button)
@@ -120,7 +124,7 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
             "Custom",
             width=270,
             height=40,
-            icon=QIcon("reinforceui_studio/GUI/icons/config.svg"),
+            icon=QIcon(get_icon_path("config.svg")),
         )
 
         yes_button.setStyleSheet(Styles.SELECTED_BUTTON)
@@ -260,8 +264,9 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
             hyperparams = {}
 
             if row["use_default"]:
+                config_path = get_config_path("config_algorithm.yaml")
                 try:
-                    with open("config/config_algorithm.yaml", "r") as file:
+                    with open(config_path, "r") as file:
                         config = yaml.safe_load(file)
                         for algo in config.get("algorithms", []):
                             if algo["name"] == algo_name:
@@ -311,7 +316,8 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
             List[str]: A list of algorithm names.
         """
         try:
-            with open("config/config_algorithm.yaml", "r") as file:
+            config_path = get_config_path("config_algorithm.yaml")
+            with open(config_path, "r") as file:
                 config = yaml.safe_load(file)
                 # Filter out "DQN" from the loaded algorithm names
                 return [

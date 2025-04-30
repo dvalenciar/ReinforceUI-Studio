@@ -181,3 +181,7 @@ def create_activation_button(
 
 def get_icon_path(icon_filename: str) -> str:
     return str(files("reinforceui_studio.GUI.icons").joinpath(icon_filename))
+
+
+def get_config_path(config_filename: str) -> str:
+    return str(files("reinforceui_studio.config").joinpath(config_filename))

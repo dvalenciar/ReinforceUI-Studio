@@ -39,7 +39,6 @@ class PlatformConfigWindow(BaseWindow):
             width=120,
             height=50,
             icon=QIcon(get_icon_path("back.svg")),
-
         )
         back_button.clicked.connect(self.open_algorithm_window)
         buttons_layout.addWidget(back_button, alignment=Qt.AlignLeft)
@@ -69,7 +68,7 @@ class PlatformConfigWindow(BaseWindow):
         platforms = [
             {
                 "name": "Gymnasium",
-                "gif":  get_icon_path("pendulum.gif"),
+                "gif": get_icon_path("pendulum.gif"),
                 "is_gif": True,
             },
         ]

@@ -21,6 +21,7 @@ from reinforceui_studio.GUI.ui_utils import (
     PlotCanvas,
     TrainingThread,
     make_unique_names,
+    get_icon_path,
 )
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
 from reinforceui_studio.GUI.ui_styles import Styles
@@ -119,7 +120,7 @@ class TrainingWindow(BaseWindow):
             "Back",
             width=120,
             height=50,
-            icon=QIcon("reinforceui_studio/GUI/icons/back.svg"),
+            icon=QIcon(get_icon_path("back.svg")),
         )
         back_button.clicked.connect(self.back_to_selection)
         button_layout.addWidget(back_button, alignment=Qt.AlignLeft)
