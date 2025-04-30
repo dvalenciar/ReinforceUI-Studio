@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
 )
 
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
-from reinforceui_studio.GUI.ui_utils import create_button
+from reinforceui_studio.GUI.ui_utils import create_button, get_icon_path
 from reinforceui_studio.GUI.ui_styles import Styles
 from reinforceui_studio.GUI.select_algorithm_window import SelectAlgorithmWindow
 from reinforceui_studio.GUI.select_multiple_algorithm_window import (
@@ -47,19 +47,19 @@ class WelcomeWindow(BaseWindow):
         manual_button = create_button(
             self,
             "Single Model Training",
-            icon=QIcon("reinforceui_studio/GUI/icons/single_icon.svg"),
+            icon=QIcon(get_icon_path("single_icon.svg")),
         )
 
         comparative_button = create_button(
             self,
             "Compare Training Models",
-            icon=QIcon("reinforceui_studio/GUI/icons/comparative_icon.svg"),
+            icon=QIcon(get_icon_path("comparative_icon.svg")),
         )
 
         load_button = create_button(
             self,
             "Load Pre-trained Model",
-            icon=QIcon("reinforceui_studio/GUI/icons/load_icon.svg"),
+            icon=QIcon(get_icon_path("load_icon.svg")),
         )
 
         button_layout.addWidget(manual_button)

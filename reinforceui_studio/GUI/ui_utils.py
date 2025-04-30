@@ -1,5 +1,6 @@
 import os
 from PyQt5.QtWidgets import QPushButton
+from importlib.resources import files
 from reinforceui_studio.GUI.ui_styles import Styles
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
@@ -176,3 +177,7 @@ def create_activation_button(
     else:
         button.setStyleSheet(Styles.STOP_BUTTON)
     return button
+
+
+def get_icon_path(icon_filename: str) -> str:
+    return str(files("reinforceui_studio.GUI.icons").joinpath(icon_filename))
