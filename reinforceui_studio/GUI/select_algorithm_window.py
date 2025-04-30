@@ -13,7 +13,7 @@ from PyQt5.QtCore import Qt
 import yaml
 
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
-from reinforceui_studio.GUI.ui_utils import create_button
+from reinforceui_studio.GUI.ui_utils import create_button, get_icon_path
 from reinforceui_studio.GUI.ui_styles import Styles
 from reinforceui_studio.GUI.select_hyperparameters_window import SelectHyperWindow
 from reinforceui_studio.GUI.select_platform_window import PlatformConfigWindow
@@ -44,7 +44,7 @@ class SelectAlgorithmWindow(BaseWindow):
             "Back",
             width=120,
             height=50,
-            icon=QIcon("reinforceui_studio/GUI/icons/back.svg"),
+            icon=QIcon(get_icon_path("back.svg")),
         )
         back_button.clicked.connect(self.open_welcome_window)
         button_layout.addWidget(back_button)
@@ -97,7 +97,7 @@ class SelectAlgorithmWindow(BaseWindow):
             "Custom",
             width=270,
             height=50,
-            icon=QIcon("reinforceui_studio/GUI/icons/config.svg"),
+            icon=QIcon(get_icon_path("config.svg")),
         )
         self.custom_button.clicked.connect(self.open_custom_hyperparams_window)
         button_layout_hyperparams.addWidget(self.custom_button)

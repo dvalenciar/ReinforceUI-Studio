@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
-from reinforceui_studio.GUI.ui_utils import create_button
+from reinforceui_studio.GUI.ui_utils import create_button, get_icon_path
 from reinforceui_studio.GUI.ui_styles import Styles
 from reinforceui_studio.RL_loops.testing_policy_loop import policy_from_model_load_test
 
@@ -43,7 +43,7 @@ class LoadConfigWindow(BaseWindow):
             "Back",
             width=120,
             height=50,
-            icon=QIcon("reinforceui_studio/GUI/icons/back.svg"),
+            icon=QIcon(get_icon_path("back.svg")),
         )
         back_button.clicked.connect(self.back_main_window)
         top_layout.addWidget(back_button, alignment=Qt.AlignLeft)

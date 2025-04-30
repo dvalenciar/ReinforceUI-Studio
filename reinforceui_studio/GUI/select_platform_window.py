@@ -11,7 +11,7 @@ from PyQt5.QtGui import QMovie, QPixmap, QIcon
 from PyQt5.QtCore import Qt
 
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
-from reinforceui_studio.GUI.ui_utils import create_button
+from reinforceui_studio.GUI.ui_utils import create_button, get_icon_path
 from reinforceui_studio.GUI.ui_styles import Styles
 from reinforceui_studio.GUI.select_environment_window import SelectEnvironmentWindow
 
@@ -38,7 +38,8 @@ class PlatformConfigWindow(BaseWindow):
             "Back",
             width=120,
             height=50,
-            icon=QIcon("reinforceui_studio/GUI/icons/back.svg"),
+            icon=QIcon(get_icon_path("back.svg")),
+
         )
         back_button.clicked.connect(self.open_algorithm_window)
         buttons_layout.addWidget(back_button, alignment=Qt.AlignLeft)
@@ -68,7 +69,7 @@ class PlatformConfigWindow(BaseWindow):
         platforms = [
             {
                 "name": "Gymnasium",
-                "gif": "reinforceui_studio/GUI/icons/pendulum.gif",
+                "gif":  get_icon_path("pendulum.gif"),
                 "is_gif": True,
             },
         ]
@@ -80,7 +81,7 @@ class PlatformConfigWindow(BaseWindow):
                     1,
                     {
                         "name": "DMCS",
-                        "gif": "reinforceui_studio/GUI/icons/cheetah_run.gif",
+                        "gif": get_icon_path("cheetah_run.gif"),
                         "is_gif": True,
                     },
                 )
@@ -88,7 +89,7 @@ class PlatformConfigWindow(BaseWindow):
                     2,
                     {
                         "name": "MuJoCo",
-                        "gif": "reinforceui_studio/GUI/icons/half_cheetah.gif",
+                        "gif": get_icon_path("half_cheetah.gif"),
                         "is_gif": True,
                     },
                 )
@@ -97,7 +98,7 @@ class PlatformConfigWindow(BaseWindow):
                 1,
                 {
                     "name": "DMCS",
-                    "gif": "reinforceui_studio/GUI/icons/cheetah_run.gif",
+                    "gif": get_icon_path("cheetah_run.gif"),
                     "is_gif": True,
                 },
             )
@@ -105,7 +106,7 @@ class PlatformConfigWindow(BaseWindow):
                 2,
                 {
                     "name": "MuJoCo",
-                    "gif": "reinforceui_studio/GUI/icons/half_cheetah.gif",
+                    "gif": get_icon_path("half_cheetah.gif"),
                     "is_gif": True,
                 },
             )
