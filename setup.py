@@ -17,7 +17,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "reinforceui-studio=main:main",
+            "reinforceui-studio=reinforceui_studio.main:main",
         ],
     },
     classifiers=[

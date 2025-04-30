@@ -1,1 +1,3 @@
+include README.md
 include requirements.txt
+recursive-include reinforceui_studio/GUI/icons *.svg *.png *.jpg

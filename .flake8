@@ -8,8 +8,8 @@ exclude =
     venv,
     build,
     dist,
-    GUI/training_window.py,
-    GUI/ui_styles.py,
-    GUI/ui_utils.py,
+    reinforceui_studio/GUI/training_window.py,
+    reinforceui_studio/GUI/ui_styles.py,
+    reinforceui_studio/GUI/ui_utils.py,
 max-complexity = 10
 docstring-convention = google
