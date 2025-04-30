@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="reinforceui-studio",
-    version="1.3.1",
+    version="1.3.2",
     author="David Valencia",
     author_email="support@reinforceui-studio.com",
     description="A GUI to simplify the configuration and monitoring of RL training processes.",
