@@ -1,6 +1,6 @@
-import os
 import yaml
-from RL_loops.training_policy_loop import create_environment_instance
+from importlib.resources import files
+from reinforceui_studio.RL_loops.training_policy_loop import create_environment_instance
 
 
 def test_create_environment_instance() -> None:
@@ -13,10 +13,9 @@ def test_create_environment_instance() -> None:
         AssertionError: If the environment instance is not created successfully
                         or does not have the required methods.
     """
-    config_path = os.path.join(
-        os.path.dirname(__file__), "..", "config", "config_platform.yaml"
+    config_path = str(
+        files("reinforceui_studio.config").joinpath("config_platform.yaml")
     )
-
     with open(config_path, "r") as file:
         config = yaml.safe_load(file)
 
@@ -29,7 +28,6 @@ def test_create_environment_instance() -> None:
                 "Seed": 42,
             }
             environment = create_environment_instance(config_data)
-
             assert (
                 environment is not None
             ), f"Failed to create environment for {platform} - {env}"

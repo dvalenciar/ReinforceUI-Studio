@@ -1,11 +1,39 @@
-<p align="center"> <a href="https://docs.reinforceui-studio.com/welcome"> <img src="media_resources/cover_RL.png" alt="ReinforceUI" width="100%"> </a> </p> 
-<h1 align="center">🚀 ReinforceUI Studio: Reinforcement Learning Made Simple</h1> 
-<p align="center"> Intuitive, Powerful, and Hassle-Free RL Training & Monitoring – All in One Place. </p> 
-<p align="center"> <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/pytest.yml?label=CI&branch=main" alt="Build Status"> </a> 
-<a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status"> </a> 
-<a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml"> <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Formatting&branch=main" alt="Formatting Status"> </a> 
-<a href="https://docs.reinforceui-studio.com/"> <img src="https://img.shields.io/badge/Docs-Up-blue" alt="Documentation"> </a> <a href="https://opensource.org/licenses/MIT"> <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"> </a> 
-<a href="https://www.python.org/downloads/release/python-310/"> <img src="https://img.shields.io/badge/python-3.10-blue.svg" alt="Python Version"> </a> </p>
+<p align="center">
+  <a href="https://docs.reinforceui-studio.com/welcome">
+    <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/cover_RL.png" alt="ReinforceUI" width="100%">
+  </a>
+</p>
+
+<h1 align="center"> ReinforceUI Studio: Reinforcement Learning Made Simple</h1>
+
+<p align="center">
+  Intuitive, Powerful, and Hassle-Free RL Training & Monitoring – All in One Place.
+</p>
+
+<p align="center">
+  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/pytest.yml?label=CI&branch=main" alt="Build Status">
+  </a>
+  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status">
+  </a>
+  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Formatting&branch=main" alt="Formatting Status">
+  </a>
+  <a href="https://docs.reinforceui-studio.com/">
+    <img src="https://img.shields.io/badge/Docs-Up-blue" alt="Documentation">
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
+  </a>
+  <a href="https://www.python.org/downloads/release/python-310/">
+    <img src="https://img.shields.io/badge/python-3.10-blue.svg" alt="Python Version">
+  </a>
+  <a href="https://pypi.org/project/reinforceui-studio/">
+    <img src="https://img.shields.io/pypi/v/reinforceui-studio" alt="PyPI version">
+  </a>
+</p>
+
 
 ---
 ⭐️ If you find this project useful, please consider giving it a star! It really helps!
@@ -21,30 +49,30 @@
 ReinforceUI Studio is a Python-based application designed to simplify Reinforcement Learning (RL) workflows through a beautiful, intuitive GUI.
 No more memorizing commands, no more juggling extra repos – just train, monitor, and evaluate in a few clicks!
 
-<p align="center"> <img src="media_resources/new_main_window_example.gif" width="80%"> </p>
+<p align="center"> <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/new_main_window_example.gif" width="80%"> </p>
+
+
+
 
 
 ## Quickstart
 Getting started with ReinforceUI Studio is fast and easy!
 
 ### 🖥️ Install and Run Locally
-The recommended way to use ReinforceUI Studio is by running it locally.
-This gives you full control over the application, with no extra tools needed.
+The easiest way to use ReinforceUI Studio is by installing it directly from PyPI. This provides a hassle-free installation, allowing you to get started quickly with no extra configuration.
 
 Follow these simple steps:
 
 1. Clone the repository and install dependencies
 
 ```bash
-git clone https://github.com/dvalenciar/ReinforceUI-Studio.git
-cd ReinforceUI-Studio
-pip install -r requirements.txt
+pip install reinforceui-studio
 ```
 
 2. Run the application
 
 ```bash
-python main.py 
+reinforceui-studio
 ```
 
 That's it! You’re ready to start training and monitoring your Reinforcement Learning agents through an intuitive GUI.
@@ -73,12 +101,12 @@ If you encounter any issues, check out the [Installation Guide](https://docs.rei
     <th>Main Window Display</th>
   </tr>
   <tr>
-    <td align="center"><img src="media_resources/single_selection.png" width="400"></td>
-    <td align="center"><img src="media_resources/single_selection_main_window.png" width="400"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/single_selection.png" width="400"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/single_selection_main_window.png" width="400"></td>
   </tr>
   <tr>
-    <td align="center"><img src="media_resources/multiple_selection.png" width="400"></td>
-    <td align="center"><img src="media_resources/multiple_selection_main_window.png" width="400"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/multiple_selection.png" width="400"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/multiple_selection_main_window.png" width="400"></td>
   </tr>
 </table>
 
@@ -102,10 +130,10 @@ Below are some examples of results generated by ReinforceUI Studio, showcasing t
 
 | **Algorithm** | **Platform** | **Environment**    | **Curve**                                                       | **Video**                                                                                        |
 |---------------|--------------|--------------------|-----------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| **SAC**       | DMCS         | Walker Walk        | <img src="media_resources/result_examples/SAC_walker_walk.png" width="200">        | <img src="media_resources/result_examples/walker_walk.gif" width="200">       | 
-| **TD3**       | MuJoCo       | HalfCheetah v5     | <img src="media_resources/result_examples/TD3_HalfCheetah-v5.png" width="200">     | <img src="media_resources/result_examples/HalfCheetah.gif" width="200">       |
-| **CDT4**      | DMCS         | Ball in cup catch  | <img src="media_resources/result_examples/CTD4_ball_in_cup_catch.png" width="200"> | <img src="media_resources/result_examples/ball_in_cup_catch.gif" width="200"> | 
-| **DQN**       | Gymnasium    | CartPole v1        | <img src="media_resources/result_examples/DQN_CartPole-v1.png" width="200">        | <img src="media_resources/result_examples/CartPole.gif" width="200">          | 
+| **SAC**       | DMCS         | Walker Walk        | <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/result_examples/SAC_walker_walk.png" width="200">        | <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/result_examples/walker_walk.gif" width="200">       | 
+| **TD3**       | MuJoCo       | HalfCheetah v5     | <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/result_examples/TD3_HalfCheetah-v5.png" width="200">     | <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/result_examples/HalfCheetah.gif" width="200">       |
+| **CDT4**      | DMCS         | Ball in cup catch  | <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/result_examples/CTD4_ball_in_cup_catch.png" width="200"> | <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/result_examples/ball_in_cup_catch.gif" width="200"> | 
+| **DQN**       | Gymnasium    | CartPole v1        | <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/result_examples/DQN_CartPole-v1.png" width="200">        | <img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/result_examples/CartPole.gif" width="200">          | 
 
 
 ## Citation
