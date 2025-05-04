@@ -14,23 +14,28 @@
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/pytest.yml?label=CI&branch=main" alt="Build Status">
   </a>
-  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status">
-  </a>
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml">
     <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Formatting&branch=main" alt="Formatting Status">
   </a>
+  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status">
+  </a>
   <a href="https://docs.reinforceui-studio.com/">
-    <img src="https://img.shields.io/badge/Docs-Up-blue" alt="Documentation">
+    <img src="https://img.shields.io/badge/Docs-Up-green" alt="Documentation">
   </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
-  </a>
+
   <a href="https://www.python.org/downloads/release/python-310/">
     <img src="https://img.shields.io/badge/python-3.10-blue.svg" alt="Python Version">
   </a>
   <a href="https://pypi.org/project/reinforceui-studio/">
     <img src="https://img.shields.io/pypi/v/reinforceui-studio" alt="PyPI version">
+  </a>
+
+  <a href="https://pepy.tech/projects/reinforceui-studio">
+    <img src="https://static.pepy.tech/badge/reinforceui-studio" alt="PyPI Downloads">
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
   </a>
 </p>
 
