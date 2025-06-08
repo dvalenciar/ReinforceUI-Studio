@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
     QFrame,
     QSpacerItem,
     QTabWidget,
+    QComboBox,  # <-- add this import
 )
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QDesktopServices, QIcon
@@ -136,10 +137,56 @@ class TrainingWindow(BaseWindow):
         self.input_layout = QGridLayout()
         self.training_inputs = self.create_input_fields()
         layout.addLayout(self.input_layout)
-        layout.addItem(QSpacerItem(20, 180))
+
+        # --- Observation Type Dropdowns ---
+        obs_type_layout = QVBoxLayout()
+        obs_type_label = QLabel("Observation Type", self)
+        obs_type_label.setStyleSheet(Styles.TEXT_LABEL)
+        obs_type_layout.addWidget(obs_type_label)
+
+        self.obs_type_combo = QComboBox(self)
+        self.obs_type_combo.addItems(["state", "image"])
+        self.obs_type_combo.setStyleSheet(Styles.COMBO_BOX)
+        obs_type_layout.addWidget(self.obs_type_combo)
+
+        self.encoder_combo = QComboBox(self)
+        self.encoder_combo.addItems(["ResNet18", "ConvNeXt"])
+        self.encoder_combo.setStyleSheet(Styles.COMBO_BOX)
+        self.encoder_combo.setVisible(False)
+        encoder_label = QLabel("Image Encoder", self)
+        encoder_label.setStyleSheet(Styles.TEXT_LABEL)
+        encoder_label.setVisible(False)
+        self.encoder_label = encoder_label  # Store for later
+
+        obs_type_layout.addWidget(encoder_label)
+        obs_type_layout.addWidget(self.encoder_combo)
+
+        self.obs_type_combo.currentTextChanged.connect(
+            lambda text: self._toggle_encoder_combo(text)
+        )
+
+        layout.addLayout(obs_type_layout)
+        # --- End Observation Type Dropdowns ---
+
+        layout.addItem(QSpacerItem(0, 25))
         layout.addLayout(self.create_start_stop_button_layout())
         layout.addWidget(self.create_separator())
         return layout
+
+    def _toggle_encoder_combo(self, text):
+        if text == "image":
+            self.encoder_combo.setVisible(True)
+            self.encoder_label.setVisible(True)
+            QMessageBox.warning(
+                self,
+                "Observation Type: Image",
+                "You have selected 'image' as the observation type.\n"
+                "Images will be used for training.",
+                QMessageBox.Ok
+            )
+        else:
+            self.encoder_combo.setVisible(False)
+            self.encoder_label.setVisible(False)
 
     def create_right_layout(self) -> QVBoxLayout:
         layout = QVBoxLayout()
