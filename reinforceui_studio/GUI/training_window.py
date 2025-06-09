@@ -425,6 +425,9 @@ class TrainingWindow(BaseWindow):
     def lock_inputs(self):
         for widget in self.training_inputs.values():
             widget.setReadOnly(True)
+        self.obs_type_combo.setEnabled(False)
+        if self.encoder_combo.isVisible():
+            self.encoder_combo.setEnabled(False)
 
     def start_training(self):
         if self.training_start:
@@ -453,6 +456,10 @@ class TrainingWindow(BaseWindow):
                 label: widget.text() for label, widget in self.training_inputs.items()
             }
 
+            # Get observation type and encoder if needed
+            obs_type = self.obs_type_combo.currentText()
+            encoder = self.encoder_combo.currentText() if obs_type == "image" else None
+
             per_algorithm_configs = []
             for algo_entry in algorithms:
                 config = {
@@ -467,7 +474,11 @@ class TrainingWindow(BaseWindow):
                         "selected_environment"
                     ),
                     "setup_choice": self.previous_selections.get("setup_choice"),
+                    "observation_type": obs_type,
+                    "encoder": encoder,
                 }
+                print(config)
+
                 per_algorithm_configs.append(config)
 
             for config_data in per_algorithm_configs:
