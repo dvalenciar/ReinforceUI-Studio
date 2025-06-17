@@ -27,8 +27,7 @@ class ImageWrapper:
         return image_space
 
     def grab_frame(self):
-        pass
-        # todo need to collect this some how either from render()
+        frame = self.environment.grab_frame(height=self.frame_height, width=self.frame_width)
 
     @cached_property
     def action_num(self):
@@ -40,6 +39,7 @@ class ImageWrapper:
 
 
     def reset(self):
+        pass
 
 
 

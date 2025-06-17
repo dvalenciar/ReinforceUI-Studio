@@ -133,6 +133,10 @@ class DMControlEnvironment:
             plt.clf()
         return combined_frame
 
+    def grab_frame(self, height, width) -> np.ndarray:
+        frame = self.env.physics.render(camera_id=0, height=height, width=width)
+
+
     def close(self) -> None:
         """Close the environment and any open figures."""
         plt.close()
