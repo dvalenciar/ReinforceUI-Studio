@@ -477,7 +477,6 @@ class TrainingWindow(BaseWindow):
                     "observation_type": obs_type,
                     "encoder": encoder,
                 }
-                print(config)
 
                 per_algorithm_configs.append(config)
 

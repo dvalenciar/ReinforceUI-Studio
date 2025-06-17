@@ -5,6 +5,7 @@ from typing import Any, Callable
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_environment.gym_env import GymEnvironment
 from reinforceui_studio.RL_environment.dmcs_env import DMControlEnvironment
+from reinforceui_studio.RL_environment.image_wrapper import ImageWrapper
 from reinforceui_studio.RL_helpers.util import set_seed
 from reinforceui_studio.RL_helpers.record_logger import RecordLogger
 from reinforceui_studio.RL_loops.evaluate_policy_loop import evaluate_policy_loop
@@ -50,13 +51,22 @@ def create_environment_instance(
         else (int(config_data.get("Seed")) + 1)
     )
 
+    # todo need to do something here, check if this logic can be optimized
+    observation_type = config_data.get("observation_type")
+    # -----------------------------------------------------------------------------
+
     if platform_name == "Gymnasium" or platform_name == "MuJoCo":
         environment = GymEnvironment(env_name, seed, render_mode)
     elif platform_name == "DMCS":
         environment = DMControlEnvironment(env_name, seed, render_mode)
     else:
         raise ValueError(f"Unsupported platform: {platform_name}")
-    return environment
+
+    if observation_type == "image":
+        encoder = config_data.get("encoder")
+        return ImageWrapper(config_data, environment)
+    else:
+        return environment
 
 
 def training_loop(  # noqa: C901
@@ -80,12 +90,14 @@ def training_loop(  # noqa: C901
     set_seed(int(config_data.get("Seed")))
     algorithm = import_algorithm_instance(algorithm_name)
 
+    # todo ------ here is my best guess to include the env wrapper for images if images state was selected
     env = create_environment_instance(
-        config_data, render_mode="rgb_array", evaluation_env=False
+        config_data, render_mode="rgb_array", evaluation_env=False,
     )
     env_evaluation = create_environment_instance(
-        config_data, render_mode="rgb_array", evaluation_env=True
+        config_data, render_mode="rgb_array", evaluation_env=True,
     )
+    # todo -------------------------------------------------------------
 
     rl_agent = algorithm(
         env.observation_space(),
@@ -112,6 +124,11 @@ def training_loop(  # noqa: C901
     total_episode_time = 0
     episode_start_time = time.time()
     state = env.reset()
+
+    # todo print the state here to double check if correct state based on the input
+    print(state)
+    exit()
+
 
     is_ppo = algorithm_name == "PPO"
     is_dqn = algorithm_name == "DQN"
