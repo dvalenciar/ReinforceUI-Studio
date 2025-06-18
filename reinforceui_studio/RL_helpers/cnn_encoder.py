@@ -25,9 +25,9 @@ class CnnEncoder:
         if self.device is None:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.encoder_model, self.transform = self.load_model_and_transform()
+        self.encoder_model, self.transform, self.embedding_size = self.load_model_and_transform()
 
-    def load_model_and_transform(self)-> Tuple[torch.nn.Module, transforms.Compose]:
+    def load_model_and_transform(self)-> Tuple[torch.nn.Module, transforms.Compose, int]:
         """Load a pre-trained ResNet model and the corresponding image transformation.
 
         Returns:
@@ -36,6 +36,8 @@ class CnnEncoder:
         try:
             if self.model_name == "resnet18":
                 model = models.resnet18(weights=self.weights)
+                #embedding_dim = model.fc.in_features # todo check if this works
+                embedding_size = 512 #that is the output of resent size
             else:
                 raise ValueError(f"Unsupported model_name: {self.model_name}")
         except Exception as e:
@@ -50,7 +52,7 @@ class CnnEncoder:
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
-        return model, transform
+        return model, transform, embedding_size
 
     def create_embedding(self, image) -> torch.Tensor:
         with torch.no_grad():

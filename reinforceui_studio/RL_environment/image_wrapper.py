@@ -4,7 +4,6 @@ from functools import cached_property
 from reinforceui_studio.RL_helpers.cnn_encoder import CnnEncoder
 
 
-
 class ImageWrapper:
     def __init__(self, config, environment):
 
@@ -31,10 +30,11 @@ class ImageWrapper:
     def observation_space(self):
         # todo this is potencially incorrect since it neeeds to return the size of the embedding here
         # todo so basically this is the embedding_dim=512 for restn and convext net is othe number
-        channels = 1 if self.grey_scale else 3
-        channels *= self.frames_to_stack
-        image_space = (channels, self.frame_width, self.frame_height)
-        return image_space
+        # channels = 1 if self.grey_scale else 3
+        # channels *= self.frames_to_stack
+        # image_space = (channels, self.frame_width, self.frame_height)
+        # return image_space
+        return self.cnn_encoder.embedding_size
 
     @cached_property
     def action_num(self):
