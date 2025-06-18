@@ -109,9 +109,9 @@ class GymEnvironment:
 
         Returns:
         """
+        # todo this may no be optimal find another way to do it if possible
         frame = self.env.render()
-
-
+        return frame
 
     def close(self) -> None:
         """Close the environment."""

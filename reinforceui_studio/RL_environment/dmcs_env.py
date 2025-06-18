@@ -135,7 +135,7 @@ class DMControlEnvironment:
 
     def grab_frame(self, height, width) -> np.ndarray:
         frame = self.env.physics.render(camera_id=0, height=height, width=width)
-
+        return frame
 
     def close(self) -> None:
         """Close the environment and any open figures."""
