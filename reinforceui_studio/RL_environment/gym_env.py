@@ -104,14 +104,13 @@ class GymEnvironment:
         frame = self.env.render()
         return frame
 
-    def grab_frame(self, height, width) -> np.ndarray:
+    def grab_frame(self) -> np.ndarray:
         """Grab a single frame from the environment.
 
         Returns:
+            np.ndarray: The rendered frame.
         """
-        # todo this may no be optimal find another way to do it if possible
-        frame = self.env.render()
-        return frame
+        return self.render_frame()
 
     def close(self) -> None:
         """Close the environment."""

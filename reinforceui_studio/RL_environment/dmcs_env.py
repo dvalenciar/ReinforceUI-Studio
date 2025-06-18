@@ -133,7 +133,7 @@ class DMControlEnvironment:
             plt.clf()
         return combined_frame
 
-    def grab_frame(self, height, width) -> np.ndarray:
+    def grab_frame(self, height: int = 240, width: int = 300) -> np.ndarray:
         frame = self.env.physics.render(camera_id=0, height=height, width=width)
         return frame
 

@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from PIL import Image
 from torchvision import models, transforms
-from torchvision.models import ResNet18_Weights
+from torchvision.models import ResNet18_Weights, ConvNeXt_Base_Weights
 from typing import Tuple, Optional
 import logging
 
@@ -10,114 +10,80 @@ logger = logging.getLogger(__name__)
 
 
 class CnnEncoder:
+    """Encodes images into feature embeddings using a pre-trained CNN model.
+
+    Attributes:
+        model_name (str): Name of the CNN model to use ('ResNet18' or 'ConvNeXt').
+        device (torch.device): Device to run the model on.
+    """
     def __init__(
         self,
-        image_size: Tuple[int, int] = (224, 224 ),
-        model_name: str = "resnet18",
-        weights: Optional[models.ResNet18_Weights] = ResNet18_Weights.IMAGENET1K_V1,
+        model_name: str = "ResNet18",
         device: Optional[torch.device] = None
     ) -> None:
+        """Initializes the CnnEncoder with a specified model and device.
 
-        self.image_size = image_size
-        self.model_name = model_name
-        self.weights = weights
-        self.device = device
-
-        if self.device is None:
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+        Args:
+            model_name (str, optional): Name of the CNN model ('ResNet18' or 'ConvNeXt'). Defaults to 'ResNet18'.
+            device (Optional[torch.device], optional): Device to use. If None, uses CUDA if available. Defaults to None.
+        """
+        self.model_name: str = model_name
+        self.device: torch.device = device if device is not None else torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.encoder_model: torch.nn.Module
+        self.transform: transforms.Compose
+        self.embedding_size: int
         self.encoder_model, self.transform, self.embedding_size = self.load_model_and_transform()
 
-    def load_model_and_transform(self)-> Tuple[torch.nn.Module, transforms.Compose, int]:
-        """Load a pre-trained ResNet model and the corresponding image transformation.
+    def load_model_and_transform(self) -> Tuple[torch.nn.Module, transforms.Compose, int]:
+        """Load a pre-trained ResNet or ConvNeXt model and its associated image transformation.
 
         Returns:
-            Tuple[torch.nn.Module, transforms.Compose]: The model and image transformation.
+            Tuple[torch.nn.Module, transforms.Compose, int]:
+                - The CNN model with the final layer removed.
+                - The image transformation pipeline.
+                - The embedding size.
+
+        Raises:
+            ValueError: If an unsupported model_name is provided.
+            Exception: If model weights cannot be loaded.
         """
         try:
-            if self.model_name == "resnet18":
-                model = models.resnet18(weights=self.weights)
-                #embedding_dim = model.fc.in_features # todo check if this works
-                embedding_size = 512 #that is the output of resent size
+            if self.model_name == "ResNet18":
+                embedding_size: int = 512
+                model: torch.nn.Module = models.resnet18(weights=ResNet18_Weights.DEFAULT)
+                transform: transforms.Compose = ResNet18_Weights.DEFAULT.transforms()
+            elif self.model_name == "ConvNeXt":
+                embedding_size: int = 1024
+                model: torch.nn.Module = models.convnext_base(weights=ConvNeXt_Base_Weights.DEFAULT)
+                transform: transforms.Compose = ConvNeXt_Base_Weights.DEFAULT.transforms()
             else:
                 raise ValueError(f"Unsupported model_name: {self.model_name}")
         except Exception as e:
             logger.error(f"Error loading model weights: {e}. Internet connection may be required.")
             raise
-
         model.fc = torch.nn.Identity()
         model.eval()
         model.to(self.device)
-
-        transform = transforms.Compose([
-            transforms.Resize(self.image_size),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
-
         return model, transform, embedding_size
 
-    def create_embedding(self, image) -> torch.Tensor:
-        print(image.shape)
-        print(type(image))
-        print("...")
+    def create_embedding(self, image: np.ndarray | Image.Image) -> np.ndarray:
+        """Creates a normalized embedding from an input image.
 
+        Args:
+            image (np.ndarray | PIL.Image.Image): Input image as a NumPy array (H, W, C) or PIL Image.
+
+        Returns:
+            np.ndarray: Normalized embedding vector.
+
+        Raises:
+            ValueError: If the input image shape is invalid.
+        """
         with torch.no_grad():
             if isinstance(image, np.ndarray):
-                if image.shape[-1] != 3:
-                    raise ValueError("Expected shape (H, W, 3) for RGB image")
+                if image.ndim != 3 or image.shape[-1] not in [1, 3]:
+                    raise ValueError("Expected shape (H, W, C) with C in [1, 3]")
                 image = Image.fromarray(image)  # Convert to PIL
-            input_tensor = self.transform(image).unsqueeze(0)
-            print(input_tensor.shape)
-            embedding = self.encoder_model(input_tensor).squeeze().numpy()
+            input_tensor: torch.Tensor = self.transform(image).unsqueeze(0)
+            embedding: np.ndarray = self.encoder_model(input_tensor).squeeze().numpy()
             embedding = embedding / np.linalg.norm(embedding)
         return embedding
-
-
-# def load_model_and_transform(
-#     image_size: Tuple[int, int] = (160, 160),
-#     model_name: str = "resnet18",
-#     weights: Optional[models.ResNet18_Weights] = ResNet18_Weights.IMAGENET1K_V1,
-#     device: Optional[torch.device] = None
-# ) -> Tuple[torch.nn.Module, transforms.Compose]:
-#     """
-#     Load a pre-trained ResNet model and the corresponding image transformation.
-#
-#     Args:
-#         image_size (Tuple[int, int]): The size to which images will be resized.
-#         model_name (str): The name of the ResNet model to load.
-#         weights: The weights to use for the model.
-#         device: The device to load the model onto.
-#
-#     Returns:
-#         Tuple[torch.nn.Module, transforms.Compose]: The model and image transformation.
-#     """
-#
-#     if device is None:
-#         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#     try:
-#         if model_name == "resnet18":
-#             model = models.resnet18(weights=weights)
-#         else:
-#             raise ValueError(f"Unsupported model_name: {model_name}")
-#     except Exception as e:
-#         logger.error(f"Error loading model weights: {e}. Internet connection may be required.")
-#         raise
-#
-#     model.fc = torch.nn.Identity()
-#     model.eval()
-#     model.to(device)
-#     transform = transforms.Compose([
-#         transforms.Resize(image_size),
-#         transforms.ToTensor(),
-#         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-#     ])
-#     return model, transform
-
-
-# def create_embedding(image) -> torch.Tensor:
-#     with torch.no_grad():
-#         input_tensor = transform(image).unsqueeze(0)
-#         embedding = encoder_model(input_tensor).squeeze().numpy()
-#         embedding = embedding / np.linalg.norm(embedding)
-#     return embedding
