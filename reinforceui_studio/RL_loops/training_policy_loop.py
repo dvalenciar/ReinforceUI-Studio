@@ -99,6 +99,7 @@ def training_loop(  # noqa: C901
     )
     # todo -------------------------------------------------------------
 
+
     rl_agent = algorithm(
         env.observation_space(),
         env.action_num(),
@@ -123,10 +124,12 @@ def training_loop(  # noqa: C901
     episode_reward = 0
     total_episode_time = 0
     episode_start_time = time.time()
+
     state = env.reset()
 
     # todo print the state here to double check if correct state based on the input
     print(state)
+    print("state shape:", state.shape)  # todo remove this line
     exit()
 
 

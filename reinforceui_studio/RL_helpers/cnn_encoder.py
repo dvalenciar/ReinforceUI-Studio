@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from PIL import Image
 from torchvision import models, transforms
 from torchvision.models import ResNet18_Weights
 from typing import Tuple, Optional
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 class CnnEncoder:
     def __init__(
         self,
-        image_size: Tuple[int, int] = (256, 256),
+        image_size: Tuple[int, int] = (224, 224 ),
         model_name: str = "resnet18",
         weights: Optional[models.ResNet18_Weights] = ResNet18_Weights.IMAGENET1K_V1,
         device: Optional[torch.device] = None
@@ -47,16 +48,27 @@ class CnnEncoder:
         model.fc = torch.nn.Identity()
         model.eval()
         model.to(self.device)
+
         transform = transforms.Compose([
             transforms.Resize(self.image_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
+
         return model, transform, embedding_size
 
     def create_embedding(self, image) -> torch.Tensor:
+        print(image.shape)
+        print(type(image))
+        print("...")
+
         with torch.no_grad():
+            if isinstance(image, np.ndarray):
+                if image.shape[-1] != 3:
+                    raise ValueError("Expected shape (H, W, 3) for RGB image")
+                image = Image.fromarray(image)  # Convert to PIL
             input_tensor = self.transform(image).unsqueeze(0)
+            print(input_tensor.shape)
             embedding = self.encoder_model(input_tensor).squeeze().numpy()
             embedding = embedding / np.linalg.norm(embedding)
         return embedding

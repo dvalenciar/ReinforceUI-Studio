@@ -36,7 +36,7 @@ class ImageWrapper:
         # return image_space
         return self.cnn_encoder.embedding_size
 
-    @cached_property
+
     def action_num(self):
         return self.environment.action_num()
 
@@ -45,19 +45,25 @@ class ImageWrapper:
 
     def reset(self):
         frame = self.environment.grab_frame(height=self.frame_height, width=self.frame_width)
-        frame = np.moveaxis(frame, -1, 0)
-        for _ in range(self.frames_to_stack):
-            self.frames_stacked.append(frame)
-        stacked_frames = np.concatenate(list(self.frames_stacked), axis=0)
-        state = self.cnn_encoder.create_embedding (stacked_frames)
+        print(frame.shape)
+
+        # frame = np.moveaxis(frame, -1, 0)
+        # for _ in range(self.frames_to_stack):
+        #     self.frames_stacked.append(frame)
+        # print("Stacked frames shape:", np.array(self.frames_stacked).shape)
+        # stacked_frames = np.concatenate(list(self.frames_stacked), axis=0)
+        # print("Stacked frames shape after concatenation:", stacked_frames.shape)
+        # state = self.cnn_encoder.create_embedding (stacked_frames)
+        state = self.cnn_encoder.create_embedding(frame)
+
         return state
 
     def step(self, action:int):
         frame = self.environment.grab_frame(height=self.frame_height, width=self.frame_width)
-        frame = np.moveaxis(frame, -1, 0)
-        self.frames_stacked.append(frame)
-        stacked_frames = np.concatenate(list(self.frames_stacked), axis=0)
-        state = self.cnn_encoder.create_embedding(stacked_frames)
+        # frame = np.moveaxis(frame, -1, 0)
+        # self.frames_stacked.append(frame)
+        # stacked_frames = np.concatenate(list(self.frames_stacked), axis=0)
+        state = self.cnn_encoder.create_embedding(frame)
         _, reward, done, truncated = self.environment.step(action)
         return state, reward, done, truncated
 
