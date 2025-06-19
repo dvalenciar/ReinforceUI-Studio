@@ -7,8 +7,6 @@ class ImageWrapper:
         self.environment = environment
         self.cnn_encoder = CnnEncoder(model_name=config.get("encoder"))
 
-        self.grey_scale = False # todo: check if this is needed and how to implement it
-
     def max_action_value(self):
         return self.environment.max_action_value
 
