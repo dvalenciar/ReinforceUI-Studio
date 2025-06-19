@@ -119,11 +119,6 @@ def training_loop(  # noqa: C901
 
     state = env.reset()
 
-    print(state)
-    print("state shape:", state.shape)  # todo remove this line
-    exit()
-
-
     is_ppo = algorithm_name == "PPO"
     is_dqn = algorithm_name == "DQN"
 

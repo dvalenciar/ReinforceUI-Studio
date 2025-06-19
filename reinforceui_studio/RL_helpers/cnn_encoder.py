@@ -83,7 +83,7 @@ class CnnEncoder:
                 if image.ndim != 3 or image.shape[-1] not in [1, 3]:
                     raise ValueError("Expected shape (H, W, C) with C in [1, 3]")
                 image = Image.fromarray(image)  # Convert to PIL
-            input_tensor: torch.Tensor = self.transform(image).unsqueeze(0)
-            embedding: np.ndarray = self.encoder_model(input_tensor).squeeze().numpy()
+            input_tensor: torch.Tensor = self.transform(image).unsqueeze(0).to(self.device)
+            embedding: np.ndarray = self.encoder_model(input_tensor).squeeze().cpu().numpy()
             embedding = embedding / np.linalg.norm(embedding)
         return embedding
