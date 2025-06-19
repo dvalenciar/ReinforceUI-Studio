@@ -25,6 +25,7 @@ class ImageWrapper:
         return self.environment.sample_action()
 
     def reset(self):
+        _ = self.environment.reset() # Reset the environment
         frame = self.environment.grab_frame()
         state = self.cnn_encoder.create_embedding(frame)
         return state
