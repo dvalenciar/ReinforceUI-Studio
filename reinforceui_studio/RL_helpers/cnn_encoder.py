@@ -33,6 +33,9 @@ class CnnEncoder:
         self.transform: transforms.Compose
         self.embedding_size: int
         self.encoder_model, self.transform, self.embedding_size = self.load_model_and_transform()
+        # Add extra fully connected layer (trainable)
+        self.fc_out_dim = 32
+        self.fc_layer = torch.nn.Linear(self.embedding_size, self.fc_out_dim).to(self.device)
 
     def load_model_and_transform(self) -> Tuple[torch.nn.Module, transforms.Compose, int]:
         """Load a pre-trained ResNet or ConvNeXt model and its associated image transformation.
@@ -50,8 +53,8 @@ class CnnEncoder:
         try:
             if self.model_name == "ResNet18":
                 embedding_size: int = 512
-                model: torch.nn.Module = models.resnet18(weights=ResNet18_Weights.DEFAULT)
-                transform: transforms.Compose = ResNet18_Weights.DEFAULT.transforms()
+                model: torch.nn.Module = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+                transform: transforms.Compose = ResNet18_Weights.IMAGENET1K_V1.transforms()
             elif self.model_name == "ConvNeXt":
                 embedding_size: int = 1024
                 model: torch.nn.Module = models.convnext_base(weights=ConvNeXt_Base_Weights.DEFAULT)
@@ -61,7 +64,10 @@ class CnnEncoder:
         except Exception as e:
             logger.error(f"Error loading model weights: {e}. Internet connection may be required.")
             raise
+
         model.fc = torch.nn.Identity()
+        for param in model.parameters():
+            param.requires_grad = False
         model.eval()
         model.to(self.device)
         return model, transform, embedding_size
@@ -83,7 +89,16 @@ class CnnEncoder:
                 if image.ndim != 3 or image.shape[-1] not in [1, 3]:
                     raise ValueError("Expected shape (H, W, C) with C in [1, 3]")
                 image = Image.fromarray(image)  # Convert to PIL
-            input_tensor: torch.Tensor = self.transform(image).unsqueeze(0).to(self.device)
-            embedding: np.ndarray = self.encoder_model(input_tensor).squeeze().cpu().numpy()
-            embedding = embedding / np.linalg.norm(embedding)
+            input_tensor = self.transform(image).unsqueeze(0).to(self.device)
+            features = self.encoder_model(input_tensor)
+
+        # Pass through trainable FC layer (requires grad for this layer only)
+        embedding = self.fc_layer(features)
+        # embedding = torch.relu(embedding)  # Add activation function
+        embedding = embedding.squeeze().detach().cpu().numpy()
+        # embedding = embedding / np.linalg.norm(embedding)
         return embedding
+
+    def get_trainable_parameters(self):
+        """Returns only the parameters of the trainable FC layer for optimization."""
+        return self.fc_layer.parameters()

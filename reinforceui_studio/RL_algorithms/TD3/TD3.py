@@ -17,7 +17,7 @@ import torch.nn.functional as functional
 
 class TD3:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict
+        self, observation_size: int, action_num: int, hyperparameters: dict, fc_params=None
     ) -> None:
         """Initialize the TD3 agent.
 
@@ -48,12 +48,21 @@ class TD3:
 
         self.action_num = action_num
 
+        # Actor optimizer: only actor parameters
         self.actor_net_optimiser = torch.optim.Adam(
             self.actor_net.parameters(), lr=self.actor_lr
         )
-        self.critic_net_optimiser = torch.optim.Adam(
-            self.critic_net.parameters(), lr=self.critic_lr
-        )
+
+        # Critic optimizer: add fc_params if provided
+        if fc_params is not None:
+            print("Using additional fully connected parameters for critic network.")
+            self.critic_net_optimiser = torch.optim.Adam(
+                list(self.critic_net.parameters()) + list(fc_params), lr=self.critic_lr
+            )
+        else:
+            self.critic_net_optimiser = torch.optim.Adam(
+                self.critic_net.parameters(), lr=self.critic_lr
+            )
 
     def select_action_from_policy(
         self,

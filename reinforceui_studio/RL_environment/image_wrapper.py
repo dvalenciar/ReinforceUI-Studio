@@ -14,7 +14,7 @@ class ImageWrapper:
         return self.environment.min_action_value
 
     def observation_space(self):
-        return self.cnn_encoder.embedding_size
+        return self.cnn_encoder.fc_out_dim
 
     def action_num(self):
         return self.environment.action_num()
@@ -29,9 +29,9 @@ class ImageWrapper:
         return state
 
     def step(self, action:int):
+        _, reward, done, truncated = self.environment.step(action)
         frame = self.environment.grab_frame()
         state = self.cnn_encoder.create_embedding(frame)
-        _, reward, done, truncated = self.environment.step(action)
         return state, reward, done, truncated
 
     def render_frame(self):

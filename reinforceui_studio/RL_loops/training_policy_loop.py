@@ -92,10 +92,17 @@ def training_loop(  # noqa: C901
     env_evaluation = create_environment_instance(
         config_data, render_mode="rgb_array", evaluation_env=True,
     )
+
+    # --- Add logic to get FC layer parameters if using image encoder ---
+    fc_params = None
+    if hasattr(env, "cnn_encoder") and hasattr(env.cnn_encoder, "get_trainable_parameters"):
+        fc_params = env.cnn_encoder.get_trainable_parameters()
+
     rl_agent = algorithm(
         env.observation_space(),
         env.action_num(),
         config_data.get("Hyperparameters"),
+        fc_params=fc_params,  # Pass FC layer params if available
     )
     memory = MemoryBuffer(
         env.observation_space(),
