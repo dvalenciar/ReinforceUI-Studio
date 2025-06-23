@@ -7,6 +7,7 @@ from reinforceui_studio.RL_environment.gym_env import GymEnvironment
 from reinforceui_studio.RL_environment.dmcs_env import DMControlEnvironment
 from reinforceui_studio.RL_helpers.util import set_seed
 from reinforceui_studio.RL_helpers.record_logger import RecordLogger
+from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
 from reinforceui_studio.RL_loops.evaluate_policy_loop import evaluate_policy_loop
 from reinforceui_studio.RL_loops.testing_policy_loop import policy_loop_test
 
@@ -100,11 +101,32 @@ def training_loop(  # noqa: C901
     )
 
     logger = RecordLogger(log_folder_path, rl_agent)
+    mlflow_logger = MLflowLogger(
+        experiment_name=f"RL_{algorithm_name}",
+        run_name=display_name,
+        tags={
+            "algorithm": algorithm_name,
+            "environment": config_data.get("selected_environment"),
+        },
+    )
+
 
     steps_training = int(config_data.get("Training Steps", 1000000))
     evaluation_interval = int(config_data.get("Evaluation Interval", 1000))
     log_interval = int(config_data.get("Log Interval", 1000))
     number_eval_episodes = int(config_data.get("Evaluation Episodes", 10))
+
+    mlflow_logger.log_params({
+        "algorithm": algorithm_name,
+        "environment": config_data.get("selected_environment"),
+        "platform": config_data.get("selected_platform"),
+        "seed": config_data.get("Seed"),
+        **(config_data.get("Hyperparameters") or {}),
+        "training_steps": steps_training,
+        "evaluation_interval": evaluation_interval,
+        "log_interval": log_interval,
+        "evaluation_episodes": number_eval_episodes,
+    })
 
     episode_timesteps = 0
     episode_num = 0
@@ -219,6 +241,14 @@ def training_loop(  # noqa: C901
                 duration=episode_time,
             )
 
+            # Log metrics to MLflow
+            mlflow_logger.log_metrics({
+                "episode_reward": episode_reward,
+                "episode_steps": episode_timesteps,
+                "episode_time": episode_time,
+                "total_timesteps": total_step_counter + 1,
+            }, step=episode_num + 1)
+
             training_window.update_plot_signal.emit(
                 display_name, df_log_train, "training"
             )
@@ -247,6 +277,16 @@ def training_loop(  # noqa: C901
             training_window.update_plot_signal.emit(
                 display_name, df_grouped, "evaluation"
             )
+
+            # Log evaluation metrics to MLflow (mean reward and steps if available)
+            if not df_grouped.empty:
+                eval_reward = df_grouped["Episode Reward"].values[-1]
+                eval_steps = df_grouped["Episode Steps"].values[-1]
+                mlflow_logger.log_metrics({
+                    "eval_episode_reward": eval_reward,
+                    "eval_episode_steps": eval_steps,
+                    "eval_total_timesteps": total_step_counter + 1,
+                }, step=total_step_counter + 1)
 
         # Update the training window
         training_window.update_algo_signal.emit(display_name, "Progress", int(progress))
