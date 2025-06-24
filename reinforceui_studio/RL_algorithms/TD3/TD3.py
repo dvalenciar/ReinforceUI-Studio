@@ -10,6 +10,7 @@ import os
 import numpy as np
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.TD3.networks import Actor, Critic
+from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
 
 import torch
 import torch.nn.functional as functional
@@ -17,7 +18,7 @@ import torch.nn.functional as functional
 
 class TD3:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict
+        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: MLflowLogger = None
     ) -> None:
         """Initialize the TD3 agent.
 
@@ -54,6 +55,8 @@ class TD3:
         self.critic_net_optimiser = torch.optim.Adam(
             self.critic_net.parameters(), lr=self.critic_lr
         )
+        self.mlflow_logger = mlflow_logger
+
 
     def select_action_from_policy(
         self,
@@ -115,6 +118,13 @@ class TD3:
         self.critic_net_optimiser.zero_grad()
         critic_loss_total.backward()
         self.critic_net_optimiser.step()
+        # Log critic losses
+        if self.mlflow_logger is not None:
+            self.mlflow_logger.log_metrics({
+                'critic_loss_one': critic_loss_one.item(),
+                'critic_loss_two': critic_loss_two.item(),
+                'critic_loss_total': critic_loss_total.item()
+            })
         return (
             critic_loss_one.item(),
             critic_loss_two.item(),
@@ -127,6 +137,9 @@ class TD3:
         self.actor_net_optimiser.zero_grad()
         actor_loss.backward()
         self.actor_net_optimiser.step()
+        # Log actor loss
+        if self.mlflow_logger is not None:
+            self.mlflow_logger.log_metric('actor_loss', actor_loss.item())
         return actor_loss.item()
 
     def train_policy(self, memory: MemoryBuffer, batch_size: int) -> None:
@@ -188,6 +201,10 @@ class TD3:
 
         torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
         torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        # Log model artifacts
+        if self.mlflow_logger is not None:
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
 
     def load_models(self, filename: str, filepath: str) -> None:
         """Load models previously saved for this algorithm.
