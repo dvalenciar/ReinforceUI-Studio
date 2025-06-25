@@ -4,10 +4,13 @@ from typing import Optional, Dict, Any
 
 
 class MLflowLogger:
-    def __init__(self, experiment_name: str = "ReinforceUI", run_name: Optional[str] = None, use_mlflow: bool = True, tags: Optional[Dict[str, Any]] = None):
+    def __init__(self, experiment_name: str = "ReinforceUI", run_name: Optional[str] = None, use_mlflow: bool = True, tags: Optional[Dict[str, Any]] = None, tracking_uri: Optional[str] = None):
         self.use_mlflow = use_mlflow
         self.run = None
         if self.use_mlflow:
+            if tracking_uri is None:
+                tracking_uri = os.path.join(os.path.expanduser("~"), "mlflow_tracking")
+            mlflow.set_tracking_uri(tracking_uri)
             mlflow.set_experiment(experiment_name)
             self.run = mlflow.start_run(run_name=run_name)
             if tags:
