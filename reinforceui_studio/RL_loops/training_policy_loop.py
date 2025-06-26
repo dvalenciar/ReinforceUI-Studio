@@ -88,7 +88,6 @@ def training_loop(  # noqa: C901
         config_data, render_mode="rgb_array", evaluation_env=True
     )
 
-
     mlflow_logger = MLflowLogger(
         experiment_name=f"RL_{algorithm_name}",
         run_name=display_name,
@@ -156,6 +155,12 @@ def training_loop(  # noqa: C901
         G = int(config_data.get("G Value", 1))  # noqa: N806
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
+
+        mlflow_logger.log_params({
+            "G Value": G,
+            "Batch Size": batch_size,
+            "Exploration Steps": steps_exploration,
+        })
 
     training_completed = True
 
@@ -247,11 +252,12 @@ def training_loop(  # noqa: C901
 
             # Log metrics to MLflow
             mlflow_logger.log_metrics({
+                "episode_num": episode_num + 1,
                 "episode_reward": episode_reward,
                 "episode_steps": episode_timesteps,
                 "episode_time": episode_time,
                 "total_timesteps": total_step_counter + 1,
-            }, step=episode_num + 1)
+            }, step=total_step_counter + 1)
 
             training_window.update_plot_signal.emit(
                 display_name, df_log_train, "training"
@@ -290,6 +296,7 @@ def training_loop(  # noqa: C901
                     "eval_episode_reward": eval_reward,
                     "eval_episode_steps": eval_steps,
                     "eval_total_timesteps": total_step_counter + 1,
+
                 }, step=total_step_counter + 1)
 
         # Update the training window
