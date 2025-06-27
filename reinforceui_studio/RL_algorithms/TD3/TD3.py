@@ -94,6 +94,7 @@ class TD3:
         rewards: torch.Tensor,
         next_states: torch.Tensor,
         dones: torch.Tensor,
+        step: int = None,
     ) -> tuple[float, float, float]:
 
         with torch.no_grad():
@@ -120,18 +121,19 @@ class TD3:
         self.critic_net_optimiser.step()
         # Log critic losses
         if self.mlflow_logger is not None:
+            log_step = step if step is not None else self.learn_counter
             self.mlflow_logger.log_metrics({
                 'critic_loss_one': critic_loss_one.item(),
                 'critic_loss_two': critic_loss_two.item(),
                 'critic_loss_total': critic_loss_total.item()
-            })
+            }, step=log_step)
         return (
             critic_loss_one.item(),
             critic_loss_two.item(),
             critic_loss_total.item(),
         )
 
-    def _update_actor(self, states: torch.Tensor) -> float:
+    def _update_actor(self, states: torch.Tensor, step: int = None,) -> float:
         actor_q_values, _ = self.critic_net(states, self.actor_net(states))
         actor_loss = -actor_q_values.mean()
         self.actor_net_optimiser.zero_grad()
@@ -139,15 +141,17 @@ class TD3:
         self.actor_net_optimiser.step()
         # Log actor loss
         if self.mlflow_logger is not None:
-            self.mlflow_logger.log_metric('actor_loss', actor_loss.item())
+            log_step = step if step is not None else self.learn_counter
+            self.mlflow_logger.log_metric('actor_loss', actor_loss.item(), step=log_step)
         return actor_loss.item()
 
-    def train_policy(self, memory: MemoryBuffer, batch_size: int) -> None:
+    def train_policy(self, memory: MemoryBuffer, batch_size: int, step: int = None) -> None:
         """Train actor and critic networks using experiences from memory.
 
         Args:
             memory: Replay buffer containing experiences
             batch_size: Number of experiences to sample
+            step: Global timestep for logging (optional)
         """
         self.learn_counter += 1
 
@@ -166,11 +170,11 @@ class TD3:
         dones = dones.reshape(batch_size, 1)
 
         # Update the Critic
-        self._update_critic(states, actions, rewards, next_states, dones)
+        self._update_critic(states, actions, rewards, next_states, dones, step=step)
 
         if self.learn_counter % self.policy_update_freq == 0:
             # Update Actor
-            self._update_actor(states)
+            self._update_actor(states, step=step)
 
             # Update target network params
             for param, target_param in zip(

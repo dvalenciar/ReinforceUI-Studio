@@ -92,10 +92,9 @@ def training_loop(  # noqa: C901
         experiment_name=f"RL_{algorithm_name}",
         run_name=display_name,
         tags={
-            "algorithm": algorithm_name,
             "environment": config_data.get("selected_environment"),
+            "platform": config_data.get("selected_platform"),
         },
-        tracking_uri=None
     )
 
     rl_agent = algorithm(
@@ -112,6 +111,7 @@ def training_loop(  # noqa: C901
     )
 
     logger = RecordLogger(log_folder_path, rl_agent)
+    mlflow_logger.start_run()
 
     steps_training = int(config_data.get("Training Steps", 1000000))
     evaluation_interval = int(config_data.get("Evaluation Interval", 1000))
@@ -214,7 +214,7 @@ def training_loop(  # noqa: C901
 
         elif not is_ppo and not is_dqn and total_step_counter >= steps_exploration:
             for _ in range(G):
-                rl_agent.train_policy(memory, batch_size)
+                rl_agent.train_policy(memory, batch_size, step=total_step_counter + 1)
 
         # Handle episode completion
         if done or truncated:
@@ -310,8 +310,7 @@ def training_loop(  # noqa: C901
             logger.save_logs(plot_flag=False)
 
     # Finalize training
-    mlflow_logger.end_run()
     logger.save_logs(plot_flag=True)
     policy_loop_test(env, rl_agent, logger, algo_name=algorithm_name)
-
     training_window.training_completed_signal.emit(display_name, training_completed)
+    mlflow_logger.end_run()
