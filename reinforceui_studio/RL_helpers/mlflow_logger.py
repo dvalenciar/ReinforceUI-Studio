@@ -2,7 +2,10 @@ import os
 import mlflow
 from functools import wraps
 from typing import Optional, Dict, Any, Callable
+
+import torch
 from mlflow.models.signature import infer_signature
+from mlflow.transformers import generate_signature_output
 
 
 def check_enabled(func: Callable) -> Callable:
@@ -102,28 +105,43 @@ class MLflowLogger:
     def end_run(self) -> None:
         mlflow.end_run(status="FINISHED")
 
-
-
+    @check_enabled
     def log_model(self, model, model_type: str = "pytorch", model_name: str = "model",
               registered_model_name: Optional[str] = None,
-              input_example=None):
+              input_example=None, model_input=None):
         """
         Log a machine learning model with optional registration.
+        input_example: numpy array or DataFrame for MLflow
+        model_input: actual input to call the model for signature inference (can be tensor, tuple, etc.)
         """
         if model_type == "pytorch":
+            signature = None
             if input_example is not None:
-                signature = infer_signature(input_example, model(input_example))
+                # Use model_input if provided, else infer from input_example
+                if model_input is not None:
+                    if isinstance(model_input, (tuple, list)):
+                        model_output = model(*model_input)
+                    else:
+                        model_output = model(model_input)
+                else:
+                    # Accept both ndarray and dict for input_example
+                    if isinstance(input_example, dict):
+                        model_output = model(**{k: torch.from_numpy(v) for k, v in input_example.items()})
+                    else:
+                        model_output = model(torch.from_numpy(input_example))
+
+                if isinstance(model_output, torch.Tensor):
+                    model_output = model_output.detach().cpu().numpy()
+                signature = infer_signature(model_input=input_example, model_output=model_output)
             else:
-                signature = None
                 print("Warning: Logging PyTorch model without signature. Inference may fail later.")
 
             mlflow.pytorch.log_model(
                 pytorch_model=model,
                 name=model_name,
                 registered_model_name=registered_model_name,
-                signature=signature
+                signature=signature,
+                input_example=input_example
             )
-
         else:
             print(f"Error: Unsupported model type '{model_type}'. Only 'pytorch' supported here.")
-

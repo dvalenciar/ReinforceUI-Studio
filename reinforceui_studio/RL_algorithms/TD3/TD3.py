@@ -7,10 +7,12 @@ Taxonomy: Off policy > Actor-Critic > Continuous action space
 
 import copy
 import os
+
 import numpy as np
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.TD3.networks import Actor, Critic
 from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
+from reinforceui_studio.RL_helpers.mlflow_wrappers import CriticMLflowWrapper
 
 import torch
 import torch.nn.functional as functional
@@ -47,6 +49,7 @@ class TD3:
         self.learn_counter = 0
         self.policy_update_freq = 2
 
+        self.observation_size = observation_size
         self.action_num = action_num
 
         self.actor_net_optimiser = torch.optim.Adam(
@@ -79,7 +82,7 @@ class TD3:
             state_tensor = torch.FloatTensor(state).to(self.device)
             state_tensor = state_tensor.unsqueeze(0)
             action = self.actor_net(state_tensor)
-            action = action.cpu().data.numpy().flatten()
+            action = action.cpu().detach().numpy().flatten()
             if not evaluation:
                 noise = np.random.normal(0, scale=noise_scale, size=self.action_num)
                 action = action + noise
@@ -123,9 +126,9 @@ class TD3:
         if self.mlflow_logger is not None:
             log_step = step if step is not None else self.learn_counter
             self.mlflow_logger.log_metrics({
-                'critic_loss_one': critic_loss_one.item(),
-                'critic_loss_two': critic_loss_two.item(),
-                'critic_loss_total': critic_loss_total.item()
+                'Critic loss one': critic_loss_one.item(),
+                'Critic loss two': critic_loss_two.item(),
+                'Critic loss total': critic_loss_total.item()
             }, step=log_step)
         return (
             critic_loss_one.item(),
@@ -142,7 +145,7 @@ class TD3:
         # Log actor loss
         if self.mlflow_logger is not None:
             log_step = step if step is not None else self.learn_counter
-            self.mlflow_logger.log_metric('actor_loss', actor_loss.item(), step=log_step)
+            self.mlflow_logger.log_metric('Actor loss', actor_loss.item(), step=log_step)
         return actor_loss.item()
 
     def train_policy(self, memory: MemoryBuffer, batch_size: int, step: int = None) -> None:
@@ -192,12 +195,13 @@ class TD3:
                     self.tau * param.data + (1 - self.tau) * target_param.data
                 )
 
-    def save_models(self, filename: str, filepath: str) -> None:
+    def save_models(self, filename: str, filepath: str, checkpoint: bool = True) -> None:
         """Save actor and critic networks to files.
 
         Args:
             filename: Base name for the saved model files
             filepath: Directory path where models will be saved
+            checkpoint: If True, mlfow won't log the model as an artifact or model
         """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
@@ -205,10 +209,32 @@ class TD3:
 
         torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
         torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
-        # Log model artifacts
-        if self.mlflow_logger is not None:
+
+        # Log model as MLflow models only at the end of training (checkpoint=False)
+        if self.mlflow_logger is not None and not checkpoint:
+
+            # Log as artifacts for backward compatibility
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
+
+            # For actor
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
+            model_input = torch.from_numpy(input_example)
+            self.mlflow_logger.log_model(
+                model=self.actor_net,
+                model_type="pytorch", model_name="actor",
+                input_example=input_example,
+                model_input=model_input)
+
+            # For critic (use wrapper for MLflow)
+            input_example = np.zeros((1, self.observation_size + self.action_num), dtype=np.float32)
+            model_input = torch.from_numpy(input_example)
+            critic_mlflow = CriticMLflowWrapper(self.critic_net, self.observation_size)
+            self.mlflow_logger.log_model(
+                model=critic_mlflow,
+                model_type="pytorch", model_name="critic",
+                input_example=input_example,
+                model_input=model_input)
 
     def load_models(self, filename: str, filepath: str) -> None:
         """Load models previously saved for this algorithm.

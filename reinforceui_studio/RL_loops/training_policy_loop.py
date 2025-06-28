@@ -307,10 +307,10 @@ def training_loop(  # noqa: C901
 
         # Save checkpoint based on log interval
         if (total_step_counter + 1) % log_interval == 0:
-            logger.save_logs(plot_flag=False)
+            logger.save_logs(plot_flag=False, checkpoint=True)
 
     # Finalize training
-    logger.save_logs(plot_flag=True)
+    logger.save_logs(plot_flag=True, checkpoint=False)
     policy_loop_test(env, rl_agent, logger, algo_name=algorithm_name)
     training_window.training_completed_signal.emit(display_name, training_completed)
     mlflow_logger.end_run()
