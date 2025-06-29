@@ -50,8 +50,7 @@ class MLflowLogger:
             return
 
         if tracking_uri is None:
-            tracking_uri = os.path.join(os.path.expanduser("~"), "mlflow_tracking")
-            # tracking_uri = "file:///home/david/mlflow_tracking"
+            tracking_uri = os.path.join(os.path.expanduser("~"), "reinforceui_studio_logs/mlflow_tracking")
 
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment(experiment_name)

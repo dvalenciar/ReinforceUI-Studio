@@ -430,10 +430,12 @@ class TrainingWindow(BaseWindow):
 
     def create_log_folder(self, algo_names: list[str]) -> None:
         home_dir = os.path.expanduser("~")
+        logs_root = os.path.join(home_dir, "reinforceui_studio_logs")
+        os.makedirs(logs_root, exist_ok=True)
         timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
         algo_str = "_".join(algo_names)
         self.main_folder_name = os.path.join(
-            home_dir, f"training_log_{algo_str}_{timestamp}"
+            logs_root, f"training_log_{algo_str}_{timestamp}"
         )
         os.makedirs(self.main_folder_name, exist_ok=True)
 

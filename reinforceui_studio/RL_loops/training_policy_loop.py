@@ -119,15 +119,15 @@ def training_loop(  # noqa: C901
     number_eval_episodes = int(config_data.get("Evaluation Episodes", 10))
 
     mlflow_logger.log_params({
-        "algorithm": algorithm_name,
-        "environment": config_data.get("selected_environment"),
-        "platform": config_data.get("selected_platform"),
-        "seed": config_data.get("Seed"),
+        "Algorithm Name": algorithm_name,
+        "Environment Name": config_data.get("selected_environment"),
+        "Selected Platform": config_data.get("selected_platform"),
+        "Seed": config_data.get("Seed"),
         **(config_data.get("Hyperparameters") or {}),
-        "training_steps": steps_training,
-        "evaluation_interval": evaluation_interval,
-        "log_interval": log_interval,
-        "evaluation_episodes": number_eval_episodes,
+        "Training Steps": steps_training,
+        "Evaluation Interval": evaluation_interval,
+        "Evaluation Episodes": number_eval_episodes,
+        "log Interval": log_interval,
     })
 
     episode_timesteps = 0
@@ -252,11 +252,10 @@ def training_loop(  # noqa: C901
 
             # Log metrics to MLflow
             mlflow_logger.log_metrics({
-                "episode_num": episode_num + 1,
-                "episode_reward": episode_reward,
-                "episode_steps": episode_timesteps,
-                "episode_time": episode_time,
-                "total_timesteps": total_step_counter + 1,
+                "Episode Number": episode_num + 1,
+                "Episode Reward": episode_reward,
+                "Steps per Episode": episode_timesteps,
+                "Time per Episode": episode_time,
             }, step=total_step_counter + 1)
 
             training_window.update_plot_signal.emit(
@@ -293,10 +292,8 @@ def training_loop(  # noqa: C901
                 eval_reward = df_grouped["Episode Reward"].values[-1]
                 eval_steps = df_grouped["Episode Steps"].values[-1]
                 mlflow_logger.log_metrics({
-                    "eval_episode_reward": eval_reward,
-                    "eval_episode_steps": eval_steps,
-                    "eval_total_timesteps": total_step_counter + 1,
-
+                    "Evaluation-Episode Reward": eval_reward,
+                    "Evaluation-Steps per Episode": eval_steps,
                 }, step=total_step_counter + 1)
 
         # Update the training window
