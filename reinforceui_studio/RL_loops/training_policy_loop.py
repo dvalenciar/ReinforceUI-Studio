@@ -95,6 +95,7 @@ def training_loop(  # noqa: C901
             "environment": config_data.get("selected_environment"),
             "platform": config_data.get("selected_platform"),
         },
+        use_mlflow = config_data.get("use_mlflow", True)
     )
 
     rl_agent = algorithm(

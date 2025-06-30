@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
     QFrame,
     QSpacerItem,
     QTabWidget,
+    QCheckBox,
 )
 from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QDesktopServices, QIcon
@@ -136,6 +137,11 @@ class TrainingWindow(BaseWindow):
         self.input_layout = QGridLayout()
         self.training_inputs = self.create_input_fields()
         layout.addLayout(self.input_layout)
+
+        # MLflow checker
+        self.mlflow_checker = self.create_mlflow_checker()
+        layout.addWidget(self.mlflow_checker, alignment=Qt.AlignLeft)
+
         layout.addItem(QSpacerItem(20, 180))
         layout.addLayout(self.create_start_stop_button_layout())
         layout.addWidget(self.create_separator())
@@ -396,6 +402,7 @@ class TrainingWindow(BaseWindow):
         ):
             self.training_start = True
             self.lock_inputs()
+            self.lock_mlflow_checker(True)
 
             algorithms = self.previous_selections.get("Algorithms", [])
             algo_names = [entry.get("Algorithm") for entry in algorithms]
@@ -420,6 +427,7 @@ class TrainingWindow(BaseWindow):
                         "selected_environment"
                     ),
                     "setup_choice": self.previous_selections.get("setup_choice"),
+                    "use_mlflow": self.mlflow_enabled,
                 }
                 per_algorithm_configs.append(config)
 
@@ -487,6 +495,7 @@ class TrainingWindow(BaseWindow):
             # Re-enable UI input fields
             for widget in self.training_inputs.values():
                 widget.setReadOnly(False)
+            self.lock_mlflow_checker(False)
 
     def back_to_selection(self):
         if self.training_start:
@@ -564,6 +573,7 @@ class TrainingWindow(BaseWindow):
         for field, widget in self.training_inputs.items():
             widget.setText(self.default_values.get(field, ""))
             widget.setReadOnly(False)
+        self.lock_mlflow_checker(False)
 
         # Reset all algorithm-specific UI (labels and progress bars)
         for algo_data in self.algo_info.values():
@@ -598,3 +608,14 @@ class TrainingWindow(BaseWindow):
         separator.setFrameShape(QFrame.VLine if vertical else QFrame.HLine)
         separator.setStyleSheet(Styles.SEPARATOR_LINE)
         return separator
+
+    def create_mlflow_checker(self):
+        checker = QCheckBox("Use MLflow", self)
+        checker.setChecked(True)
+        checker.setStyleSheet(Styles.TEXT_LABEL)
+        checker.stateChanged.connect(lambda state: setattr(self, 'mlflow_enabled', bool(state)))
+        self.mlflow_enabled = True
+        return checker
+
+    def lock_mlflow_checker(self, locked: bool):
+        self.mlflow_checker.setEnabled(not locked)
