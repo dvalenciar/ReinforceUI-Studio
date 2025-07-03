@@ -42,6 +42,11 @@ class TrainingWindow(BaseWindow):
         # handle the possibility of having the same algorithms with different hyperparameters
         make_unique_names(previous_selections["Algorithms"])
 
+        #todo need to find a way that auto run the mlflow server as this point
+        # todo from location /home/user/
+        #todo mlflow ui --backend-store-uri file:reinforceui_studio_logs/mlflow_tracking
+        #
+
         self.main_folder_name = None
         self.selected_button = None
         self.training_start = None
@@ -108,7 +113,16 @@ class TrainingWindow(BaseWindow):
             self, "Open Log Folder", width=200, height=40
         )
         open_log_file_button.clicked.connect(self.open_log_file)
-        main_layout.addWidget(open_log_file_button, alignment=Qt.AlignRight)
+
+        view_mlflow_button = create_button(
+            self, "View MLflow Server", width=200, height=40
+        )
+        view_mlflow_button.clicked.connect(self.launch_mlflow_server)
+
+        log_buttons_layout = QHBoxLayout()
+        log_buttons_layout.addWidget(open_log_file_button)
+        log_buttons_layout.addWidget(view_mlflow_button)
+        main_layout.addLayout(log_buttons_layout)
 
         self.setCentralWidget(container)
         self.show_training_curve()
@@ -531,6 +545,26 @@ class TrainingWindow(BaseWindow):
             )
         else:
             QDesktopServices.openUrl(QUrl.fromLocalFile(self.main_folder_name))
+
+    def launch_mlflow_server(self):
+        if not self.mlflow_enabled:
+            self.show_message_box(
+                "MLflow Disabled",
+                "MLflow is disabled. Please enable it in the settings.",
+                QMessageBox.Warning,
+            )
+            return
+
+        if not self.training_start:
+            self.show_message_box(
+                "Training Not Started",
+                "Please start a training session first to view MLflow.",
+                QMessageBox.Warning,
+            )
+            return
+
+
+        QDesktopServices.openUrl(QUrl(f"http://localhost:5000"))
 
     def show_message_box(self, title, text, icon):
         msg_box = QMessageBox(self)
