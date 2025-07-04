@@ -1,4 +1,6 @@
 import os
+import socket
+import subprocess
 import json
 from datetime import datetime
 from PyQt5.QtWidgets import (
@@ -40,12 +42,8 @@ class TrainingWindow(BaseWindow):
         super().__init__("Training Configuration Window", 1300, 890)
 
         # handle the possibility of having the same algorithms with different hyperparameters
+        self.mlflow_enabled = None
         make_unique_names(previous_selections["Algorithms"])
-
-        #todo need to find a way that auto run the mlflow server as this point
-        # todo from location /home/user/
-        #todo mlflow ui --backend-store-uri file:reinforceui_studio_logs/mlflow_tracking
-        #
 
         self.main_folder_name = None
         self.selected_button = None
@@ -128,6 +126,32 @@ class TrainingWindow(BaseWindow):
         self.show_training_curve()
         self.adjust_for_ppo()
 
+    def is_port_in_use(self, port=5000):
+        """Check if the specified port is in use (likely MLflow running)"""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(('localhost', port)) == 0
+
+    def start_mlflow_server(self):
+        if self.is_port_in_use(5000):
+            print("MLflow server already running")
+            return
+        try:
+            working_dir = os.path.expanduser("~")
+            mlflow_cmd_command = [
+                "mlflow",
+                "ui",
+                "--port",
+                "5000",
+                "--backend-store-uri",
+                'file:reinforceui_studio_logs/mlflow_tracking'
+            ]
+
+            subprocess.Popen(mlflow_cmd_command, cwd=working_dir)
+            print("MLflow server started successfully")
+        except Exception as e:
+            print("MLflow server failed to start")
+
+
     def create_back_button_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
         back_button = create_button(
@@ -155,6 +179,11 @@ class TrainingWindow(BaseWindow):
         # MLflow checker
         self.mlflow_checker = self.create_mlflow_checker()
         layout.addWidget(self.mlflow_checker, alignment=Qt.AlignLeft)
+        if self.mlflow_checker:
+            self.mlflow_enabled = True
+            self.start_mlflow_server()
+        else:
+            self.mlflow_enabled = False
 
         layout.addItem(QSpacerItem(20, 180))
         layout.addLayout(self.create_start_stop_button_layout())
@@ -418,6 +447,7 @@ class TrainingWindow(BaseWindow):
             self.lock_inputs()
             self.lock_mlflow_checker(True)
 
+
             algorithms = self.previous_selections.get("Algorithms", [])
             algo_names = [entry.get("Algorithm") for entry in algorithms]
 
@@ -562,8 +592,6 @@ class TrainingWindow(BaseWindow):
                 QMessageBox.Warning,
             )
             return
-
-
         QDesktopServices.openUrl(QUrl(f"http://localhost:5000"))
 
     def show_message_box(self, title, text, icon):
@@ -648,7 +676,7 @@ class TrainingWindow(BaseWindow):
         checker.setChecked(True)
         checker.setStyleSheet(Styles.TEXT_LABEL)
         checker.stateChanged.connect(lambda state: setattr(self, 'mlflow_enabled', bool(state)))
-        self.mlflow_enabled = True
+        # self.mlflow_enabled = True
         return checker
 
     def lock_mlflow_checker(self, locked: bool):
