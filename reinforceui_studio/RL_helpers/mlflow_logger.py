@@ -5,7 +5,6 @@ from typing import Optional, Dict, Any, Callable
 
 import torch
 from mlflow.models.signature import infer_signature
-from mlflow.transformers import generate_signature_output
 
 
 def check_enabled(func: Callable) -> Callable:

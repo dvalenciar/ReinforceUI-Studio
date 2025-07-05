@@ -111,7 +111,7 @@ def training_loop(  # noqa: C901
         algorithm_name,
     )
 
-    logger = RecordLogger(log_folder_path, rl_agent)
+    logger = RecordLogger(log_folder_path, rl_agent, mlflow_logger=mlflow_logger)
     mlflow_logger.start_run()
 
     steps_training = int(config_data.get("Training Steps", 1000000))
@@ -243,6 +243,7 @@ def training_loop(  # noqa: C901
                 display_name, "Episode Steps", episode_timesteps
             )
 
+            # Log metrics to file logger
             df_log_train = logger.log_training(
                 episode=episode_num + 1,
                 episode_reward=episode_reward,

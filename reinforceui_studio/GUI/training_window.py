@@ -26,8 +26,9 @@ from reinforceui_studio.GUI.ui_utils import (
     make_unique_names,
     get_icon_path,
 )
-from reinforceui_studio.GUI.ui_base_window import BaseWindow
+
 from reinforceui_studio.GUI.ui_styles import Styles
+from reinforceui_studio.GUI.ui_base_window import BaseWindow
 from reinforceui_studio.GUI.ui_utils import create_button, create_activation_button
 from reinforceui_studio.RL_helpers.plotters import plot_comparison
 
@@ -39,15 +40,16 @@ class TrainingWindow(BaseWindow):
 
     def __init__(self, previous_window, previous_selections) -> None:  # noqa
         """Initialize the TrainingWindow class"""
-        super().__init__("Training Configuration Window", 1300, 890)
+        super().__init__("Training Configuration Window", 1300, 900)
 
         # handle the possibility of having the same algorithms with different hyperparameters
-        self.mlflow_enabled = None
         make_unique_names(previous_selections["Algorithms"])
 
-        self.main_folder_name = None
-        self.selected_button = None
+        self.mlflow_enabled = True
+        self.mlflow_process = None
         self.training_start = None
+        self.selected_button = None
+        self.main_folder_name = None
 
         self.previous_window = previous_window
         self.previous_selections = previous_selections
@@ -62,7 +64,7 @@ class TrainingWindow(BaseWindow):
         self.default_values = {
             "Training Steps": "1000000",
             "Exploration Steps": "1000",
-            "Batch Size": "64",
+            "Batch Size": "32",
             "G Value": "1",
             "Evaluation Interval": "1000",
             "Evaluation Episodes": "10",
@@ -113,7 +115,7 @@ class TrainingWindow(BaseWindow):
         open_log_file_button.clicked.connect(self.open_log_file)
 
         view_mlflow_button = create_button(
-            self, "View MLflow Server", width=200, height=40
+            self, "Open MLflow Dashboard", width=225, height=40
         )
         view_mlflow_button.clicked.connect(self.launch_mlflow_server)
 
@@ -125,32 +127,6 @@ class TrainingWindow(BaseWindow):
         self.setCentralWidget(container)
         self.show_training_curve()
         self.adjust_for_ppo()
-
-    def is_port_in_use(self, port=5000):
-        """Check if the specified port is in use (likely MLflow running)"""
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            return s.connect_ex(('localhost', port)) == 0
-
-    def start_mlflow_server(self):
-        if self.is_port_in_use(5000):
-            print("MLflow server already running")
-            return
-        try:
-            working_dir = os.path.expanduser("~")
-            mlflow_cmd_command = [
-                "mlflow",
-                "ui",
-                "--port",
-                "5000",
-                "--backend-store-uri",
-                'file:reinforceui_studio_logs/mlflow_tracking'
-            ]
-
-            subprocess.Popen(mlflow_cmd_command, cwd=working_dir)
-            print("MLflow server started successfully")
-        except Exception as e:
-            print("MLflow server failed to start")
-
 
     def create_back_button_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
@@ -178,12 +154,8 @@ class TrainingWindow(BaseWindow):
 
         # MLflow checker
         self.mlflow_checker = self.create_mlflow_checker()
-        layout.addWidget(self.mlflow_checker, alignment=Qt.AlignLeft)
-        if self.mlflow_checker:
-            self.mlflow_enabled = True
-            self.start_mlflow_server()
-        else:
-            self.mlflow_enabled = False
+        layout.addWidget(self.mlflow_checker, alignment=Qt.AlignRight)
+        self.start_mlflow_server()
 
         layout.addItem(QSpacerItem(20, 180))
         layout.addLayout(self.create_start_stop_button_layout())
@@ -447,7 +419,6 @@ class TrainingWindow(BaseWindow):
             self.lock_inputs()
             self.lock_mlflow_checker(True)
 
-
             algorithms = self.previous_selections.get("Algorithms", [])
             algo_names = [entry.get("Algorithm") for entry in algorithms]
 
@@ -456,6 +427,7 @@ class TrainingWindow(BaseWindow):
             shared_training_params = {
                 label: widget.text() for label, widget in self.training_inputs.items()
             }
+
 
             per_algorithm_configs = []
             for algo_entry in algorithms:
@@ -588,7 +560,7 @@ class TrainingWindow(BaseWindow):
         if not self.training_start:
             self.show_message_box(
                 "Training Not Started",
-                "Please start a training session first to view MLflow.",
+                "Please start a training session first to view MLflow Dashboard.",
                 QMessageBox.Warning,
             )
             return
@@ -659,6 +631,90 @@ class TrainingWindow(BaseWindow):
                 self.training_inputs[field].setText("")
                 self.training_inputs[field].setReadOnly(True)
 
+    def start_mlflow_server(self):
+        if self.is_port_in_use(5000):
+            print("MLflow server already running")
+            return
+        try:
+            # service will start allways, even if enabled is False, but it will not log anything
+            working_dir = os.path.expanduser("~")
+            mlflow_cmd_command = [
+                "mlflow",
+                "ui",
+                "--port",
+                "5000",
+                "--backend-store-uri",
+                'file:reinforceui_studio_logs/mlflow_tracking'
+            ]
+            self.mlflow_process = subprocess.Popen(mlflow_cmd_command, cwd=working_dir)
+            print("MLflow server started successfully")
+        except Exception as e:
+            print("MLflow server failed to start")
+
+    def stop_mlflow_server(self):
+        if self.is_port_in_use(5000):
+            try:
+                self.mlflow_process.terminate()
+                self.mlflow_process.wait(timeout=5)
+                print("MLflow server stopped successfully")
+            except subprocess.TimeoutExpired:
+                print("MLflow server did not stop in time, force killing")
+                self.mlflow_process.kill()
+            except Exception as e:
+                print(f"Failed to stop MLflow server: {e}")
+            finally:
+                self.mlflow_process = None
+
+    def create_mlflow_checker(self):
+        checker = QCheckBox("Use MLflow", self)
+        checker.setChecked(True)
+        checker.setStyleSheet(Styles.TEXT_LABEL)
+        checker.stateChanged.connect(lambda state: setattr(self, 'mlflow_enabled', bool(state)))
+        return checker
+
+    def lock_mlflow_checker(self, locked: bool):
+        self.mlflow_checker.setEnabled(not locked)
+
+    def closeEvent(self, event):
+        """Show a confirmation dialog and gracefully close all resources."""
+        if self.training_start:
+            message = "Are you sure you want to exit? All running training processes will be stopped."
+        else:
+            message = "Are you sure you want to exit?"
+
+        # Show confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            "Confirm Exit",
+            message,
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+
+        if reply == QMessageBox.Yes:
+            # Gracefully stop all training threads if training was started
+            if self.training_start:
+                for thread in self.training_threads:
+                    try:
+                        if hasattr(thread, 'stop'):
+                            thread.stop()
+                        if thread.isRunning():
+                            thread.quit()
+                            thread.wait()
+                    except Exception as e:
+                        print(f"Error stopping thread: {e}")
+
+            # Stop MLflow process if running
+            try:
+                self.stop_mlflow_server()
+            except Exception as e:
+                print(f"Error stopping MLflow server: {e}")
+
+            event.accept()
+        else:
+            event.ignore()
+
+
     @staticmethod
     def update_button_styles(active_button, inactive_button):
         active_button.setStyleSheet(Styles.SELECTED_BUTTON)
@@ -671,13 +727,10 @@ class TrainingWindow(BaseWindow):
         separator.setStyleSheet(Styles.SEPARATOR_LINE)
         return separator
 
-    def create_mlflow_checker(self):
-        checker = QCheckBox("Use MLflow", self)
-        checker.setChecked(True)
-        checker.setStyleSheet(Styles.TEXT_LABEL)
-        checker.stateChanged.connect(lambda state: setattr(self, 'mlflow_enabled', bool(state)))
-        # self.mlflow_enabled = True
-        return checker
+    @staticmethod
+    def is_port_in_use(port=5000):
+        """Check if the specified port is in use (likely MLflow running)"""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(('localhost', port)) == 0
 
-    def lock_mlflow_checker(self, locked: bool):
-        self.mlflow_checker.setEnabled(not locked)
+
