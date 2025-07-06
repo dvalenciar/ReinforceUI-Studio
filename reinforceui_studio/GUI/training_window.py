@@ -22,7 +22,6 @@ from PyQt5.QtCore import Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QDesktopServices, QIcon
 from reinforceui_studio.GUI.ui_utils import (
     PlotCanvas,
-    TrainingThread,
     make_unique_names,
     get_icon_path,
 )
@@ -31,6 +30,8 @@ from reinforceui_studio.GUI.ui_styles import Styles
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
 from reinforceui_studio.GUI.ui_utils import create_button, create_activation_button
 from reinforceui_studio.RL_helpers.plotters import plot_comparison
+from reinforceui_studio.RL_helpers.trainining_thread_manager import TrainingThread
+
 
 
 class TrainingWindow(BaseWindow):

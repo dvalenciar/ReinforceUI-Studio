@@ -115,7 +115,6 @@ class RecordLogger:
             os.path.join(self.data_log_dir, "evaluation_log.csv"),
         )
 
-
         self.rl_agent.save_models(filename="model", filepath=self.model_log_dir, checkpoint=checkpoint)
 
         if plot_flag:
@@ -139,7 +138,7 @@ class RecordLogger:
                 os.path.join(self.data_log_dir, "evaluation_log.png"),
             )
 
-        if not checkpoint:
+        if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow and not checkpoint:
             self.mlflow_logger.log_artifact(
                 os.path.join(self.data_log_dir, "training_log.csv")
             )
@@ -184,7 +183,7 @@ class RecordLogger:
             self.video_writer = None
             print("Video recording completed.")
 
-            self.mlflow_logger.log_artifact(
-                os.path.join(self.log_dir, "video_tested_final_policy.mp4")
-            )
-
+            if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow:
+                self.mlflow_logger.log_artifact(
+                    os.path.join(self.log_dir, "video_tested_final_policy.mp4")
+                )

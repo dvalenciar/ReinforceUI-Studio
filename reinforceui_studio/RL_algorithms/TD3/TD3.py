@@ -211,8 +211,7 @@ class TD3:
         torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
 
         # Log model as MLflow models only at the end of training (checkpoint=False)
-        if self.mlflow_logger is not None and not checkpoint:
-
+        if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow and not checkpoint:
             # Log as artifacts for backward compatibility
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
