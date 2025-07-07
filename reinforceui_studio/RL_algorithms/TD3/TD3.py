@@ -126,8 +126,8 @@ class TD3:
         if self.mlflow_logger is not None:
             log_step = step if step is not None else self.learn_counter
             self.mlflow_logger.log_metrics({
-                'Critic loss one': critic_loss_one.item(),
-                'Critic loss two': critic_loss_two.item(),
+                'Critic loss 1': critic_loss_one.item(),
+                'Critic loss 2': critic_loss_two.item(),
                 'Critic loss total': critic_loss_total.item()
             }, step=log_step)
         return (
@@ -221,7 +221,8 @@ class TD3:
             model_input = torch.from_numpy(input_example)
             self.mlflow_logger.log_model(
                 model=self.actor_net,
-                model_type="pytorch", model_name="actor",
+                model_type="pytorch",
+                model_name="actor",
                 input_example=input_example,
                 model_input=model_input,
                 device=self.device,
@@ -233,7 +234,8 @@ class TD3:
             critic_mlflow = CriticMLflowWrapper(self.critic_net, self.observation_size)
             self.mlflow_logger.log_model(
                 model=critic_mlflow,
-                model_type="pytorch", model_name="critic",
+                model_type="pytorch",
+                model_name="critic",
                 input_example=input_example,
                 model_input=model_input)
 
