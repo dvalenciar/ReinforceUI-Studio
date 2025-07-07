@@ -223,7 +223,9 @@ class TD3:
                 model=self.actor_net,
                 model_type="pytorch", model_name="actor",
                 input_example=input_example,
-                model_input=model_input)
+                model_input=model_input,
+                device=self.device,
+            )
 
             # For critic (use wrapper for MLflow)
             input_example = np.zeros((1, self.observation_size + self.action_num), dtype=np.float32)

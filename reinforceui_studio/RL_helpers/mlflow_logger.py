@@ -106,27 +106,33 @@ class MLflowLogger:
     @check_enabled
     def log_model(self, model, model_type: str = "pytorch", model_name: str = "model",
               registered_model_name: Optional[str] = None,
-              input_example=None, model_input=None):
+              input_example=None, model_input=None, device="cpu") -> None:
         """
         Log a machine learning model with optional registration.
         input_example: numpy array or DataFrame for MLflow
         model_input: actual input to call the model for signature inference (can be tensor, tuple, etc.)
+        device: device string (e.g., 'cpu' or 'cuda:0') to move input tensors to
         """
         if model_type == "pytorch":
+            model.to(device)
             signature = None
+
             if input_example is not None:
                 # Use model_input if provided, else infer from input_example
                 if model_input is not None:
-                    if isinstance(model_input, (tuple, list)):
-                        model_output = model(*model_input)
+                    if isinstance(model_input, torch.Tensor):
+                        model_input = model_input.to(device)
                     else:
-                        model_output = model(model_input)
+                        model_input = torch.from_numpy(model_input).to(device)
+                    model_output = model(model_input)
                 else:
                     # Accept both ndarray and dict for input_example
                     if isinstance(input_example, dict):
-                        model_output = model(**{k: torch.from_numpy(v) for k, v in input_example.items()})
+                        model_input = {k: torch.from_numpy(v).to(device) for k, v in input_example.items()}
+                        model_output = model(**model_input)
                     else:
-                        model_output = model(torch.from_numpy(input_example))
+                        model_input = torch.from_numpy(input_example).to(device)
+                        model_output = model(model_input)
 
                 if isinstance(model_output, torch.Tensor):
                     model_output = model_output.detach().cpu().numpy()

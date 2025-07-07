@@ -88,13 +88,9 @@ def training_loop(  # noqa: C901
         config_data, render_mode="rgb_array", evaluation_env=True
     )
 
-    # todo find a better way to handle the experiment name
-    print(log_folder_path)
-    input("Press Enter to continue...")
-
-
+    experiment_name = f"{config_data.get('Algorithms_names')}_{config_data.get('selected_platform')}_{config_data.get('selected_environment')}"
     mlflow_logger = MLflowLogger(
-        experiment_name= "experiment_name",
+        experiment_name= experiment_name,
         run_name=display_name,
         tags={
             "environment": config_data.get("selected_environment"),

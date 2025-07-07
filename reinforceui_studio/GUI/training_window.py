@@ -429,10 +429,10 @@ class TrainingWindow(BaseWindow):
                 label: widget.text() for label, widget in self.training_inputs.items()
             }
 
-
             per_algorithm_configs = []
             for algo_entry in algorithms:
                 config = {
+                    "Algorithms_names": "_".join(algo_names), # the only reason for this is to have the sane name for all algorithms in the log of mlflow
                     "Algorithm": algo_entry.get("Algorithm"),
                     "UniqueName": algo_entry.get("UniqueName"),
                     "Hyperparameters": algo_entry.get("Hyperparameters", {}),
