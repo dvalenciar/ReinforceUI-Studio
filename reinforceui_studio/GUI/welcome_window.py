@@ -52,7 +52,7 @@ class WelcomeWindow(BaseWindow):
 
         comparative_button = create_button(
             self,
-            "Compare Training Models",
+            "Multiple Models Training ",
             icon=QIcon(get_icon_path("comparative_icon.svg")),
         )
 

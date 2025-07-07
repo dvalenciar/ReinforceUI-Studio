@@ -13,11 +13,13 @@ import torch
 import torch.nn.functional as functional
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.SAC.networks import Actor, Critic
+from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
+from reinforceui_studio.RL_helpers.mlflow_wrappers import CriticMLflowWrapperTD3_SAC, ActorMLflowWrapperSAC
 
 
 class SAC:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict
+        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: 'MLflowLogger' = None
     ) -> None:
         """Initialize the SAC agent.
 
@@ -60,6 +62,9 @@ class SAC:
         self.critic_net_optimiser = torch.optim.Adam(
             self.critic_net.parameters(), lr=self.critic_lr
         )
+        self.mlflow_logger = mlflow_logger
+        self.observation_size = observation_size
+        self.action_num = action_num
 
     def select_action_from_policy(
         self,
@@ -101,6 +106,7 @@ class SAC:
         rewards: torch.Tensor,
         next_states: torch.Tensor,
         dones: torch.Tensor,
+        step: int = None,
     ) -> tuple[float, float, float]:
         with torch.no_grad():
             next_actions, next_log_pi, _ = self.actor_net(next_states)
@@ -117,22 +123,28 @@ class SAC:
             )
 
         q_values_one, q_values_two = self.critic_net(states, actions)
-
         critic_loss_one = functional.mse_loss(q_values_one, q_target)
         critic_loss_two = functional.mse_loss(q_values_two, q_target)
         critic_loss_total = critic_loss_one + critic_loss_two
-
         self.critic_net_optimiser.zero_grad()
         critic_loss_total.backward()
         self.critic_net_optimiser.step()
 
+        # MLflow logging for critic losses
+        if self.mlflow_logger is not None:
+            log_step = step if step is not None else self.learn_counter
+            self.mlflow_logger.log_metrics({
+                'Critic loss 1': critic_loss_one.item(),
+                'Critic loss 2': critic_loss_two.item(),
+                'Critic loss total': critic_loss_total.item()
+            }, step=log_step)
         return (
             critic_loss_one.item(),
             critic_loss_two.item(),
             critic_loss_total.item(),
         )
 
-    def _update_actor_alpha(self, states: torch.Tensor) -> tuple[float, float]:
+    def _update_actor_alpha(self, states: torch.Tensor, step: int = None) -> tuple[float, float]:
         pi, log_pi, _ = self.actor_net(states)
         qf1_pi, qf2_pi = self.critic_net(states, pi)
         min_qf_pi = torch.minimum(qf1_pi, qf2_pi)
@@ -150,9 +162,15 @@ class SAC:
         alpha_loss.backward()
         self.log_alpha_optimizer.step()
 
+        # MLflow logging for actor and alpha loss
+        if self.mlflow_logger is not None:
+            log_step = step if step is not None else self.learn_counter
+            self.mlflow_logger.log_metric('Actor loss', actor_loss.item(), step=log_step)
+            self.mlflow_logger.log_metric('Alpha loss', alpha_loss.item(), step=log_step)
+
         return actor_loss.item(), alpha_loss.item()
 
-    def train_policy(self, memory: MemoryBuffer, batch_size: int) -> None:
+    def train_policy(self, memory: MemoryBuffer, batch_size: int, step: int = None) -> None:
         """Train actor and critic networks using experiences from memory.
 
         Args:
@@ -175,10 +193,10 @@ class SAC:
         dones = dones.reshape(batch_size, 1)
 
         # Update the Critic
-        self._update_critic(states, actions, rewards, next_states, dones)
+        self._update_critic(states, actions, rewards, next_states, dones, step=step)
 
         # Update the Actor and Alpha
-        self._update_actor_alpha(states)
+        self._update_actor_alpha(states, step=step)
 
         if self.learn_counter % self.policy_update_freq == 0:
             for param, target_param in zip(
@@ -189,7 +207,7 @@ class SAC:
                     self.tau * param.data + (1 - self.tau) * target_param.data
                 )
 
-    def save_models(self, filename: str, filepath: str) -> None:
+    def save_models(self, filename: str, filepath: str, checkpoint: bool = True) -> None:
         """Save actor and critic networks to files.
 
         Args:
@@ -202,6 +220,35 @@ class SAC:
 
         torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
         torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        # Log model as MLflow models only at the end of training (checkpoint=False)
+        if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow and not checkpoint:
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
+
+            # For actor
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
+            model_input = torch.from_numpy(input_example)
+            actor_mlflow = ActorMLflowWrapperSAC(self.actor_net, self.observation_size)
+            self.mlflow_logger.log_model(
+                model=actor_mlflow,
+                model_type="pytorch",
+                model_name="actor",
+                input_example=input_example,
+                model_input=model_input,
+                device=self.device,
+            )
+            # For critic (use wrapper for MLflow)
+            input_example = np.zeros((1, self.observation_size + self.action_num), dtype=np.float32)
+            model_input = torch.from_numpy(input_example)
+            critic_mlflow = CriticMLflowWrapperTD3_SAC(self.critic_net, self.observation_size)
+            self.mlflow_logger.log_model(
+                model=critic_mlflow,
+                model_type="pytorch",
+                model_name="critic",
+                input_example=input_example,
+                model_input=model_input,
+                device=self.device,
+            )
 
     def load_models(self, filename: str, filepath: str) -> None:
         """Load models previously saved for this algorithm.

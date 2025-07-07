@@ -12,7 +12,7 @@ import numpy as np
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.TD3.networks import Actor, Critic
 from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
-from reinforceui_studio.RL_helpers.mlflow_wrappers import CriticMLflowWrapper
+from reinforceui_studio.RL_helpers.mlflow_wrappers import CriticMLflowWrapperTD3_SAC
 
 import torch
 import torch.nn.functional as functional
@@ -231,7 +231,7 @@ class TD3:
             # For critic (use wrapper for MLflow)
             input_example = np.zeros((1, self.observation_size + self.action_num), dtype=np.float32)
             model_input = torch.from_numpy(input_example)
-            critic_mlflow = CriticMLflowWrapper(self.critic_net, self.observation_size)
+            critic_mlflow = CriticMLflowWrapperTD3_SAC(self.critic_net, self.observation_size)
             self.mlflow_logger.log_model(
                 model=critic_mlflow,
                 model_type="pytorch",
