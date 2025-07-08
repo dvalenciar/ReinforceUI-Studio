@@ -316,10 +316,13 @@ class TrainingWindow(BaseWindow):
         )
         msg_box.setStyleSheet(Styles.MESSAGE_BOX)
         see_log_button = msg_box.addButton("See log folder", QMessageBox.AcceptRole)
+        see_mlflow_button = msg_box.addButton("See MLflow Dashboard", QMessageBox.ActionRole)
         msg_box.exec_()
 
         if msg_box.clickedButton() == see_log_button:
             self.open_log_file()
+        elif msg_box.clickedButton() == see_mlflow_button:
+            self.launch_mlflow_server()
         self.reset_training_window()
 
     def update_confirmation(self, algo_name, status_flag):
@@ -553,18 +556,19 @@ class TrainingWindow(BaseWindow):
         if not self.mlflow_enabled:
             self.show_message_box(
                 "MLflow Disabled",
-                "MLflow is disabled. Please enable it in the settings.",
+                "MLflow is disabled. Please enable it in the settings and start a  new training session.",
                 QMessageBox.Warning,
             )
             return
 
-        if not self.training_start:
-            self.show_message_box(
-                "Training Not Started",
-                "Please start a training session first to view MLflow Dashboard.",
-                QMessageBox.Warning,
-            )
-            return
+        # if not self.main_folder_name:
+        #     self.show_message_box(
+        #         "Training Not Started",
+        #         "Please start a training session first to view MLflow Dashboard.",
+        #         QMessageBox.Warning,
+        #     )
+        #     return
+
         QDesktopServices.openUrl(QUrl(f"http://localhost:5000"))
 
     def show_message_box(self, title, text, icon):
@@ -733,5 +737,3 @@ class TrainingWindow(BaseWindow):
         """Check if the specified port is in use (likely MLflow running)"""
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex(('localhost', port)) == 0
-
-

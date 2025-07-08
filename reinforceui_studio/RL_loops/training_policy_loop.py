@@ -291,13 +291,12 @@ def training_loop(  # noqa: C901
             )
 
             # Log evaluation metrics to MLflow (mean reward and steps if available)
-            if not df_grouped.empty:
-                eval_reward = df_grouped["Episode Reward"].values[-1]
-                eval_steps = df_grouped["Episode Steps"].values[-1]
-                mlflow_logger.log_metrics({
-                    "Evaluation-Episode Reward": eval_reward,
-                    "Evaluation-Steps per Episode": eval_steps,
-                }, step=total_step_counter + 1)
+            eval_reward = df_grouped["Episode Reward"].values[-1]
+            eval_steps = df_grouped["Episode Steps"].values[-1]
+            mlflow_logger.log_metrics({
+                "Evaluation-Episode Reward": eval_reward,
+                "Evaluation-Steps per Episode": eval_steps,
+            }, step=total_step_counter + 1)
 
         # Update the training window
         training_window.update_algo_signal.emit(display_name, "Progress", int(progress))

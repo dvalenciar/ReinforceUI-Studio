@@ -34,11 +34,29 @@
   <a href="https://pepy.tech/projects/reinforceui-studio">
     <img src="https://static.pepy.tech/badge/reinforceui-studio" alt="PyPI Downloads">
   </a>
+
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
   </a>
-</p>
 
+
+![mlflow](https://img.shields.io/badge/mlflow-3.1.0-%23d9ead3.svg?style=for-the-badge&logo=numpy&logoColor=blue)
+![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-22--24-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
+![Python](https://img.shields.io/badge/python-3.10--3.12-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+
+[![CI](https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/pytest.yml?branch=main&label=CI&style=for-the-badge)](https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/pytest.yml)
+[![Formatting](https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?branch=main&label=Formatting&style=for-the-badge)](https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml)
+[![Docker](https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?branch=main&label=Docker&style=for-the-badge)](https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/docker-publish.yml)
+[![Docs](https://img.shields.io/badge/docs-UP-success.svg?style=for-the-badge)](https://docs.reinforceui-studio.com/)
+
+[![Total Downloads](https://img.shields.io/pypi/dw/mlflow?style=for-the-badge&logo=pypi&logoColor=blue)](https://pepy.tech/projects/reinforceui-studio)
+
+
+
+
+
+</p>
 
 ---
 ⭐️ If you find this project useful, please consider giving it a star! It really helps!
