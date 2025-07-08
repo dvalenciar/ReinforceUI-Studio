@@ -18,7 +18,7 @@ from reinforceui_studio.RL_helpers.mlflow_wrappers import CriticMLflowWrapperDDP
 
 class DDPG:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: 'MLflowLogger' = None
+        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: MLflowLogger = None
     ) -> None:
         """Initialize the DDPG agent.
 

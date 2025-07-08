@@ -8,15 +8,17 @@ Taxonomy: On policy > Policy Based > Continuous action space
 import os
 import numpy as np
 import torch
+from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.PPO.networks import Actor, Critic
+from reinforceui_studio.RL_helpers.mlflow_wrappers import  ActorMLflowWrapperPPO
 import torch.nn.functional as functional
 from torch.distributions import Normal
 
 
 class PPO:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict
+        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: MLflowLogger = None
     ) -> None:
         """Initialize PPO agent.
 
@@ -40,14 +42,16 @@ class PPO:
         self.eps_clip = float(hyperparameters.get("eps_clip"))
         self.updates_per_iteration = int(hyperparameters.get("updates_per_iteration"))
 
-        self.action_num = action_num
-
         self.actor_net_optimiser = torch.optim.Adam(
             self.actor_net.parameters(), lr=self.actor_lr
         )
         self.critic_net_optimiser = torch.optim.Adam(
             self.critic_net.parameters(), lr=self.critic_lr
         )
+
+        self.mlflow_logger = mlflow_logger
+        self.observation_size = observation_size
+        self.action_num = action_num
 
     def select_action_from_policy(
         self, state: np.ndarray
@@ -111,13 +115,14 @@ class PPO:
             rtgs[i] = discounted_reward
         return rtgs.to(self.device)
 
-    def train_policy(self, memory: MemoryBuffer) -> None:
+    def train_policy(self, memory: MemoryBuffer, step: int = None) -> None:
         """Train policy using experiences from memory buffer.
 
         Note: PPO use the whole memory buffer to train the policy then flushes it.
 
         Args:
             memory: Memory buffer containing experiences
+            step: Current training step, used for logging purposes
         """
         experiences = memory.return_flushed_memory()
         states, actions, rewards, _, dones, log_probs = experiences
@@ -157,12 +162,17 @@ class PPO:
             critic_loss.backward()
             self.critic_net_optimiser.step()
 
-    def save_models(self, filename: str, filepath: str) -> None:
+            if self.mlflow_logger is not None:
+                self.mlflow_logger.log_metric('Actor loss', actor_loss.item(), step=step)
+                self.mlflow_logger.log_metric('Critic loss', critic_loss.item(), step=step)
+
+    def save_models(self, filename: str, filepath: str, checkpoint: bool = True) -> None:
         """Save actor and critic networks to files.
 
         Args:
             filename: Base name for the saved model files
             filepath: Directory path where models will be saved
+            checkpoint: If True, save models as checkpoints. If False, save models for MLflow logging.
         """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
@@ -170,6 +180,37 @@ class PPO:
 
         torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
         torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+
+        # Log model as MLflow models only at the end of training (checkpoint=False)
+        if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow and not checkpoint:
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
+
+            # For actor
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
+            model_input = torch.from_numpy(input_example)
+            actor_mlflow = ActorMLflowWrapperPPO(self.actor_net, self.observation_size)
+            self.mlflow_logger.log_model(
+                model=actor_mlflow,
+                model_type="pytorch",
+                model_name="actor",
+                input_example=input_example,
+                model_input=model_input,
+                device=self.device,
+            )
+
+            # For critic (use wrapper for MLflow)
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
+            model_input = torch.from_numpy(input_example)
+            self.mlflow_logger.log_model(
+                model=self.critic_net,
+                model_type="pytorch",
+                model_name="critic",
+                input_example=input_example,
+                model_input=model_input,
+                device=self.device,
+            )
+
 
     def load_models(self, filename: str, filepath: str) -> None:
         """Load models previously saved for this algorithm.

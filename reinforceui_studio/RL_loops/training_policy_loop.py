@@ -208,11 +208,11 @@ def training_loop(  # noqa: C901
 
         # Train the policy
         if is_ppo and (total_step_counter + 1) % max_steps_per_batch == 0:
-            rl_agent.train_policy(memory)
+            rl_agent.train_policy(memory, step=total_step_counter + 1)
 
         elif is_dqn and total_step_counter > batch_size:
             for _ in range(G):
-                rl_agent.train_policy(memory, batch_size)
+                rl_agent.train_policy(memory, batch_size, step=total_step_counter + 1)
 
         elif not is_ppo and not is_dqn and total_step_counter >= steps_exploration:
             for _ in range(G):

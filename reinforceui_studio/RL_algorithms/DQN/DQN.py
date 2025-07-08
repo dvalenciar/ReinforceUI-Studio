@@ -10,13 +10,14 @@ import copy
 import numpy as np
 import torch
 import torch.nn.functional as functional
+from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.DQN.networks import Network
 
 
 class DQN:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict
+        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: MLflowLogger = None
     ) -> None:
         """Initialize the DQN agent.
 
@@ -38,8 +39,11 @@ class DQN:
         self.learn_counter = 0
         self.target_update_freq = int(hyperparameters.get("target_update_freq"))
 
-        self.action_num = action_num
         self.optimiser = torch.optim.Adam(self.net.parameters(), lr=self.lr)
+
+        self.mlflow_logger = mlflow_logger
+        self.observation_size = observation_size
+        self.action_num = action_num
 
     def select_action_from_policy(
         self, state: np.ndarray, evaluation: bool = False
@@ -62,12 +66,13 @@ class DQN:
         self.net.train()
         return action
 
-    def train_policy(self, memory: MemoryBuffer, batch_size: int) -> None:
+    def train_policy(self, memory: MemoryBuffer, batch_size: int,  step: int = None) -> None:
         """Train network using experiences from memory.
 
         Args:
             memory: Replay buffer containing experiences
             batch_size: Number of experiences to sample
+            step: Current training step, used for logging purposes
         """
         experiences = memory.sample_experience(batch_size)
         states, actions, rewards, next_states, dones = experiences
@@ -103,17 +108,42 @@ class DQN:
         if self.learn_counter % self.target_update_freq == 0:
             self.target_net.load_state_dict(self.net.state_dict())
 
-    def save_models(self, filename: str, filepath: str) -> None:
+        # MLflow logging for critic loss
+        if self.mlflow_logger is not None:
+            log_step = step if step is not None else self.learn_counter
+            self.mlflow_logger.log_metric('Loss', loss.item(), step=log_step)
+
+    def save_models(self, filename: str, filepath: str, checkpoint: bool = True) -> None:
         """Save the model for this algorithm.
 
         Args:
             filename: Base name for the saved model files
             filepath: Directory path where models will be saved
+            checkpoint: If True, save models as checkpoints. If False, save models for MLflow logging.
         """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
             os.makedirs(filepath)
+
         torch.save(self.net.state_dict(), f"{filepath}/{filename}_net.pth")
+
+        # Log model as MLflow models only at the end of training (checkpoint=False)
+        if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow and not checkpoint:
+            # Log as artifacts for backward compatibility
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_net.pth")
+
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
+            model_input = torch.from_numpy(input_example)
+            self.mlflow_logger.log_model(
+                model=self.net,
+                model_type="pytorch",
+                model_name="network",
+                input_example=input_example,
+                model_input=model_input,
+                device=self.device,
+            )
+
+
 
     def load_models(self, filename: str, filepath: str) -> None:
         """Load the model previously saved for this algorithm.

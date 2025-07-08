@@ -7,7 +7,6 @@ Taxonomy: Off policy > Actor-Critic > Continuous action space
 
 import copy
 import os
-
 import numpy as np
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.TD3.networks import Actor, Critic
@@ -49,16 +48,16 @@ class TD3:
         self.learn_counter = 0
         self.policy_update_freq = 2
 
-        self.observation_size = observation_size
-        self.action_num = action_num
-
         self.actor_net_optimiser = torch.optim.Adam(
             self.actor_net.parameters(), lr=self.actor_lr
         )
         self.critic_net_optimiser = torch.optim.Adam(
             self.critic_net.parameters(), lr=self.critic_lr
         )
+
         self.mlflow_logger = mlflow_logger
+        self.observation_size = observation_size
+        self.action_num = action_num
 
 
     def select_action_from_policy(

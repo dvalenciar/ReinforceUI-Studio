@@ -19,7 +19,7 @@ from reinforceui_studio.RL_helpers.mlflow_wrappers import CriticMLflowWrapperTD3
 
 class SAC:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: 'MLflowLogger' = None
+        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: MLflowLogger = None
     ) -> None:
         """Initialize the SAC agent.
 
@@ -176,6 +176,7 @@ class SAC:
         Args:
             memory: Replay buffer containing experiences
             batch_size: Number of experiences to sample
+            step: Current training step, used for logging purposes
         """
         self.learn_counter += 1
 
@@ -213,6 +214,8 @@ class SAC:
         Args:
             filename: Base name for the saved model files
             filepath: Directory path where models will be saved
+            checkpoint: If True, save models as checkpoints. If False, save models for MLflow logging.
+
         """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
@@ -220,6 +223,7 @@ class SAC:
 
         torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
         torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+
         # Log model as MLflow models only at the end of training (checkpoint=False)
         if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow and not checkpoint:
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
