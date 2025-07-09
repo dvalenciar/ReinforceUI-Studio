@@ -3,7 +3,9 @@ from torch import nn
 
 
 class Critic(nn.Module):
-    def __init__(self, observation_size: int, hidden_size: list[int] = None) -> None:
+    def __init__(
+        self, observation_size: int, hidden_size: list[int] = None
+    ) -> None:
         """Initialize the critic network.
 
         Args:

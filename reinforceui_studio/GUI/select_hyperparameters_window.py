@@ -31,7 +31,9 @@ class SelectHyperWindow(BaseWindow):
         layout = QVBoxLayout()
 
         # Title label
-        title_label = QLabel(f"Custom Hyperparameters for {selected_algorithm}", self)
+        title_label = QLabel(
+            f"Custom Hyperparameters for {selected_algorithm}", self
+        )
         title_label.setAlignment(Qt.AlignCenter)
         title_label.setStyleSheet(Styles.WELCOME_LABEL)
         layout.addWidget(title_label)
@@ -82,8 +84,12 @@ class SelectHyperWindow(BaseWindow):
                 algorithms = config.get("algorithms", [])
                 for algo in algorithms:
                     if algo["name"] == algorithm_name:
-                        self.default_hyperparameters = algo.get("hyperparameters", {})
-                        self.hyperparameters = self.default_hyperparameters.copy()
+                        self.default_hyperparameters = algo.get(
+                            "hyperparameters", {}
+                        )
+                        self.hyperparameters = (
+                            self.default_hyperparameters.copy()
+                        )
                         break
         except FileNotFoundError:
             print("Algorithm config file not found.")

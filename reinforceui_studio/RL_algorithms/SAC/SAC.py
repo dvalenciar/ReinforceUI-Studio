@@ -14,12 +14,19 @@ import torch.nn.functional as functional
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.SAC.networks import Actor, Critic
 from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
-from reinforceui_studio.RL_helpers.mlflow_wrappers import CriticMLflowWrapperTD3_SAC, ActorMLflowWrapperSAC
+from reinforceui_studio.RL_helpers.mlflow_wrappers import (
+    CriticMLflowWrapperTD3_SAC,
+    ActorMLflowWrapperSAC,
+)
 
 
 class SAC:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: MLflowLogger = None
+        self,
+        observation_size: int,
+        action_num: int,
+        hyperparameters: dict,
+        mlflow_logger: MLflowLogger = None,
     ) -> None:
         """Initialize the SAC agent.
 
@@ -32,9 +39,12 @@ class SAC:
                 actor_lr: Learning rate for the actor network
                 critic_lr: Learning rate for the critic network
                 alpha_lr: Learning rate for the temperature parameter
+            mlflow_logger: Logger for MLflow integration, if None, no logging will be done
 
         """
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_critic_net = copy.deepcopy(self.critic_net).to(self.device)
@@ -54,7 +64,9 @@ class SAC:
         init_temperature = 1.0
         self.log_alpha = torch.tensor(np.log(init_temperature)).to(self.device)
         self.log_alpha.requires_grad = True
-        self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=self.alpha_lr)
+        self.log_alpha_optimizer = torch.optim.Adam(
+            [self.log_alpha], lr=self.alpha_lr
+        )
 
         self.actor_net_optimiser = torch.optim.Adam(
             self.actor_net.parameters(), lr=self.actor_lr
@@ -119,7 +131,8 @@ class SAC:
             )
 
             q_target = (
-                rewards * self.reward_scale + self.gamma * (1 - dones) * target_q_values
+                rewards * self.reward_scale
+                + self.gamma * (1 - dones) * target_q_values
             )
 
         q_values_one, q_values_two = self.critic_net(states, actions)
@@ -133,18 +146,23 @@ class SAC:
         # MLflow logging for critic losses
         if self.mlflow_logger is not None:
             log_step = step if step is not None else self.learn_counter
-            self.mlflow_logger.log_metrics({
-                'Critic loss 1': critic_loss_one.item(),
-                'Critic loss 2': critic_loss_two.item(),
-                'Critic loss total': critic_loss_total.item()
-            }, step=log_step)
+            self.mlflow_logger.log_metrics(
+                {
+                    "Critic loss 1": critic_loss_one.item(),
+                    "Critic loss 2": critic_loss_two.item(),
+                    "Critic loss total": critic_loss_total.item(),
+                },
+                step=log_step,
+            )
         return (
             critic_loss_one.item(),
             critic_loss_two.item(),
             critic_loss_total.item(),
         )
 
-    def _update_actor_alpha(self, states: torch.Tensor, step: int = None) -> tuple[float, float]:
+    def _update_actor_alpha(
+        self, states: torch.Tensor, step: int = None
+    ) -> tuple[float, float]:
         pi, log_pi, _ = self.actor_net(states)
         qf1_pi, qf2_pi = self.critic_net(states, pi)
         min_qf_pi = torch.minimum(qf1_pi, qf2_pi)
@@ -156,7 +174,9 @@ class SAC:
         self.actor_net_optimiser.step()
 
         # update the temperature (alpha)
-        alpha_loss = -(self.log_alpha * (log_pi + self.target_entropy).detach()).mean()
+        alpha_loss = -(
+            self.log_alpha * (log_pi + self.target_entropy).detach()
+        ).mean()
 
         self.log_alpha_optimizer.zero_grad()
         alpha_loss.backward()
@@ -165,12 +185,18 @@ class SAC:
         # MLflow logging for actor and alpha loss
         if self.mlflow_logger is not None:
             log_step = step if step is not None else self.learn_counter
-            self.mlflow_logger.log_metric('Actor loss', actor_loss.item(), step=log_step)
-            self.mlflow_logger.log_metric('Alpha loss', alpha_loss.item(), step=log_step)
+            self.mlflow_logger.log_metric(
+                "Actor loss", actor_loss.item(), step=log_step
+            )
+            self.mlflow_logger.log_metric(
+                "Alpha loss", alpha_loss.item(), step=log_step
+            )
 
         return actor_loss.item(), alpha_loss.item()
 
-    def train_policy(self, memory: MemoryBuffer, batch_size: int, step: int = None) -> None:
+    def train_policy(
+        self, memory: MemoryBuffer, batch_size: int, step: int = None
+    ) -> None:
         """Train actor and critic networks using experiences from memory.
 
         Args:
@@ -194,7 +220,9 @@ class SAC:
         dones = dones.reshape(batch_size, 1)
 
         # Update the Critic
-        self._update_critic(states, actions, rewards, next_states, dones, step=step)
+        self._update_critic(
+            states, actions, rewards, next_states, dones, step=step
+        )
 
         # Update the Actor and Alpha
         self._update_actor_alpha(states, step=step)
@@ -208,7 +236,9 @@ class SAC:
                     self.tau * param.data + (1 - self.tau) * target_param.data
                 )
 
-    def save_models(self, filename: str, filepath: str, checkpoint: bool = True) -> None:
+    def save_models(
+        self, filename: str, filepath: str, checkpoint: bool = True
+    ) -> None:
         """Save actor and critic networks to files.
 
         Args:
@@ -221,18 +251,32 @@ class SAC:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
-        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        torch.save(
+            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
+        )
+        torch.save(
+            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
+        )
 
         # Log model as MLflow models only at the end of training (checkpoint=False)
-        if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow and not checkpoint:
+        if (
+            self.mlflow_logger is not None
+            and self.mlflow_logger.use_mlflow
+            and not checkpoint
+        ):
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
-            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
+            self.mlflow_logger.log_artifact(
+                f"{filepath}/{filename}_critic.pht"
+            )
 
             # For actor
-            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
+            input_example = np.zeros(
+                (1, self.observation_size), dtype=np.float32
+            )
             model_input = torch.from_numpy(input_example)
-            actor_mlflow = ActorMLflowWrapperSAC(self.actor_net, self.observation_size)
+            actor_mlflow = ActorMLflowWrapperSAC(
+                self.actor_net, self.observation_size
+            )
             self.mlflow_logger.log_model(
                 model=actor_mlflow,
                 model_type="pytorch",
@@ -242,9 +286,13 @@ class SAC:
                 device=self.device,
             )
             # For critic (use wrapper for MLflow)
-            input_example = np.zeros((1, self.observation_size + self.action_num), dtype=np.float32)
+            input_example = np.zeros(
+                (1, self.observation_size + self.action_num), dtype=np.float32
+            )
             model_input = torch.from_numpy(input_example)
-            critic_mlflow = CriticMLflowWrapperTD3_SAC(self.critic_net, self.observation_size)
+            critic_mlflow = CriticMLflowWrapperTD3_SAC(
+                self.critic_net, self.observation_size
+            )
             self.mlflow_logger.log_model(
                 model=critic_mlflow,
                 model_type="pytorch",

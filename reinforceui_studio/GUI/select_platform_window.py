@@ -13,7 +13,9 @@ from PyQt5.QtCore import Qt
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
 from reinforceui_studio.GUI.ui_utils import create_button, get_icon_path
 from reinforceui_studio.GUI.ui_styles import Styles
-from reinforceui_studio.GUI.select_environment_window import SelectEnvironmentWindow
+from reinforceui_studio.GUI.select_environment_window import (
+    SelectEnvironmentWindow,
+)
 
 
 class PlatformConfigWindow(BaseWindow):
@@ -61,7 +63,9 @@ class PlatformConfigWindow(BaseWindow):
 
         # Platforms layout
         platforms_layout = QHBoxLayout()
-        spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        spacer = QSpacerItem(
+            40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum
+        )
         platforms_layout.addItem(spacer)
 
         # Define available platforms

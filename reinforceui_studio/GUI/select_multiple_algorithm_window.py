@@ -21,7 +21,9 @@ from reinforceui_studio.GUI.ui_utils import (
     get_config_path,
 )
 from reinforceui_studio.GUI.ui_styles import Styles
-from reinforceui_studio.GUI.select_hyperparameters_window import SelectHyperWindow
+from reinforceui_studio.GUI.select_hyperparameters_window import (
+    SelectHyperWindow,
+)
 from reinforceui_studio.GUI.select_platform_window import PlatformConfigWindow
 
 
@@ -29,7 +31,9 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
     def __init__(
         self,
         welcome_window: Callable[[], None],
-        user_selections: Dict[str, Union[str, List[Dict[str, Union[str, Dict]]]]],
+        user_selections: Dict[
+            str, Union[str, List[Dict[str, Union[str, Dict]]]]
+        ],
     ) -> None:
         """Initializes the SelectMultipleAlgorithmWindow.
 
@@ -244,7 +248,9 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
         self.custom_window.show()
 
     def save_custom_params(
-        self, row_widget: QWidget, hyperparameters: Dict[str, Union[str, int, float]]
+        self,
+        row_widget: QWidget,
+        hyperparameters: Dict[str, Union[str, int, float]],
     ) -> None:
         """Saves custom hyperparameters for a specific algorithm.
 
@@ -298,7 +304,9 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Warning)
         msg_box.setWindowTitle("Selection Required")
-        msg_box.setText("Please select at least one algorithm before proceeding.")
+        msg_box.setText(
+            "Please select at least one algorithm before proceeding."
+        )
         msg_box.setStyleSheet(Styles.MESSAGE_BOX)
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec_()

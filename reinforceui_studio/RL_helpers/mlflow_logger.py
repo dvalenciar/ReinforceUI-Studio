@@ -9,22 +9,24 @@ from mlflow.models.signature import infer_signature
 
 def check_enabled(func: Callable) -> Callable:
     """Decorator to gracefully skip logging if MLflow is disabled."""
+
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         if not self.use_mlflow:
-            return  None
+            return None
         return func(self, *args, **kwargs)
+
     return wrapper
 
 
 class MLflowLogger:
     def __init__(
-            self,
-            experiment_name: str = "ReinforceUI Experiment",
-            run_name: str = "Run 1",
-            use_mlflow: bool = True,
-            tags: Optional[Dict[str, Any]] = None,
-            tracking_uri: Optional[str] = None
+        self,
+        experiment_name: str = "ReinforceUI Experiment",
+        run_name: str = "Run 1",
+        use_mlflow: bool = True,
+        tags: Optional[Dict[str, Any]] = None,
+        tracking_uri: Optional[str] = None,
     ) -> None:
         """Initialize the MLflow logger.
         Args:
@@ -49,7 +51,10 @@ class MLflowLogger:
             return
 
         if tracking_uri is None:
-            tracking_uri = os.path.join(os.path.expanduser("~"), "reinforceui_studio_logs/mlflow_tracking")
+            tracking_uri = os.path.join(
+                os.path.expanduser("~"),
+                "reinforceui_studio_logs/mlflow_tracking",
+            )
 
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment(experiment_name)
@@ -69,11 +74,15 @@ class MLflowLogger:
         mlflow.log_params(params)
 
     @check_enabled
-    def log_metric(self, key: str, value: float, step: Optional[int] = None) -> None:
+    def log_metric(
+        self, key: str, value: float, step: Optional[int] = None
+    ) -> None:
         mlflow.log_metric(key, value, step=step)
 
     @check_enabled
-    def log_metrics(self, metrics: Dict[str, float], step: Optional[int] = None) -> None:
+    def log_metrics(
+        self, metrics: Dict[str, float], step: Optional[int] = None
+    ) -> None:
         for key, value in metrics.items():
             mlflow.log_metric(key, value, step=step)
 
@@ -104,9 +113,16 @@ class MLflowLogger:
         mlflow.end_run(status="FINISHED")
 
     @check_enabled
-    def log_model(self, model, model_type: str = "pytorch", model_name: str = "model",
-              registered_model_name: Optional[str] = None,
-              input_example=None, model_input=None, device="cpu") -> None:
+    def log_model(
+        self,
+        model,
+        model_type: str = "pytorch",
+        model_name: str = "model",
+        registered_model_name: Optional[str] = None,
+        input_example=None,
+        model_input=None,
+        device="cpu",
+    ) -> None:
         """
         Log a machine learning model with optional registration.
         input_example: numpy array or DataFrame for MLflow
@@ -128,24 +144,35 @@ class MLflowLogger:
                 else:
                     # Accept both ndarray and dict for input_example
                     if isinstance(input_example, dict):
-                        model_input = {k: torch.from_numpy(v).to(device) for k, v in input_example.items()}
+                        model_input = {
+                            k: torch.from_numpy(v).to(device)
+                            for k, v in input_example.items()
+                        }
                         model_output = model(**model_input)
                     else:
-                        model_input = torch.from_numpy(input_example).to(device)
+                        model_input = torch.from_numpy(input_example).to(
+                            device
+                        )
                         model_output = model(model_input)
 
                 if isinstance(model_output, torch.Tensor):
                     model_output = model_output.detach().cpu().numpy()
-                signature = infer_signature(model_input=input_example, model_output=model_output)
+                signature = infer_signature(
+                    model_input=input_example, model_output=model_output
+                )
             else:
-                print("Warning: Logging PyTorch model without signature. Inference may fail later.")
+                print(
+                    "Warning: Logging PyTorch model without signature. Inference may fail later."
+                )
 
             mlflow.pytorch.log_model(
                 pytorch_model=model,
                 name=model_name,
                 registered_model_name=registered_model_name,
                 signature=signature,
-                input_example=input_example
+                input_example=input_example,
             )
         else:
-            print(f"Error: Unsupported model type '{model_type}'. Only 'pytorch' supported here.")
+            print(
+                f"Error: Unsupported model type '{model_type}'. Only 'pytorch' supported here."
+            )

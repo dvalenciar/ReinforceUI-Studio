@@ -1,6 +1,8 @@
 import yaml
 from importlib.resources import files
-from reinforceui_studio.RL_loops.training_policy_loop import create_environment_instance
+from reinforceui_studio.RL_loops.training_policy_loop import (
+    create_environment_instance,
+)
 
 
 def test_create_environment_instance() -> None:
@@ -20,7 +22,9 @@ def test_create_environment_instance() -> None:
         config = yaml.safe_load(file)
 
     for platform, envs in config["platforms"].items():
-        all_envs = envs.get("environments", []) + envs.get("discrete_environments", [])
+        all_envs = envs.get("environments", []) + envs.get(
+            "discrete_environments", []
+        )
         for env in all_envs:
             config_data = {
                 "selected_platform": platform,

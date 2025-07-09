@@ -10,7 +10,9 @@ from PyQt5.QtWidgets import (
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
 from reinforceui_studio.GUI.ui_utils import create_button, get_icon_path
 from reinforceui_studio.GUI.ui_styles import Styles
-from reinforceui_studio.GUI.select_algorithm_window import SelectAlgorithmWindow
+from reinforceui_studio.GUI.select_algorithm_window import (
+    SelectAlgorithmWindow,
+)
 from reinforceui_studio.GUI.select_multiple_algorithm_window import (
     SelectMultipleAlgorithmWindow,
 )
@@ -79,7 +81,9 @@ class WelcomeWindow(BaseWindow):
         """Open the load configuration window."""
         self.user_selections["setup_choice"] = "load_model"
         self.close()
-        self.load_config_window = LoadConfigWindow(self.show, self.user_selections)
+        self.load_config_window = LoadConfigWindow(
+            self.show, self.user_selections
+        )
         self.load_config_window.show()
 
     def open_single_manual_configuration(self) -> None:

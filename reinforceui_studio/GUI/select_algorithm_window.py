@@ -19,7 +19,9 @@ from reinforceui_studio.GUI.ui_utils import (
     get_config_path,
 )
 from reinforceui_studio.GUI.ui_styles import Styles
-from reinforceui_studio.GUI.select_hyperparameters_window import SelectHyperWindow
+from reinforceui_studio.GUI.select_hyperparameters_window import (
+    SelectHyperWindow,
+)
 from reinforceui_studio.GUI.select_platform_window import PlatformConfigWindow
 
 
@@ -183,7 +185,9 @@ class SelectAlgorithmWindow(BaseWindow):
 
         self.user_selections["Algorithms"] = selection
         self.close()
-        self.platform_window = PlatformConfigWindow(self.show, self.user_selections)
+        self.platform_window = PlatformConfigWindow(
+            self.show, self.user_selections
+        )
         self.platform_window.show()
 
     def _show_selection_required_warning(self) -> None:
@@ -198,7 +202,9 @@ class SelectAlgorithmWindow(BaseWindow):
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec_()
 
-    def set_active_button(self, active_button, inactive_button) -> None:  # noqa
+    def set_active_button(
+        self, active_button, inactive_button  # noqa: ANN001
+    ) -> None:
         """Visually highlight the selected option button."""
         active_button.setStyleSheet(Styles.SELECTED_BUTTON)
         inactive_button.setStyleSheet(Styles.BUTTON)

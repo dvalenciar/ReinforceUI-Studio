@@ -13,12 +13,18 @@ import torch.nn.functional as functional
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.DDPG.networks import Actor, Critic
 from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
-from reinforceui_studio.RL_helpers.mlflow_wrappers import CriticMLflowWrapperDDPG
+from reinforceui_studio.RL_helpers.mlflow_wrappers import (
+    CriticMLflowWrapperDDPG,
+)
 
 
 class DDPG:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict, mlflow_logger: MLflowLogger = None
+        self,
+        observation_size: int,
+        action_num: int,
+        hyperparameters: dict,
+        mlflow_logger: MLflowLogger = None,
     ) -> None:
         """Initialize the DDPG agent.
 
@@ -30,8 +36,11 @@ class DDPG:
                 tau: Target networks update rate
                 actor_lr: Learning rate for actor network
                 critic_lr: Learning rate for critic networks
+            mlflow_logger: Logger for MLflow integration, if None, no logging will be done
         """
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_actor_net = copy.deepcopy(self.actor_net).to(self.device)
@@ -103,7 +112,9 @@ class DDPG:
         # MLflow logging for critic loss
         if self.mlflow_logger is not None:
             log_step = step if step is not None else 0
-            self.mlflow_logger.log_metric('Critic loss', critic_loss.item(), step=log_step)
+            self.mlflow_logger.log_metric(
+                "Critic loss", critic_loss.item(), step=log_step
+            )
 
         return critic_loss.item()
 
@@ -119,16 +130,21 @@ class DDPG:
         # MLflow logging for actor loss
         if self.mlflow_logger is not None:
             log_step = step if step is not None else 0
-            self.mlflow_logger.log_metric('Actor loss', actor_loss.item(), step=log_step)
+            self.mlflow_logger.log_metric(
+                "Actor loss", actor_loss.item(), step=log_step
+            )
 
         return actor_loss.item()
 
-    def train_policy(self, memory: MemoryBuffer, batch_size: int, step: int = None) -> None:
+    def train_policy(
+        self, memory: MemoryBuffer, batch_size: int, step: int = None
+    ) -> None:
         """Train actor and critic networks using experiences from memory.
 
         Args:
             memory: Replay buffer containing experiences
             batch_size: Number of experiences to sample
+            step: Current training step, used for logging
         """
         experiences = memory.sample_experience(batch_size)
         (states, actions, rewards, next_states, dones) = experiences
@@ -145,7 +161,9 @@ class DDPG:
         dones = dones.reshape(batch_size, 1)
 
         # Update Critic
-        self._update_critic(states, actions, rewards, next_states, dones, step=step)
+        self._update_critic(
+            states, actions, rewards, next_states, dones, step=step
+        )
 
         # Update Actor
         self._update_actor(states, step=step)
@@ -165,7 +183,9 @@ class DDPG:
                 self.tau * param.data + (1 - self.tau) * target_param.data
             )
 
-    def save_models(self, filename: str, filepath: str, checkpoint: bool = True) -> None:
+    def save_models(
+        self, filename: str, filepath: str, checkpoint: bool = True
+    ) -> None:
         """Save actor and critic networks to files.
 
         Args:
@@ -177,17 +197,29 @@ class DDPG:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
-        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
+        torch.save(
+            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
+        )
+        torch.save(
+            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
+        )
 
         # Log model as MLflow models only at the end of training (checkpoint=False)
-        if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow and not checkpoint:
+        if (
+            self.mlflow_logger is not None
+            and self.mlflow_logger.use_mlflow
+            and not checkpoint
+        ):
             # Log as artifacts for backward compatibility
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
-            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
+            self.mlflow_logger.log_artifact(
+                f"{filepath}/{filename}_critic.pht"
+            )
 
             # For actor
-            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
+            input_example = np.zeros(
+                (1, self.observation_size), dtype=np.float32
+            )
             model_input = torch.from_numpy(input_example)
             self.mlflow_logger.log_model(
                 model=self.actor_net,
@@ -199,9 +231,13 @@ class DDPG:
             )
 
             # For critic (use wrapper for MLflow)
-            input_example = np.zeros((1, self.observation_size + self.action_num), dtype=np.float32)
+            input_example = np.zeros(
+                (1, self.observation_size + self.action_num), dtype=np.float32
+            )
             model_input = torch.from_numpy(input_example)
-            critic_mlflow = CriticMLflowWrapperDDPG(self.critic_net, self.observation_size)
+            critic_mlflow = CriticMLflowWrapperDDPG(
+                self.critic_net, self.observation_size
+            )
             self.mlflow_logger.log_model(
                 model=critic_mlflow,
                 model_type="pytorch",

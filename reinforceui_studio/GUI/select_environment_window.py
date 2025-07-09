@@ -108,5 +108,7 @@ class SelectEnvironmentWindow(BaseWindow):
         self.user_selections["selected_environment"] = selected_env
         self.close()
 
-        self.select_alg_window = TrainingWindow(self.show, self.user_selections)
+        self.select_alg_window = TrainingWindow(
+            self.show, self.user_selections
+        )
         self.select_alg_window.show()

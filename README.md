@@ -133,8 +133,8 @@ If you encounter any issues, check out the [Installation Guide](https://docs.rei
     <th>Example of MLflow Metrics</th>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/feature/36-integrate-mlflow-for-model-tracking-and-loading/media_resources/mlflow_dashboard_1.png" width="400"></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/feature/36-integrate-mlflow-for-model-tracking-and-loading/media_resources/mlflow_dashboard_2.png" width="400"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/mlflow_dashboard_1.png" width="400"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/mlflow_dashboard_2.png" width="400"></td>
   </tr>
   
 </table>
