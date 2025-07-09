@@ -35,10 +35,6 @@
 <p align="center">
    <img src="https://img.shields.io/badge/python-3.10--3.12-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" alt="Python Version">
    <img src="https://img.shields.io/badge/Ubuntu-22--24-E95420?style=for-the-badge&logo=ubuntu&logoColor=white&&color=blue" alt="Ubuntu Version">
-   <a href="https://pepy.tech/projects/reinforceui-studio">
-    <img src="https://img.shields.io/pepy/dt/reinforceui-studio?style=for-the-badge&logo=pypi&color=blue" alt="PyPI Downloads">
-   </a>
-
    <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="License">
  
 </p>
@@ -49,6 +45,12 @@
    <img src="https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white" alt="Mlflow">
 </p>
 
+
+<p align="center">
+   <a href="https://pepy.tech/projects/reinforceui-studio">
+    <img src="https://img.shields.io/pepy/dt/reinforceui-studio?style=for-the-badge&logo=pypi&color=blue" alt="PyPI Downloads">
+   </a>
+</p>
 
 ---
 ⭐️ If you find this project useful, please consider giving it a star! It really helps!
