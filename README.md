@@ -4,7 +4,7 @@
   </a>
 </p>
 
-<h1 align="center"> ReinforceUI Studio: Reinforcement Learning Made Simple</h1>
+<h1 align="center"> Reinforcement Learning Made Simple</h1>
 
 <p align="center">
   Intuitive, Powerful, and Hassle-Free RL Training & Monitoring – All in One Place.
@@ -70,8 +70,6 @@ No more memorizing commands, no more juggling extra repos – just train, monito
 
 
 
-
-
 ## Quickstart
 Getting started with ReinforceUI Studio is fast and easy!
 
@@ -80,7 +78,7 @@ The easiest way to use ReinforceUI Studio is by installing it directly from PyPI
 
 Follow these simple steps:
 
-1. Clone the repository and install dependencies
+1. Install ReinforceUI Studio from PyPI
 
 ```bash
 pip install reinforceui-studio
@@ -100,6 +98,7 @@ If you encounter any issues, check out the [Installation Guide](https://docs.rei
 ## Why you should use ReinforceUI Studio
 * 🚀 Instant RL Training: Configure environments, select algorithms, set hyperparameters – all in seconds.
 * 🖥️ Real-Time Dashboard: Watch your agents learn with live performance curves and metrics.
+* 📊 Mlflow Integration: Automatically log and visualize your training runs with MLflow.
 * 🧠 Multi-Algorithm Support: Train and compare multiple algorithms simultaneously.
 * 📦 Full Logging: Automatically save models, plots, evaluations, videos, and training stats.
 * 🔧 Easy Customization: Adjust hyperparameters or load optimized defaults.
