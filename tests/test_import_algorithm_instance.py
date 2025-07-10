@@ -1,4 +1,6 @@
-from reinforceui_studio.RL_loops.training_policy_loop import import_algorithm_instance
+from reinforceui_studio.RL_loops.training_policy_loop import (
+    import_algorithm_instance,
+)
 
 
 def test_import_algorithm_instance() -> None:

@@ -4,41 +4,53 @@
   </a>
 </p>
 
-<h1 align="center"> ReinforceUI Studio: Reinforcement Learning Made Simple</h1>
+<h1 align="center"> Reinforcement Learning Made Simple</h1>
 
 <p align="center">
   Intuitive, Powerful, and Hassle-Free RL Training & Monitoring – All in One Place.
 </p>
 
 <p align="center">
-  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/pytest.yml?label=CI&branch=main" alt="Build Status">
+  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/pytest.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/pytest.yml?style=for-the-badge&logo=github&label=CI" alt="Build Status">
   </a>
+
   <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/formatting.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?label=Formatting&branch=main" alt="Formatting Status">
-  </a>
-  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?label=Docker&branch=main" alt="Docker Status">
-  </a>
-  <a href="https://docs.reinforceui-studio.com/">
-    <img src="https://img.shields.io/badge/Docs-Up-green" alt="Documentation">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/formatting.yml?style=for-the-badge&label=Formatting&branch=main" alt="Formatting Status">
   </a>
 
-  <a href="https://www.python.org/downloads/release/python-310/">
-    <img src="https://img.shields.io/badge/python-3.10-blue.svg" alt="Python Version">
+  <a href="https://github.com/dvalenciar/ReinforceUI-Studio/actions/workflows/docker-publish.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/dvalenciar/ReinforceUI-Studio/docker-publish.yml?style=for-the-badge&logo=docker&label=Docker" alt="Docker Status">
   </a>
+
   <a href="https://pypi.org/project/reinforceui-studio/">
-    <img src="https://img.shields.io/pypi/v/reinforceui-studio" alt="PyPI version">
+    <img src="https://img.shields.io/pypi/v/reinforceui-studio?style=for-the-badge&logo=pypi&color=#44cc11" alt="PyPI version">
   </a>
 
-  <a href="https://pepy.tech/projects/reinforceui-studio">
-    <img src="https://static.pepy.tech/badge/reinforceui-studio" alt="PyPI Downloads">
-  </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
+  <a href="https://docs.reinforceui-studio.com/">
+    <img src="https://img.shields.io/website?url=https%3A%2F%2Fdocs.reinforceui-studio.com&up_message=online&down_color=red&style=for-the-badge&label=Docs" alt="Documentation">
   </a>
 </p>
 
+<p align="center">
+   <img src="https://img.shields.io/badge/python-3.10--3.12-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" alt="Python Version">
+   <img src="https://img.shields.io/badge/Ubuntu-22--24-E95420?style=for-the-badge&logo=ubuntu&logoColor=white&&color=blue" alt="Ubuntu Version">
+   <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="License">
+ 
+</p>
+
+
+<p align="center">
+   <img src="https://img.shields.io/badge/mlflow-%23d9ead3.svg?style=for-the-badge&logo=numpy&logoColor=blue" alt="Mlflow">
+   <img src="https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white" alt="Mlflow">
+</p>
+
+
+<p align="center">
+   <a href="https://pepy.tech/projects/reinforceui-studio">
+    <img src="https://img.shields.io/pepy/dt/reinforceui-studio?style=for-the-badge&logo=pypi&color=blue" alt="PyPI Downloads">
+   </a>
+</p>
 
 ---
 ⭐️ If you find this project useful, please consider giving it a star! It really helps!
@@ -58,8 +70,6 @@ No more memorizing commands, no more juggling extra repos – just train, monito
 
 
 
-
-
 ## Quickstart
 Getting started with ReinforceUI Studio is fast and easy!
 
@@ -68,7 +78,7 @@ The easiest way to use ReinforceUI Studio is by installing it directly from PyPI
 
 Follow these simple steps:
 
-1. Clone the repository and install dependencies
+1. Install ReinforceUI Studio from PyPI
 
 ```bash
 pip install reinforceui-studio
@@ -88,6 +98,7 @@ If you encounter any issues, check out the [Installation Guide](https://docs.rei
 ## Why you should use ReinforceUI Studio
 * 🚀 Instant RL Training: Configure environments, select algorithms, set hyperparameters – all in seconds.
 * 🖥️ Real-Time Dashboard: Watch your agents learn with live performance curves and metrics.
+* 📊 Mlflow Integration: Automatically log and visualize your training runs with MLflow.
 * 🧠 Multi-Algorithm Support: Train and compare multiple algorithms simultaneously.
 * 📦 Full Logging: Automatically save models, plots, evaluations, videos, and training stats.
 * 🔧 Easy Customization: Adjust hyperparameters or load optimized defaults.
@@ -113,6 +124,19 @@ If you encounter any issues, check out the [Installation Guide](https://docs.rei
     <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/multiple_selection.png" width="400"></td>
     <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/multiple_selection_main_window.png" width="400"></td>
   </tr>
+</table>
+
+## Mlflow Integration
+<table align="center">
+  <tr>
+    <th>Example of MLflow Dashboard</th>
+    <th>Example of MLflow Metrics</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/mlflow_dashboard_1.png" width="400"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/dvalenciar/ReinforceUI-Studio/main/media_resources/mlflow_dashboard_2.png" width="400"></td>
+  </tr>
+  
 </table>
 
 ## Supported Algorithms
@@ -163,7 +187,3 @@ Together, we can make Reinforcement Learning accessible to everyone!
 ## License
 ReinforceUI Studio is licensed under the MIT License. You are free to use, modify, and distribute this software, 
 provided that the original copyright notice and license are included in any copies or substantial portions of the software.
-
-
-### Acknowledgements
-This project was inspired by the CARES Reinforcement Learning Package from the University of Auckland 

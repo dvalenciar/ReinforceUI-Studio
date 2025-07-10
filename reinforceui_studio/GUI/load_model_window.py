@@ -15,7 +15,9 @@ from PyQt5.QtCore import Qt
 from reinforceui_studio.GUI.ui_base_window import BaseWindow
 from reinforceui_studio.GUI.ui_utils import create_button, get_icon_path
 from reinforceui_studio.GUI.ui_styles import Styles
-from reinforceui_studio.RL_loops.testing_policy_loop import policy_from_model_load_test
+from reinforceui_studio.RL_loops.testing_policy_loop import (
+    policy_from_model_load_test,
+)
 
 
 class LoadConfigWindow(BaseWindow):

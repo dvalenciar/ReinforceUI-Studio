@@ -1,24 +1,31 @@
 import os
+from typing import Any
+
 import numpy as np
 import cv2
 import pandas as pd
 
 
 from reinforceui_studio.RL_helpers.plotters import plot_logs
+from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
 
 
 class RecordLogger:
-    def __init__(self, log_dir: str, rl_agent) -> None:  # noqa: ANN001
+    def __init__(
+        self, log_dir: str, rl_agent: Any, mlflow_logger: MLflowLogger
+    ) -> None:
         """Initialize the RecordLogger.
 
         Args:
             log_dir: Directory to save logs and videos.
             rl_agent: The reinforcement learning agent being logged, this come from the algorithm.
+            mlflow_logger: The MLflow logger instance for logging metrics.
         """
         self.logs_training = []
         self.logs_evaluation = []
         self.rl_agent = rl_agent
         self.log_dir = log_dir
+        self.mlflow_logger = mlflow_logger
         self.video_writer = None
 
         self.data_log_dir = os.path.join(log_dir, "data_log")
@@ -100,7 +107,7 @@ class RecordLogger:
         df = pd.DataFrame(logs)
         df.to_csv(filename, index=False)
 
-    def save_logs(self, plot_flag: bool = False) -> None:
+    def save_logs(self, plot_flag: bool = False, checkpoint: bool = True) -> None:
         """Save training and evaluation logs to CSV files and plot them."""
         self._save_csv(
             self.logs_training,
@@ -112,7 +119,11 @@ class RecordLogger:
             os.path.join(self.data_log_dir, "evaluation_log.csv"),
         )
 
-        self.rl_agent.save_models(filename="model", filepath=self.model_log_dir)
+        self.rl_agent.save_models(
+            filename="model",
+            filepath=self.model_log_dir,
+            checkpoint=checkpoint,
+        )
 
         if plot_flag:
             plot_logs(
@@ -133,6 +144,24 @@ class RecordLogger:
                 "Steps",
                 "Average Reward",
                 os.path.join(self.data_log_dir, "evaluation_log.png"),
+            )
+
+        if (
+            self.mlflow_logger is not None
+            and self.mlflow_logger.use_mlflow
+            and not checkpoint
+        ):
+            self.mlflow_logger.log_artifact(
+                os.path.join(self.data_log_dir, "training_log.csv")
+            )
+            self.mlflow_logger.log_artifact(
+                os.path.join(self.data_log_dir, "evaluation_log.csv")
+            )
+            self.mlflow_logger.log_artifact(
+                os.path.join(self.data_log_dir, "training_log.png")
+            )
+            self.mlflow_logger.log_artifact(
+                os.path.join(self.data_log_dir, "evaluation_log.png")
             )
 
     def start_video_record(self, frame: np.ndarray) -> None:
@@ -165,3 +194,8 @@ class RecordLogger:
             self.video_writer.release()
             self.video_writer = None
             print("Video recording completed.")
+
+            if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow:
+                self.mlflow_logger.log_artifact(
+                    os.path.join(self.log_dir, "video_tested_final_policy.mp4")
+                )

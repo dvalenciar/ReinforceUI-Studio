@@ -7,7 +7,10 @@ from reinforceui_studio.RL_environment.gym_env import GymEnvironment
 from reinforceui_studio.RL_environment.dmcs_env import DMControlEnvironment
 from reinforceui_studio.RL_helpers.util import set_seed
 from reinforceui_studio.RL_helpers.record_logger import RecordLogger
-from reinforceui_studio.RL_loops.evaluate_policy_loop import evaluate_policy_loop
+from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
+from reinforceui_studio.RL_loops.evaluate_policy_loop import (
+    evaluate_policy_loop,
+)
 from reinforceui_studio.RL_loops.testing_policy_loop import policy_loop_test
 
 
@@ -87,10 +90,22 @@ def training_loop(  # noqa: C901
         config_data, render_mode="rgb_array", evaluation_env=True
     )
 
+    experiment_name = f"{config_data.get('Algorithms_names')}_{config_data.get('selected_platform')}_{config_data.get('selected_environment')}"
+    mlflow_logger = MLflowLogger(
+        experiment_name=experiment_name,
+        run_name=display_name,
+        tags={
+            "environment": config_data.get("selected_environment"),
+            "platform": config_data.get("selected_platform"),
+        },
+        use_mlflow=config_data.get("use_mlflow", True),
+    )
+
     rl_agent = algorithm(
         env.observation_space(),
         env.action_num(),
         config_data.get("Hyperparameters"),
+        mlflow_logger=mlflow_logger,
     )
     memory = MemoryBuffer(
         env.observation_space(),
@@ -99,12 +114,27 @@ def training_loop(  # noqa: C901
         algorithm_name,
     )
 
-    logger = RecordLogger(log_folder_path, rl_agent)
+    logger = RecordLogger(log_folder_path, rl_agent, mlflow_logger=mlflow_logger)
+    mlflow_logger.start_run()
 
     steps_training = int(config_data.get("Training Steps", 1000000))
     evaluation_interval = int(config_data.get("Evaluation Interval", 1000))
     log_interval = int(config_data.get("Log Interval", 1000))
     number_eval_episodes = int(config_data.get("Evaluation Episodes", 10))
+
+    mlflow_logger.log_params(
+        {
+            "Algorithm Name": algorithm_name,
+            "Environment Name": config_data.get("selected_environment"),
+            "Selected Platform": config_data.get("selected_platform"),
+            "Seed": config_data.get("Seed"),
+            **(config_data.get("Hyperparameters") or {}),
+            "Training Steps": steps_training,
+            "Evaluation Interval": evaluation_interval,
+            "Evaluation Episodes": number_eval_episodes,
+            "log Interval": log_interval,
+        }
+    )
 
     episode_timesteps = 0
     episode_num = 0
@@ -132,7 +162,16 @@ def training_loop(  # noqa: C901
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
 
+        mlflow_logger.log_params(
+            {
+                "G Value": G,
+                "Batch Size": batch_size,
+                "Exploration Steps": steps_exploration,
+            }
+        )
+
     training_completed = True
+
     for total_step_counter in range(steps_training):
         if not is_running():  # Check the running state using the callable
             print("Training loop interrupted. Exiting...")
@@ -175,15 +214,15 @@ def training_loop(  # noqa: C901
 
         # Train the policy
         if is_ppo and (total_step_counter + 1) % max_steps_per_batch == 0:
-            rl_agent.train_policy(memory)
+            rl_agent.train_policy(memory, step=total_step_counter + 1)
 
         elif is_dqn and total_step_counter > batch_size:
             for _ in range(G):
-                rl_agent.train_policy(memory, batch_size)
+                rl_agent.train_policy(memory, batch_size, step=total_step_counter + 1)
 
         elif not is_ppo and not is_dqn and total_step_counter >= steps_exploration:
             for _ in range(G):
-                rl_agent.train_policy(memory, batch_size)
+                rl_agent.train_policy(memory, batch_size, step=total_step_counter + 1)
 
         # Handle episode completion
         if done or truncated:
@@ -211,12 +250,24 @@ def training_loop(  # noqa: C901
                 display_name, "Episode Steps", episode_timesteps
             )
 
+            # Log metrics to file logger
             df_log_train = logger.log_training(
                 episode=episode_num + 1,
                 episode_reward=episode_reward,
                 episode_steps=episode_timesteps,
                 total_timesteps=total_step_counter + 1,
                 duration=episode_time,
+            )
+
+            # Log metrics to MLflow
+            mlflow_logger.log_metrics(
+                {
+                    "Episode Number": episode_num + 1,
+                    "Episode Reward": episode_reward,
+                    "Steps per Episode": episode_timesteps,
+                    "Time per Episode": episode_time,
+                },
+                step=total_step_counter + 1,
             )
 
             training_window.update_plot_signal.emit(
@@ -248,6 +299,17 @@ def training_loop(  # noqa: C901
                 display_name, df_grouped, "evaluation"
             )
 
+            # Log evaluation metrics to MLflow (mean reward and steps if available)
+            eval_reward = df_grouped["Episode Reward"].values[-1]
+            eval_steps = df_grouped["Episode Steps"].values[-1]
+            mlflow_logger.log_metrics(
+                {
+                    "Evaluation-Episode Reward": eval_reward,
+                    "Evaluation-Steps per Episode": eval_steps,
+                },
+                step=total_step_counter + 1,
+            )
+
         # Update the training window
         training_window.update_algo_signal.emit(display_name, "Progress", int(progress))
         training_window.update_algo_signal.emit(
@@ -256,10 +318,10 @@ def training_loop(  # noqa: C901
 
         # Save checkpoint based on log interval
         if (total_step_counter + 1) % log_interval == 0:
-            logger.save_logs(plot_flag=False)
+            logger.save_logs(plot_flag=False, checkpoint=True)
 
     # Finalize training
-    logger.save_logs(plot_flag=True)
+    logger.save_logs(plot_flag=True, checkpoint=False)
     policy_loop_test(env, rl_agent, logger, algo_name=algorithm_name)
-
     training_window.training_completed_signal.emit(display_name, training_completed)
+    mlflow_logger.end_run()

@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 
 def plot_comparison(
-    algo_folders: dict[str, str], output_file: str, title: str = "Evaluation Comparison"
+    algo_folders: dict[str, str],
+    output_file: str,
+    title: str = "Evaluation Comparison",
 ) -> None:
     """Plot evaluation logs from multiple algorithms for comparison.
 

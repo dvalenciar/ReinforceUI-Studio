@@ -21,7 +21,9 @@ from reinforceui_studio.GUI.ui_utils import (
     get_config_path,
 )
 from reinforceui_studio.GUI.ui_styles import Styles
-from reinforceui_studio.GUI.select_hyperparameters_window import SelectHyperWindow
+from reinforceui_studio.GUI.select_hyperparameters_window import (
+    SelectHyperWindow,
+)
 from reinforceui_studio.GUI.select_platform_window import PlatformConfigWindow
 
 
@@ -244,7 +246,9 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
         self.custom_window.show()
 
     def save_custom_params(
-        self, row_widget: QWidget, hyperparameters: Dict[str, Union[str, int, float]]
+        self,
+        row_widget: QWidget,
+        hyperparameters: Dict[str, Union[str, int, float]],
     ) -> None:
         """Saves custom hyperparameters for a specific algorithm.
 

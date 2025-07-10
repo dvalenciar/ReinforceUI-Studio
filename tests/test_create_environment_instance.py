@@ -1,6 +1,8 @@
 import yaml
 from importlib.resources import files
-from reinforceui_studio.RL_loops.training_policy_loop import create_environment_instance
+from reinforceui_studio.RL_loops.training_policy_loop import (
+    create_environment_instance,
+)
 
 
 def test_create_environment_instance() -> None:

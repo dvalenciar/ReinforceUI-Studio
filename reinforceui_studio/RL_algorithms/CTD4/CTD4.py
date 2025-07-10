@@ -11,11 +11,19 @@ import numpy as np
 import torch
 from reinforceui_studio.RL_memory.memory_buffer import MemoryBuffer
 from reinforceui_studio.RL_algorithms.CTD4.networks import Actor, Critic
+from reinforceui_studio.RL_helpers.mlflow_logger import MLflowLogger
+from reinforceui_studio.RL_helpers.mlflow_wrappers import (
+    CriticMLflowWrapperCtd4,
+)
 
 
 class CTD4:
     def __init__(
-        self, observation_size: int, action_num: int, hyperparameters: dict
+        self,
+        observation_size: int,
+        action_num: int,
+        hyperparameters: dict,
+        mlflow_logger: MLflowLogger = None,
     ) -> None:
         """Initialize the CTD4 agent.
 
@@ -29,6 +37,7 @@ class CTD4:
                 critic_lr: Learning rate for critic networks
                 ensemble_size: Number of critic networks in the ensemble
                 policy_noise_decay: Decay rate for target policy noise
+            mlflow_logger: Logger for MLflow integration, can be None
         """
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.gamma = float(hyperparameters.get("gamma"))
@@ -68,6 +77,9 @@ class CTD4:
             torch.optim.Adam(critic.parameters(), lr=self.critic_lr)
             for critic in self.ensemble_critics
         ]
+
+        self.mlflow_logger = mlflow_logger
+        self.observation_size = observation_size
 
     def select_action_from_policy(
         self,
@@ -135,6 +147,7 @@ class CTD4:
         rewards: torch.Tensor,
         next_states: torch.Tensor,
         dones: torch.Tensor,
+        step: int = None,
     ) -> list[float]:
 
         with torch.no_grad():
@@ -166,27 +179,39 @@ class CTD4:
 
         critic_loss_totals = []
 
-        for critic_net, critic_net_optimiser in zip(
-            self.ensemble_critics, self.ensemble_critics_optimizers
+        for idx, (critic_net, critic_net_optimiser) in enumerate(
+            zip(self.ensemble_critics, self.ensemble_critics_optimizers)
         ):
             u_current, std_current = critic_net(states, actions)
             current_distribution = torch.distributions.normal.Normal(
                 u_current, std_current + 1e-6
             )
-
             # Compute each critic loss
             critic_individual_loss = torch.distributions.kl.kl_divergence(
                 current_distribution, target_distribution
             ).mean()
-
             critic_net_optimiser.zero_grad()
             critic_individual_loss.backward()
             critic_net_optimiser.step()
-
             critic_loss_totals.append(critic_individual_loss.item())
+
+            # MLflow logging for each critic
+            if self.mlflow_logger is not None:
+                log_step = step if step is not None else self.learn_counter
+                self.mlflow_logger.log_metric(
+                    f"Critic loss {idx + 1}",
+                    critic_individual_loss.item(),
+                    step=log_step,
+                )
+
+        if self.mlflow_logger is not None:
+            log_step = step if step is not None else self.learn_counter
+            self.mlflow_logger.log_metric(
+                "Critic loss total", sum(critic_loss_totals), step=log_step
+            )
         return critic_loss_totals
 
-    def _update_actor(self, states: torch.Tensor) -> float:
+    def _update_actor(self, states: torch.Tensor, step: int = None) -> float:
         actor_q_u_set = []
         actor_q_std_set = []
 
@@ -203,14 +228,24 @@ class CTD4:
         actor_loss.backward()
         self.actor_net_optimiser.step()
 
+        # MLflow logging for actor loss
+        if self.mlflow_logger is not None:
+            log_step = step if step is not None else self.learn_counter
+            self.mlflow_logger.log_metric(
+                "Actor loss", actor_loss.item(), step=log_step
+            )
+
         return actor_loss.item()
 
-    def train_policy(self, memory: MemoryBuffer, batch_size: int) -> None:
+    def train_policy(
+        self, memory: MemoryBuffer, batch_size: int, step: int = None
+    ) -> None:
         """Train actor and critic networks using experiences from memory.
 
         Args:
             memory: Replay buffer containing experiences
             batch_size: Number of experiences to sample
+            step: Current training step, used for logging
         """
         self.learn_counter += 1
 
@@ -233,11 +268,11 @@ class CTD4:
         rewards = rewards.reshape(batch_size, 1)
         dones = dones.reshape(batch_size, 1)
 
-        self._update_critics(states, actions, rewards, next_states, dones)
+        self._update_critics(states, actions, rewards, next_states, dones, step=step)
 
         if self.learn_counter % self.policy_update_freq == 0:
             # Update Actor
-            self._update_actor(states)
+            self._update_actor(states, step=step)
 
             for critic_net, target_critic_net in zip(
                 self.ensemble_critics, self.target_ensemble_critics
@@ -256,12 +291,15 @@ class CTD4:
                     self.tau * param.data + (1 - self.tau) * target_param.data
                 )
 
-    def save_models(self, filename: str, filepath: str) -> None:
+    def save_models(
+        self, filename: str, filepath: str, checkpoint: bool = True
+    ) -> None:
         """Save actor and critic networks to files.
 
         Args:
             filename: Base name for the saved model files
             filepath: Directory path where models will be saved
+            checkpoint: If True, mlfow won't log the model as an artifact or model
         """
         dir_exists = os.path.exists(filepath)
         if not dir_exists:
@@ -272,6 +310,48 @@ class CTD4:
             self.ensemble_critics.state_dict(),
             f"{filepath}/{filename}_ensemble_critic.pht",
         )
+
+        # Log model as MLflow models only at the end of training (checkpoint=False)
+        if (
+            self.mlflow_logger is not None
+            and self.mlflow_logger.use_mlflow
+            and not checkpoint
+        ):
+            # Log as artifacts for backward compatibility
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
+            self.mlflow_logger.log_artifact(
+                f"{filepath}/{filename}_ensemble_critic.pht"
+            )
+
+            # For actor
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
+            model_input = torch.from_numpy(input_example)
+            self.mlflow_logger.log_model(
+                model=self.actor_net,
+                model_type="pytorch",
+                model_name="actor",
+                input_example=input_example,
+                model_input=model_input,
+                device=self.device,
+            )
+
+            # For critic (use wrapper for MLflow)
+            input_example = np.zeros(
+                (1, self.observation_size + self.action_num), dtype=np.float32
+            )
+            model_input = torch.from_numpy(input_example)
+            for idx, critic_net in enumerate(self.ensemble_critics):
+                critic_mlflow = CriticMLflowWrapperCtd4(
+                    critic_net, self.observation_size
+                )
+                self.mlflow_logger.log_model(
+                    model=critic_mlflow,
+                    model_type="pytorch",
+                    model_name=f"critic_{idx + 1}",
+                    input_example=input_example,
+                    model_input=model_input,
+                    device=self.device,
+                )
 
     def load_models(self, filename: str, filepath: str) -> None:
         """Load models previously saved for this algorithm.

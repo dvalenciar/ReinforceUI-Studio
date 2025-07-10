@@ -19,7 +19,9 @@ from reinforceui_studio.GUI.ui_utils import (
     get_config_path,
 )
 from reinforceui_studio.GUI.ui_styles import Styles
-from reinforceui_studio.GUI.select_hyperparameters_window import SelectHyperWindow
+from reinforceui_studio.GUI.select_hyperparameters_window import (
+    SelectHyperWindow,
+)
 from reinforceui_studio.GUI.select_platform_window import PlatformConfigWindow
 
 
@@ -198,8 +200,7 @@ class SelectAlgorithmWindow(BaseWindow):
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec_()
 
-    # todo this is redundant with the one in update_button_styles in training_window.py, remove it or make it a common function
-    def set_active_button(self, active_button, inactive_button) -> None:  # noqa
+    def set_active_button(self, active_button, inactive_button) -> None:  # noqa: ANN001
         """Visually highlight the selected option button."""
         active_button.setStyleSheet(Styles.SELECTED_BUTTON)
         inactive_button.setStyleSheet(Styles.BUTTON)
