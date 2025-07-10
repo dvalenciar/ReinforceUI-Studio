@@ -31,9 +31,7 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
     def __init__(
         self,
         welcome_window: Callable[[], None],
-        user_selections: Dict[
-            str, Union[str, List[Dict[str, Union[str, Dict]]]]
-        ],
+        user_selections: Dict[str, Union[str, List[Dict[str, Union[str, Dict]]]]],
     ) -> None:
         """Initializes the SelectMultipleAlgorithmWindow.
 
@@ -304,9 +302,7 @@ class SelectMultipleAlgorithmWindow(BaseWindow):
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Warning)
         msg_box.setWindowTitle("Selection Required")
-        msg_box.setText(
-            "Please select at least one algorithm before proceeding."
-        )
+        msg_box.setText("Please select at least one algorithm before proceeding.")
         msg_box.setStyleSheet(Styles.MESSAGE_BOX)
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec_()

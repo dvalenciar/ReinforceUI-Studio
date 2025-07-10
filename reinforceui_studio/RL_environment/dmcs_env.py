@@ -12,9 +12,7 @@ class DMControlEnvironment:
 
     """
 
-    def __init__(
-        self, env_name: str, seed: int, render_mode: str = None
-    ) -> None:
+    def __init__(self, env_name: str, seed: int, render_mode: str = None) -> None:
         """Initialize the DMControlEnvironment.
 
         Args:
@@ -123,12 +121,8 @@ class DMControlEnvironment:
         Returns:
             np.ndarray: The rendered frame.
         """
-        frame1 = self.env.physics.render(
-            camera_id=0, height=height, width=width
-        )
-        frame2 = self.env.physics.render(
-            camera_id=1, height=height, width=width
-        )
+        frame1 = self.env.physics.render(camera_id=0, height=height, width=width)
+        frame2 = self.env.physics.render(camera_id=1, height=height, width=width)
         combined_frame = np.hstack((frame1, frame2))
 
         if self.render_mode == "human":

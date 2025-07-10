@@ -107,9 +107,7 @@ class RecordLogger:
         df = pd.DataFrame(logs)
         df.to_csv(filename, index=False)
 
-    def save_logs(
-        self, plot_flag: bool = False, checkpoint: bool = True
-    ) -> None:
+    def save_logs(self, plot_flag: bool = False, checkpoint: bool = True) -> None:
         """Save training and evaluation logs to CSV files and plot them."""
         self._save_csv(
             self.logs_training,
@@ -173,9 +171,7 @@ class RecordLogger:
             frame: The first frame of the video to determine the video dimensions.
         """
         frame_height, frame_width, _ = frame.shape
-        video_filename = os.path.join(
-            self.log_dir, "video_tested_final_policy.mp4"
-        )
+        video_filename = os.path.join(self.log_dir, "video_tested_final_policy.mp4")
         self.video_writer = cv2.VideoWriter(
             video_filename,
             cv2.VideoWriter_fourcc(*"mp4v"),
@@ -199,10 +195,7 @@ class RecordLogger:
             self.video_writer = None
             print("Video recording completed.")
 
-            if (
-                self.mlflow_logger is not None
-                and self.mlflow_logger.use_mlflow
-            ):
+            if self.mlflow_logger is not None and self.mlflow_logger.use_mlflow:
                 self.mlflow_logger.log_artifact(
                     os.path.join(self.log_dir, "video_tested_final_policy.mp4")
                 )

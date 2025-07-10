@@ -81,9 +81,7 @@ class WelcomeWindow(BaseWindow):
         """Open the load configuration window."""
         self.user_selections["setup_choice"] = "load_model"
         self.close()
-        self.load_config_window = LoadConfigWindow(
-            self.show, self.user_selections
-        )
+        self.load_config_window = LoadConfigWindow(self.show, self.user_selections)
         self.load_config_window.show()
 
     def open_single_manual_configuration(self) -> None:

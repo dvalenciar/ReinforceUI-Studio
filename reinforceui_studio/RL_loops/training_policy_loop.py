@@ -114,9 +114,7 @@ def training_loop(  # noqa: C901
         algorithm_name,
     )
 
-    logger = RecordLogger(
-        log_folder_path, rl_agent, mlflow_logger=mlflow_logger
-    )
+    logger = RecordLogger(log_folder_path, rl_agent, mlflow_logger=mlflow_logger)
     mlflow_logger.start_run()
 
     steps_training = int(config_data.get("Training Steps", 1000000))
@@ -154,12 +152,8 @@ def training_loop(  # noqa: C901
         )
     elif is_dqn:
         exploration_rate = 1
-        epsilon_min = float(
-            config_data.get("Hyperparameters").get("epsilon_min")
-        )
-        epsilon_decay = float(
-            config_data.get("Hyperparameters").get("epsilon_decay")
-        )
+        epsilon_min = float(config_data.get("Hyperparameters").get("epsilon_min"))
+        epsilon_decay = float(config_data.get("Hyperparameters").get("epsilon_decay"))
         G = int(config_data.get("G Value", 1))  # noqa: N806
         batch_size = int(config_data.get("Batch Size", 32))
         steps_exploration = int(config_data.get("Exploration Steps", 1000))
@@ -211,9 +205,7 @@ def training_loop(  # noqa: C901
 
         # Store experience in memory
         if is_ppo:
-            memory.add_experience(
-                state, action, reward, next_state, done, log_prob
-            )
+            memory.add_experience(state, action, reward, next_state, done, log_prob)
         else:
             memory.add_experience(state, action, reward, next_state, done)
 
@@ -226,19 +218,11 @@ def training_loop(  # noqa: C901
 
         elif is_dqn and total_step_counter > batch_size:
             for _ in range(G):
-                rl_agent.train_policy(
-                    memory, batch_size, step=total_step_counter + 1
-                )
+                rl_agent.train_policy(memory, batch_size, step=total_step_counter + 1)
 
-        elif (
-            not is_ppo
-            and not is_dqn
-            and total_step_counter >= steps_exploration
-        ):
+        elif not is_ppo and not is_dqn and total_step_counter >= steps_exploration:
             for _ in range(G):
-                rl_agent.train_policy(
-                    memory, batch_size, step=total_step_counter + 1
-                )
+                rl_agent.train_policy(memory, batch_size, step=total_step_counter + 1)
 
         # Handle episode completion
         if done or truncated:
@@ -248,9 +232,7 @@ def training_loop(  # noqa: C901
             remaining_episodes = (
                 steps_training - total_step_counter - 1
             ) // episode_timesteps
-            estimated_time_remaining = (
-                average_episode_time * remaining_episodes
-            )
+            estimated_time_remaining = average_episode_time * remaining_episodes
             episode_time_str = time.strftime(
                 "%H:%M:%S", time.gmtime(max(0, estimated_time_remaining))
             )
@@ -329,9 +311,7 @@ def training_loop(  # noqa: C901
             )
 
         # Update the training window
-        training_window.update_algo_signal.emit(
-            display_name, "Progress", int(progress)
-        )
+        training_window.update_algo_signal.emit(display_name, "Progress", int(progress))
         training_window.update_algo_signal.emit(
             display_name, "Total Steps", total_step_counter + 1
         )
@@ -343,7 +323,5 @@ def training_loop(  # noqa: C901
     # Finalize training
     logger.save_logs(plot_flag=True, checkpoint=False)
     policy_loop_test(env, rl_agent, logger, algo_name=algorithm_name)
-    training_window.training_completed_signal.emit(
-        display_name, training_completed
-    )
+    training_window.training_completed_signal.emit(display_name, training_completed)
     mlflow_logger.end_run()

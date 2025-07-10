@@ -19,9 +19,7 @@ class MLP(nn.Module):
         self.fully_connected_layers = []
         for i, next_size in enumerate(hidden_sizes):
             fully_connected_layer = nn.Linear(input_size, next_size)
-            self.add_module(
-                f"fully_connected_layer_{i}", fully_connected_layer
-            )
+            self.add_module(f"fully_connected_layer_{i}", fully_connected_layer)
             self.fully_connected_layers.append(fully_connected_layer)
             input_size = next_size
 

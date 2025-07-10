@@ -42,9 +42,7 @@ class SAC:
             mlflow_logger: Logger for MLflow integration, if None, no logging will be done
 
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_critic_net = copy.deepcopy(self.critic_net).to(self.device)
@@ -64,9 +62,7 @@ class SAC:
         init_temperature = 1.0
         self.log_alpha = torch.tensor(np.log(init_temperature)).to(self.device)
         self.log_alpha.requires_grad = True
-        self.log_alpha_optimizer = torch.optim.Adam(
-            [self.log_alpha], lr=self.alpha_lr
-        )
+        self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=self.alpha_lr)
 
         self.actor_net_optimiser = torch.optim.Adam(
             self.actor_net.parameters(), lr=self.actor_lr
@@ -131,8 +127,7 @@ class SAC:
             )
 
             q_target = (
-                rewards * self.reward_scale
-                + self.gamma * (1 - dones) * target_q_values
+                rewards * self.reward_scale + self.gamma * (1 - dones) * target_q_values
             )
 
         q_values_one, q_values_two = self.critic_net(states, actions)
@@ -174,9 +169,7 @@ class SAC:
         self.actor_net_optimiser.step()
 
         # update the temperature (alpha)
-        alpha_loss = -(
-            self.log_alpha * (log_pi + self.target_entropy).detach()
-        ).mean()
+        alpha_loss = -(self.log_alpha * (log_pi + self.target_entropy).detach()).mean()
 
         self.log_alpha_optimizer.zero_grad()
         alpha_loss.backward()
@@ -220,9 +213,7 @@ class SAC:
         dones = dones.reshape(batch_size, 1)
 
         # Update the Critic
-        self._update_critic(
-            states, actions, rewards, next_states, dones, step=step
-        )
+        self._update_critic(states, actions, rewards, next_states, dones, step=step)
 
         # Update the Actor and Alpha
         self._update_actor_alpha(states, step=step)
@@ -251,12 +242,8 @@ class SAC:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(
-            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
-        )
-        torch.save(
-            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
-        )
+        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
+        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
 
         # Log model as MLflow models only at the end of training (checkpoint=False)
         if (
@@ -265,18 +252,12 @@ class SAC:
             and not checkpoint
         ):
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
-            self.mlflow_logger.log_artifact(
-                f"{filepath}/{filename}_critic.pht"
-            )
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
 
             # For actor
-            input_example = np.zeros(
-                (1, self.observation_size), dtype=np.float32
-            )
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
             model_input = torch.from_numpy(input_example)
-            actor_mlflow = ActorMLflowWrapperSAC(
-                self.actor_net, self.observation_size
-            )
+            actor_mlflow = ActorMLflowWrapperSAC(self.actor_net, self.observation_size)
             self.mlflow_logger.log_model(
                 model=actor_mlflow,
                 model_type="pytorch",

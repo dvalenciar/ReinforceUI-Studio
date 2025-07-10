@@ -2,7 +2,7 @@ import torch.nn as nn
 from typing import Any
 
 
-class CriticMLflowWrapperTD3_SAC(nn.Module):
+class CriticMLflowWrapperTD3_SAC(nn.Module):  # noqa: N801
     def __init__(self, critic: nn.Module, obs_dim: int) -> None:
         """Mlflow wrapper for TD3/SAC critic networks.
 

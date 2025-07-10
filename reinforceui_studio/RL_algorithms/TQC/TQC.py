@@ -43,18 +43,14 @@ class TQC:
                 "critic_lr" (float): The critic learning rate.
                 "alpha_lr" (float): The alpha learning rate.
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         log_std_bounds = list(hyperparameters.get("log_std_bounds"))
         n_quantiles = int(hyperparameters.get("n_quantiles"))
         num_critics = int(hyperparameters.get("num_critics"))
 
         self.gamma = float(hyperparameters.get("gamma"))
         self.tau = float(hyperparameters.get("tau"))
-        self.top_quantiles_to_drop = int(
-            hyperparameters.get("top_quantiles_to_drop")
-        )
+        self.top_quantiles_to_drop = int(hyperparameters.get("top_quantiles_to_drop"))
         self.actor_lr = float(hyperparameters.get("actor_lr"))
         self.critic_lr = float(hyperparameters.get("critic_lr"))
         self.alpha_lr = float(hyperparameters.get("alpha_lr"))
@@ -86,9 +82,7 @@ class TQC:
         init_temperature = 1.0
         self.log_alpha = torch.tensor(np.log(init_temperature)).to(self.device)
         self.log_alpha.requires_grad = True
-        self.log_alpha_optimizer = torch.optim.Adam(
-            [self.log_alpha], lr=self.alpha_lr
-        )
+        self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=self.alpha_lr)
 
         self.mlflow_logger = mlflow_logger
         self.observation_size = observation_size
@@ -227,18 +221,14 @@ class TQC:
     ) -> tuple[float, float]:
         new_action, log_pi, _ = self.actor_net(states)
 
-        mean_qf_pi = (
-            self.critic_net(states, new_action).mean(2).mean(1, keepdim=True)
-        )
+        mean_qf_pi = self.critic_net(states, new_action).mean(2).mean(1, keepdim=True)
         actor_loss = (self.alpha * log_pi - mean_qf_pi).mean()
 
         self.actor_net_optimiser.zero_grad()
         actor_loss.backward()
         self.actor_net_optimiser.step()
 
-        alpha_loss = (
-            -self.log_alpha * (log_pi + self.target_entropy).detach().mean()
-        )
+        alpha_loss = -self.log_alpha * (log_pi + self.target_entropy).detach().mean()
 
         # update the temperature
         self.log_alpha_optimizer.zero_grad()
@@ -283,9 +273,7 @@ class TQC:
         dones = dones.reshape(batch_size, 1)
 
         # Update the Critics
-        self._update_critics(
-            states, actions, rewards, next_states, dones, step=step
-        )
+        self._update_critics(states, actions, rewards, next_states, dones, step=step)
 
         # Update the Actor
         self._update_actor(states, step=step)
@@ -313,12 +301,8 @@ class TQC:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(
-            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
-        )
-        torch.save(
-            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
-        )
+        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
+        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
 
         # Log model as MLflow models only at the end of training (checkpoint=False)
         if (
@@ -327,18 +311,12 @@ class TQC:
             and not checkpoint
         ):
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
-            self.mlflow_logger.log_artifact(
-                f"{filepath}/{filename}_critic.pht"
-            )
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
 
             # For actor
-            input_example = np.zeros(
-                (1, self.observation_size), dtype=np.float32
-            )
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
             model_input = torch.from_numpy(input_example)
-            actor_mlflow = ActorMLflowWrapperTQC(
-                self.actor_net, self.observation_size
-            )
+            actor_mlflow = ActorMLflowWrapperTQC(self.actor_net, self.observation_size)
             self.mlflow_logger.log_model(
                 model=actor_mlflow,
                 model_type="pytorch",

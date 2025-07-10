@@ -29,20 +29,14 @@ class MemoryBuffer:
             self.max_size = int(hyperparameters.get("buffer_size"))
 
         # allocate memory for the buffer.
-        self.state = np.zeros(
-            (self.max_size, observation_size), dtype=np.float32
-        )
+        self.state = np.zeros((self.max_size, observation_size), dtype=np.float32)
 
         if algorithm_name == "DQN":
             self.action = np.zeros((self.max_size,), dtype=np.int32)
         else:
-            self.action = np.zeros(
-                (self.max_size, action_num), dtype=np.float32
-            )
+            self.action = np.zeros((self.max_size, action_num), dtype=np.float32)
         self.reward = np.zeros((self.max_size,), dtype=np.float32)
-        self.next_state = np.zeros(
-            (self.max_size, observation_size), dtype=np.float32
-        )
+        self.next_state = np.zeros((self.max_size, observation_size), dtype=np.float32)
         self.done = np.zeros((self.max_size,), dtype=np.bool_)
 
     def add_experience(

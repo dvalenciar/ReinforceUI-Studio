@@ -64,9 +64,7 @@ class TrainingWindow(BaseWindow):
         self.training_plot_data_by_algo = {}
         self.evaluation_plot_data_by_algo = {}  # For evaluation curves
         self.completed_algorithms = set()
-        self.total_algorithms = len(
-            self.previous_selections.get("Algorithms", [])
-        )
+        self.total_algorithms = len(self.previous_selections.get("Algorithms", []))
 
         self.default_values = {
             "Training Steps": "1000000",
@@ -321,9 +319,7 @@ class TrainingWindow(BaseWindow):
             else "The training process has been interrupted."
         )
         msg_box.setStyleSheet(Styles.MESSAGE_BOX)
-        see_log_button = msg_box.addButton(
-            "See log folder", QMessageBox.AcceptRole
-        )
+        see_log_button = msg_box.addButton("See log folder", QMessageBox.AcceptRole)
         see_mlflow_button = msg_box.addButton(
             "See MLflow Dashboard", QMessageBox.ActionRole
         )
@@ -408,9 +404,7 @@ class TrainingWindow(BaseWindow):
             lines.append("")  # Empty line between algorithms
 
         selections = "\n".join(lines)
-        self.show_message_box(
-            "Hyperparameters", selections, QMessageBox.Information
-        )
+        self.show_message_box("Hyperparameters", selections, QMessageBox.Information)
 
     def lock_inputs(self):
         for widget in self.training_inputs.values():
@@ -441,8 +435,7 @@ class TrainingWindow(BaseWindow):
             self.create_log_folder(algo_names=algo_names)
 
             shared_training_params = {
-                label: widget.text()
-                for label, widget in self.training_inputs.items()
+                label: widget.text() for label, widget in self.training_inputs.items()
             }
 
             per_algorithm_configs = []
@@ -461,17 +454,13 @@ class TrainingWindow(BaseWindow):
                     "selected_environment": self.previous_selections.get(
                         "selected_environment"
                     ),
-                    "setup_choice": self.previous_selections.get(
-                        "setup_choice"
-                    ),
+                    "setup_choice": self.previous_selections.get("setup_choice"),
                     "use_mlflow": self.mlflow_enabled,
                 }
                 per_algorithm_configs.append(config)
 
             for config_data in per_algorithm_configs:
-                thread = TrainingThread(
-                    self, config_data, self.main_folder_name
-                )
+                thread = TrainingThread(self, config_data, self.main_folder_name)
                 self.training_threads.append(thread)
                 thread.start()
 
@@ -488,8 +477,7 @@ class TrainingWindow(BaseWindow):
 
         # Shared/global training parameters
         training_params = {
-            label: widget.text()
-            for label, widget in self.training_inputs.items()
+            label: widget.text() for label, widget in self.training_inputs.items()
         }
 
         # Save the global config file
@@ -505,26 +493,20 @@ class TrainingWindow(BaseWindow):
         for algo_entry in algorithms:
             algo_name_display = algo_entry.get("UniqueName")
 
-            algo_folder = os.path.join(
-                self.main_folder_name, algo_name_display
-            )
+            algo_folder = os.path.join(self.main_folder_name, algo_name_display)
             os.makedirs(algo_folder, exist_ok=True)
 
             algo_config = {
                 "Shared Parameters": training_params,
                 "Algorithm": algo_entry.get("Algorithm"),
                 "Hyperparameters": algo_entry.get("Hyperparameters", {}),
-                "selected_platform": self.previous_selections.get(
-                    "selected_platform"
-                ),
+                "selected_platform": self.previous_selections.get("selected_platform"),
                 "selected_environment": self.previous_selections.get(
                     "selected_environment"
                 ),
             }
 
-            with open(
-                os.path.join(algo_folder, "config.json"), "w"
-            ) as algo_file:
+            with open(os.path.join(algo_folder, "config.json"), "w") as algo_file:
                 json.dump(algo_config, algo_file, indent=4)
 
     def stop_training(self):
@@ -556,9 +538,7 @@ class TrainingWindow(BaseWindow):
 
     def all_inputs_filled(self):
         algorithms = self.previous_selections.get("Algorithms", [])
-        is_single_ppo = (
-            len(algorithms) == 1 and algorithms[0].get("Algorithm") == "PPO"
-        )
+        is_single_ppo = len(algorithms) == 1 and algorithms[0].get("Algorithm") == "PPO"
         for label, widget in self.training_inputs.items():
             if is_single_ppo and label in [
                 "Exploration Steps",
@@ -679,9 +659,7 @@ class TrainingWindow(BaseWindow):
                 "--backend-store-uri",
                 "file:reinforceui_studio_logs/mlflow_tracking",
             ]
-            self.mlflow_process = subprocess.Popen(
-                mlflow_cmd_command, cwd=working_dir
-            )
+            self.mlflow_process = subprocess.Popen(mlflow_cmd_command, cwd=working_dir)
             print("MLflow server started successfully")
         except Exception as e:
             print("MLflow server failed to start")

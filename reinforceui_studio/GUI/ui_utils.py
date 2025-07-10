@@ -20,9 +20,7 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.figure = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.figure)
         self.figure.set_facecolor("#222222")  # Dark Gray Background
-        self.ax = self.figure.add_subplot(
-            111, facecolor="#222222", frameon=False
-        )
+        self.ax = self.figure.add_subplot(111, facecolor="#222222", frameon=False)
         self.clear_data()
 
     def plot_data(self, data_plot: dict, title: str, y_label: str) -> None:
@@ -44,9 +42,7 @@ class PlotCanvas(FigureCanvasQTAgg):
             )
 
         # Set Titles and Labels
-        self.ax.set_title(
-            title, color="white", fontsize=14, fontweight="bold", pad=10
-        )
+        self.ax.set_title(title, color="white", fontsize=14, fontweight="bold", pad=10)
         self.ax.set_xlabel("Steps", color="white", fontsize=12, labelpad=5)
         self.ax.set_ylabel(y_label, color="white", fontsize=12, labelpad=5)
 
@@ -55,9 +51,7 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.ax.tick_params(axis="y", colors="white", labelsize=10)
 
         # Grid Style
-        self.ax.grid(
-            True, color="#666666", linestyle="--", linewidth=0.6, alpha=0.7
-        )
+        self.ax.grid(True, color="#666666", linestyle="--", linewidth=0.6, alpha=0.7)
         self.ax.legend(loc="upper left", fontsize=10)
 
         self.draw()

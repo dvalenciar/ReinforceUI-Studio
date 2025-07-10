@@ -34,9 +34,7 @@ class DQN:
                 target_update_freq: Frequency of updating the target network
             mlflow_logger: Logger for MLflow integration, if None, no logging will be done
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.gamma = float(hyperparameters.get("gamma"))
         self.lr = float(hyperparameters.get("lr"))
 
@@ -44,9 +42,7 @@ class DQN:
         self.target_net = copy.deepcopy(self.net).to(self.device)
 
         self.learn_counter = 0
-        self.target_update_freq = int(
-            hyperparameters.get("target_update_freq")
-        )
+        self.target_update_freq = int(hyperparameters.get("target_update_freq"))
 
         self.optimiser = torch.optim.Adam(self.net.parameters(), lr=self.lr)
 
@@ -107,13 +103,9 @@ class DQN:
         with torch.no_grad():
             next_q_values = self.target_net(next_states)
             best_next_q_values = torch.max(next_q_values, 1)[0].unsqueeze(1)
-            target_q_values = (
-                rewards + self.gamma * (1 - dones) * best_next_q_values
-            )
+            target_q_values = rewards + self.gamma * (1 - dones) * best_next_q_values
 
-        loss = functional.mse_loss(
-            taken_action_q_values, target_q_values.detach()
-        )
+        loss = functional.mse_loss(taken_action_q_values, target_q_values.detach())
         self.optimiser.zero_grad()
         loss.backward()
         self.optimiser.step()
@@ -153,9 +145,7 @@ class DQN:
             # Log as artifacts for backward compatibility
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_net.pth")
 
-            input_example = np.zeros(
-                (1, self.observation_size), dtype=np.float32
-            )
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
             model_input = torch.from_numpy(input_example)
             self.mlflow_logger.log_model(
                 model=self.net,

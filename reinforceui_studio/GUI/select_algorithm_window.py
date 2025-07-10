@@ -185,9 +185,7 @@ class SelectAlgorithmWindow(BaseWindow):
 
         self.user_selections["Algorithms"] = selection
         self.close()
-        self.platform_window = PlatformConfigWindow(
-            self.show, self.user_selections
-        )
+        self.platform_window = PlatformConfigWindow(self.show, self.user_selections)
         self.platform_window.show()
 
     def _show_selection_required_warning(self) -> None:
@@ -202,9 +200,7 @@ class SelectAlgorithmWindow(BaseWindow):
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec_()
 
-    def set_active_button(
-        self, active_button, inactive_button  # noqa: ANN001
-    ) -> None:
+    def set_active_button(self, active_button, inactive_button) -> None:  # noqa: ANN001
         """Visually highlight the selected option button."""
         active_button.setStyleSheet(Styles.SELECTED_BUTTON)
         inactive_button.setStyleSheet(Styles.BUTTON)

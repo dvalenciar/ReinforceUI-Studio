@@ -11,11 +11,10 @@ def check_enabled(func: Callable) -> Callable:
     """Decorator to gracefully skip logging if MLflow is disabled."""
 
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs) -> Optional[Any]:  # noqa: ANN001, ANN002, ANN003
         if not self.use_mlflow:
             return None
         return func(self, *args, **kwargs)
-
     return wrapper
 
 
@@ -28,7 +27,8 @@ class MLflowLogger:
         tags: Optional[Dict[str, Any]] = None,
         tracking_uri: Optional[str] = None,
     ) -> None:
-        """Initialize the MLflow logger.
+        """Initialize the MLflowLogger.
+
         Args:
             experiment_name: Name of the MLflow experiment.
             run_name: Name of the MLflow run. If None, a random name will be generated.
@@ -59,75 +59,135 @@ class MLflowLogger:
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment(experiment_name)
 
+    def set_experiment(self, experiment_name: str) -> None:
+        """Set the MLflow experiment.
+
+        Args:
+            experiment_name (str): Name of the experiment to set.
+        """
+        self.experiment_name = experiment_name
+        if self.use_mlflow:
+            mlflow.set_experiment(experiment_name)
+
     @check_enabled
-    def start_run(self) -> None:
+    def start_run(self, run_name: Optional[str] = None) -> None:
+        """Start an MLflow run.
+
+        Args:
+            run_name (Optional[str]): Name of the run to start.
+        """
+        if run_name is not None:
+            self.run_name = run_name
         self.run = mlflow.start_run(run_name=self.run_name)
         if self.tags:
             mlflow.set_tags(self.tags)
 
     @check_enabled
+    def end_run(self) -> None:
+        """End the current MLflow run."""
+        mlflow.end_run(status="FINISHED")
+
+    @check_enabled
     def log_param(self, key: str, value: Any) -> None:
+        """Log a parameter to MLflow.
+
+        Args:
+            key (str): Parameter name.
+            value (Any): Parameter value.
+        """
         mlflow.log_param(key, value)
 
     @check_enabled
-    def log_params(self, params: Dict[str, Any]) -> None:
+    def log_params(self, params: dict) -> None:
+        """Log multiple parameters to MLflow.
+
+        Args:
+            params (dict): Dictionary of parameters to log.
+        """
         mlflow.log_params(params)
 
     @check_enabled
-    def log_metric(
-        self, key: str, value: float, step: Optional[int] = None
-    ) -> None:
+    def log_metric(self, key: str, value: float, step: Optional[int] = None) -> None:
+        """Log a metric to MLflow.
+
+        Args:
+            key (str): Metric name.
+            value (float): Metric value.
+            step (Optional[int]): Step at which the metric was logged.
+        """
         mlflow.log_metric(key, value, step=step)
 
     @check_enabled
-    def log_metrics(
-        self, metrics: Dict[str, float], step: Optional[int] = None
-    ) -> None:
+    def log_metrics(self, metrics: dict, step: Optional[int] = None) -> None:
+        """Log multiple metrics to MLflow.
+
+        Args:
+            metrics (dict): Dictionary of metrics to log.
+            step (Optional[int]): Step at which the metrics were logged.
+        """
         for key, value in metrics.items():
             mlflow.log_metric(key, value, step=step)
 
     @check_enabled
-    def log_artifact(self, filepath: str) -> None:
-        if os.path.exists(filepath):
-            mlflow.log_artifact(filepath)
+    def log_artifact(
+        self, local_path: str, artifact_path: Optional[str] = None
+    ) -> None:
+        """Log an artifact to MLflow.
+
+        Args:
+            local_path (str): Path to the local file.
+            artifact_path (Optional[str]): Path in the artifact store.
+        """
+        if os.path.exists(local_path):
+            mlflow.log_artifact(local_path, artifact_path)
         else:
-            print(f"Warning: File not found: {filepath}")
+            print(f"Warning: File not found: {local_path}")
 
     @check_enabled
-    def log_artifacts(self, dirpath: str) -> None:
-        if os.path.isdir(dirpath):
-            mlflow.log_artifacts(dirpath)
+    def log_artifacts(
+        self, local_dir: str, artifact_path: Optional[str] = None
+    ) -> None:
+        """Log multiple artifacts to MLflow.
+
+        Args:
+            local_dir (str): Directory containing artifacts.
+            artifact_path (Optional[str]): Path in the artifact store.
+        """
+        if os.path.isdir(local_dir):
+            mlflow.log_artifacts(local_dir, artifact_path)
         else:
-            print(f"Warning: Directory not found: {dirpath}")
+            print(f"Warning: Directory not found: {local_dir}")
 
     @check_enabled
-    def set_tag(self, key: str, value: Any) -> None:
-        mlflow.set_tag(key, value)
+    def set_tags(self, tags: dict) -> None:
+        """Set tags for the MLflow run.
 
-    @check_enabled
-    def set_tags(self, tags: Dict[str, Any]) -> None:
+        Args:
+            tags (dict): Dictionary of tags to set.
+        """
         mlflow.set_tags(tags)
-
-    @check_enabled
-    def end_run(self) -> None:
-        mlflow.end_run(status="FINISHED")
 
     @check_enabled
     def log_model(
         self,
-        model,
+        model: Any,
         model_type: str = "pytorch",
         model_name: str = "model",
         registered_model_name: Optional[str] = None,
-        input_example=None,
-        model_input=None,
-        device="cpu",
+        input_example: Optional[Any] = None,
+        model_input: Optional[Any] = None,
+        device: str = "cpu",
     ) -> None:
-        """
-        Log a machine learning model with optional registration.
-        input_example: numpy array or DataFrame for MLflow
-        model_input: actual input to call the model for signature inference (can be tensor, tuple, etc.)
-        device: device string (e.g., 'cpu' or 'cuda:0') to move input tensors to
+        """Log a machine learning model with optional registration.
+
+        Args:
+            model (Any): The model to log.
+            model_type (str): Type of the model (e.g., 'pytorch').
+            model_name (str): Name to log the model under.
+            registered_model_name (Optional[str]): Name to register the model as.
+            input_example (Optional[Any]): Example input for MLflow signature.
+            model_input (Optional[Any]): Actual input for signature inference.
+            device (str): Device string (e.g., 'cpu' or 'cuda:0').
         """
         if model_type == "pytorch":
             model.to(device)
@@ -150,9 +210,7 @@ class MLflowLogger:
                         }
                         model_output = model(**model_input)
                     else:
-                        model_input = torch.from_numpy(input_example).to(
-                            device
-                        )
+                        model_input = torch.from_numpy(input_example).to(device)
                         model_output = model(model_input)
 
                 if isinstance(model_output, torch.Tensor):

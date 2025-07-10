@@ -38,9 +38,7 @@ class DDPG:
                 critic_lr: Learning rate for critic networks
             mlflow_logger: Logger for MLflow integration, if None, no logging will be done
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_actor_net = copy.deepcopy(self.actor_net).to(self.device)
@@ -161,9 +159,7 @@ class DDPG:
         dones = dones.reshape(batch_size, 1)
 
         # Update Critic
-        self._update_critic(
-            states, actions, rewards, next_states, dones, step=step
-        )
+        self._update_critic(states, actions, rewards, next_states, dones, step=step)
 
         # Update Actor
         self._update_actor(states, step=step)
@@ -197,12 +193,8 @@ class DDPG:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(
-            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
-        )
-        torch.save(
-            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
-        )
+        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
+        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
 
         # Log model as MLflow models only at the end of training (checkpoint=False)
         if (
@@ -212,14 +204,10 @@ class DDPG:
         ):
             # Log as artifacts for backward compatibility
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
-            self.mlflow_logger.log_artifact(
-                f"{filepath}/{filename}_critic.pht"
-            )
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
 
             # For actor
-            input_example = np.zeros(
-                (1, self.observation_size), dtype=np.float32
-            )
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
             model_input = torch.from_numpy(input_example)
             self.mlflow_logger.log_model(
                 model=self.actor_net,

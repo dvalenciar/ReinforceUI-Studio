@@ -39,9 +39,7 @@ class TD3:
                 - critic_lr: Learning rate for critic networks
             mlflow_logger: Logger for MLflow integration, if None, no logging will be done
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor_net = Actor(observation_size, action_num).to(self.device)
         self.critic_net = Critic(observation_size, action_num).to(self.device)
         self.target_actor_net = copy.deepcopy(self.actor_net).to(self.device)
@@ -91,9 +89,7 @@ class TD3:
             action = self.actor_net(state_tensor)
             action = action.cpu().detach().numpy().flatten()
             if not evaluation:
-                noise = np.random.normal(
-                    0, scale=noise_scale, size=self.action_num
-                )
+                noise = np.random.normal(0, scale=noise_scale, size=self.action_num)
                 action = action + noise
                 action = np.clip(action, -1, 1)
         self.actor_net.train()
@@ -112,18 +108,14 @@ class TD3:
         with torch.no_grad():
             next_actions = self.target_actor_net(next_states)
             target_noise = self.policy_noise * torch.randn_like(next_actions)
-            target_noise = torch.clamp(
-                target_noise, -self.noise_clip, self.noise_clip
-            )
+            target_noise = torch.clamp(target_noise, -self.noise_clip, self.noise_clip)
             next_actions = next_actions + target_noise
             next_actions = torch.clamp(next_actions, min=-1, max=1)
 
             target_q_values_one, target_q_values_two = self.target_critic_net(
                 next_states, next_actions
             )
-            target_q_values = torch.minimum(
-                target_q_values_one, target_q_values_two
-            )
+            target_q_values = torch.minimum(target_q_values_one, target_q_values_two)
             q_target = rewards + self.gamma * (1 - dones) * target_q_values
 
         q_values_one, q_values_two = self.critic_net(states, actions)
@@ -197,9 +189,7 @@ class TD3:
         dones = dones.reshape(batch_size, 1)
 
         # Update the Critic
-        self._update_critic(
-            states, actions, rewards, next_states, dones, step=step
-        )
+        self._update_critic(states, actions, rewards, next_states, dones, step=step)
 
         if self.learn_counter % self.policy_update_freq == 0:
             # Update Actor
@@ -235,12 +225,8 @@ class TD3:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(
-            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
-        )
-        torch.save(
-            self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht"
-        )
+        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
+        torch.save(self.critic_net.state_dict(), f"{filepath}/{filename}_critic.pht")
 
         # Log model as MLflow models only at the end of training (checkpoint=False)
         if (
@@ -250,14 +236,10 @@ class TD3:
         ):
             # Log as artifacts for backward compatibility
             self.mlflow_logger.log_artifact(f"{filepath}/{filename}_actor.pht")
-            self.mlflow_logger.log_artifact(
-                f"{filepath}/{filename}_critic.pht"
-            )
+            self.mlflow_logger.log_artifact(f"{filepath}/{filename}_critic.pht")
 
             # For actor
-            input_example = np.zeros(
-                (1, self.observation_size), dtype=np.float32
-            )
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
             model_input = torch.from_numpy(input_example)
             self.mlflow_logger.log_model(
                 model=self.actor_net,

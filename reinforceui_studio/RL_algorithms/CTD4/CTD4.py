@@ -39,9 +39,7 @@ class CTD4:
                 policy_noise_decay: Decay rate for target policy noise
             mlflow_logger: Logger for MLflow integration, can be None
         """
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.gamma = float(hyperparameters.get("gamma"))
         self.tau = float(hyperparameters.get("tau"))
         self.actor_lr = float(hyperparameters.get("actor_lr"))
@@ -63,9 +61,7 @@ class CTD4:
 
         self.noise_clip = 0.5
         self.target_policy_noise_scale = 0.2
-        self.policy_noise_decay = float(
-            hyperparameters.get("policy_noise_decay")
-        )
+        self.policy_noise_decay = float(hyperparameters.get("policy_noise_decay"))
         self.min_policy_noise = 0.0
 
         self.learn_counter = 0
@@ -108,9 +104,7 @@ class CTD4:
             action = self.actor_net(state_tensor)
             action = action.cpu().data.numpy().flatten()
             if not evaluation:
-                noise = np.random.normal(
-                    0, scale=noise_scale, size=self.action_num
-                )
+                noise = np.random.normal(0, scale=noise_scale, size=self.action_num)
                 action = action + noise
                 action = np.clip(action, -1, 1)
         self.actor_net.train()
@@ -126,9 +120,7 @@ class CTD4:
 
         kalman_gain = (std_1**2) / (std_1**2 + std_2**2)
         fusion_mean = mean_1 + kalman_gain * (mean_2 - mean_1)
-        fusion_variance = (
-            (1 - kalman_gain) * std_1**2 + kalman_gain * std_2**2 + 1e-6
-        )
+        fusion_variance = (1 - kalman_gain) * std_1**2 + kalman_gain * std_2**2 + 1e-6
         fusion_std = torch.sqrt(fusion_variance)
         return fusion_mean, fusion_std
 
@@ -164,9 +156,7 @@ class CTD4:
             target_noise = self.target_policy_noise_scale * torch.randn_like(
                 next_actions
             )
-            target_noise = torch.clamp(
-                target_noise, -self.noise_clip, self.noise_clip
-            )
+            target_noise = torch.clamp(target_noise, -self.noise_clip, self.noise_clip)
             next_actions = next_actions + target_noise
             next_actions = torch.clamp(next_actions, min=-1, max=1)
 
@@ -278,9 +268,7 @@ class CTD4:
         rewards = rewards.reshape(batch_size, 1)
         dones = dones.reshape(batch_size, 1)
 
-        self._update_critics(
-            states, actions, rewards, next_states, dones, step=step
-        )
+        self._update_critics(states, actions, rewards, next_states, dones, step=step)
 
         if self.learn_counter % self.policy_update_freq == 0:
             # Update Actor
@@ -293,8 +281,7 @@ class CTD4:
                     critic_net.parameters(), target_critic_net.parameters()
                 ):
                     target_param.data.copy_(
-                        self.tau * param.data
-                        + (1 - self.tau) * target_param.data
+                        self.tau * param.data + (1 - self.tau) * target_param.data
                     )
 
             for param, target_param in zip(
@@ -318,9 +305,7 @@ class CTD4:
         if not dir_exists:
             os.makedirs(filepath)
 
-        torch.save(
-            self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht"
-        )
+        torch.save(self.actor_net.state_dict(), f"{filepath}/{filename}_actor.pht")
         torch.save(
             self.ensemble_critics.state_dict(),
             f"{filepath}/{filename}_ensemble_critic.pht",
@@ -339,9 +324,7 @@ class CTD4:
             )
 
             # For actor
-            input_example = np.zeros(
-                (1, self.observation_size), dtype=np.float32
-            )
+            input_example = np.zeros((1, self.observation_size), dtype=np.float32)
             model_input = torch.from_numpy(input_example)
             self.mlflow_logger.log_model(
                 model=self.actor_net,
